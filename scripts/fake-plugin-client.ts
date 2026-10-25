@@ -11,6 +11,9 @@ import {
   sessionFileSchema,
   failure,
   type Envelope,
+  type Command,
+  type CommandResult,
+  errorSchema,
   type NodeSnapshot,
 } from '../packages/shared/src/index.js';
 
@@ -24,6 +27,9 @@ export class FakePluginClient {
   constructor(
     readonly url: string,
     readonly token: string,
+    private readonly renderHandler?: (
+      command: Extract<Command, { command: 'renderDesign' }>,
+    ) => Promise<CommandResult>,
   ) {}
   async connect() {
     const socket = new WebSocket(this.url, { origin: 'null' });
@@ -85,6 +91,37 @@ export class FakePluginClient {
           return;
         }
         if (this.dropCommands) return;
+        if (command.command === 'renderDesign' && this.renderHandler) {
+          void this.renderHandler(command)
+            .then((result) =>
+              this.send(
+                envelope(
+                  'result',
+                  this.sessionId,
+                  message.correlationId,
+                  result,
+                ),
+              ),
+            )
+            .catch((error: unknown) => {
+              const detail = errorSchema.safeParse(
+                error && typeof error === 'object' && 'error' in error
+                  ? error.error
+                  : undefined,
+              );
+              this.send(
+                envelope(
+                  'error',
+                  this.sessionId,
+                  message.correlationId,
+                  detail.success
+                    ? detail.data
+                    : failure('INTERNAL_ERROR', 'Render harness failed.'),
+                ),
+              );
+            });
+          return;
+        }
         if (command.command === 'createFrame') {
           const { name, width, height, x, y, pageId } = command.input;
           const node = {
@@ -104,7 +141,7 @@ export class FakePluginClient {
               result: node,
             }),
           );
-        } else {
+        } else if (command.command === 'readNode') {
           const node = this.nodes.get(command.input.nodeId);
           this.send(
             node

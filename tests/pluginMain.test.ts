@@ -208,3 +208,26 @@ it('validates local messages and handles storage failures without leaking creden
 it('does not ship import expressions, including comments rejected by the Figma sandbox', () => {
   expect(bundle).not.toMatch(/\bimport\s*\(/);
 });
+
+it('replaces oversized responses with an explicit size error', async () => {
+  figmaHarness.getNodeByIdAsync.mockResolvedValue({
+    ...node,
+    name: 'x'.repeat(70000),
+  });
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('command', 'session', 'oversize', {
+      command: 'readNode',
+      input: { nodeId: '1:2' },
+    }),
+  });
+  expect(replies.at(-1)).toMatchObject({
+    kind: 'bridge',
+    message: {
+      type: 'error',
+      correlationId: 'oversize',
+      payload: { code: 'MESSAGE_TOO_LARGE' },
+    },
+  });
+  expect(Buffer.byteLength(JSON.stringify(replies.at(-1)))).toBeLessThan(65536);
+});

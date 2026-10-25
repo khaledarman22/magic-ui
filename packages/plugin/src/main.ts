@@ -1,5 +1,7 @@
 import {
   uiToMainSchema,
+  MAX_MESSAGE_BYTES,
+  utf8ByteLength,
   mainToUiSchema,
   tokenSchema,
   MagicUiError,
@@ -12,8 +14,30 @@ import { executePluginCommand } from './pluginCommandHandlers';
 figma.showUI(__html__, { width: 360, height: 400, themeColors: true });
 let sessionId: string | undefined;
 const active = new Map<string, { cancelled: boolean }>();
-const post = (message: MainToUi) =>
+const post = (message: MainToUi) => {
+  if (
+    message.kind === 'bridge' &&
+    utf8ByteLength(JSON.stringify(message.message)) > MAX_MESSAGE_BYTES
+  ) {
+    const incoming = message.message;
+    figma.ui.postMessage(
+      mainToUiSchema.parse({
+        kind: 'bridge',
+        message: envelope(
+          'error',
+          incoming.sessionId,
+          incoming.correlationId,
+          failure(
+            'MESSAGE_TOO_LARGE',
+            'The response exceeds the 65536-byte bridge limit. Writes may have completed; inspect Figma before retrying.',
+          ),
+        ),
+      }),
+    );
+    return;
+  }
   figma.ui.postMessage(mainToUiSchema.parse(message));
+};
 async function sendSettings(correlationId: string) {
   const stored: unknown = await figma.clientStorage.getAsync(
     'magicUiSessionToken',

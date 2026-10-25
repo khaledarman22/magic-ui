@@ -1,5 +1,9 @@
+import { designSystemInputSchema, designSystemResultSchema, readDesignSystemSchema, componentRegistrySchema, variablesResultSchema } from './designSystemCommands.js';
 import { z } from 'zod';
-import { renderDesignSchema, renderDesignResultSchema } from './designCommands.js';
+import {
+  renderDesignSchema,
+  renderDesignResultSchema,
+} from './designCommands.js';
 import { identifierSchema } from '../protocol/constants.js';
 export const documentSchema = z
   .object({
@@ -21,7 +25,12 @@ export const createFrameSchema = z
 export const readNodeSchema = z.object({ nodeId: identifierSchema }).strict();
 export const pingSchema = z.object({}).strict();
 export const commandSchema = z.discriminatedUnion('command', [
-  z.object({ command: z.literal('renderDesign'), input: renderDesignSchema }).strict(),
+ z.object({command:z.literal('renderDesignSystem'),input:designSystemInputSchema}).strict(),
+ z.object({command:z.literal('readComponents'),input:readDesignSystemSchema}).strict(),
+ z.object({command:z.literal('readVariables'),input:readDesignSystemSchema}).strict(),
+  z
+    .object({ command: z.literal('renderDesign'), input: renderDesignSchema })
+    .strict(),
   z.object({ command: z.literal('ping'), input: pingSchema }).strict(),
   z
     .object({ command: z.literal('createFrame'), input: createFrameSchema })
@@ -41,7 +50,15 @@ export const nodeSnapshotSchema = z
   })
   .strict();
 export const commandResultSchema = z.discriminatedUnion('command', [
-  z.object({ command: z.literal('renderDesign'), result: renderDesignResultSchema }).strict(),
+ z.object({command:z.literal('renderDesignSystem'),result:designSystemResultSchema}).strict(),
+ z.object({command:z.literal('readComponents'),result:componentRegistrySchema}).strict(),
+ z.object({command:z.literal('readVariables'),result:variablesResultSchema}).strict(),
+  z
+    .object({
+      command: z.literal('renderDesign'),
+      result: renderDesignResultSchema,
+    })
+    .strict(),
   z
     .object({
       command: z.literal('ping'),

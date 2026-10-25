@@ -221,6 +221,16 @@ export class BridgeServer {
         new MagicUiError(failure('CANCELLED', 'Request cancelled.')),
       );
     const correlationId = randomUUID();
+    const message = envelope('command', sessionId, correlationId, command);
+    if (Buffer.byteLength(JSON.stringify(message), 'utf8') > MAX_MESSAGE_BYTES)
+      return Promise.reject(
+        new MagicUiError(
+          failure(
+            'MESSAGE_TOO_LARGE',
+            'Render request exceeds the 65536-byte bridge limit. Reduce the specification.',
+          ),
+        ),
+      );
     return new Promise((resolve, reject) => {
       const finishWithError = (error: MagicError) => {
         const pending = this.pending.get(correlationId);
@@ -261,10 +271,7 @@ export class BridgeServer {
         dispose: () => signal?.removeEventListener('abort', onAbort),
       });
       signal?.addEventListener('abort', onAbort, { once: true });
-      this.send(
-        connection.socket,
-        envelope('command', sessionId, correlationId, command),
-      );
+      this.send(connection.socket, message);
     });
   }
   async close() {

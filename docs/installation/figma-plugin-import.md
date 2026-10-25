@@ -15,12 +15,15 @@ pnpm build
 pnpm --filter mcp-server start --selftest
 ```
 
-آخر أمر لازم يطبع الأدوات الثلاث:
+آخر أمر لازم يطبع الأدوات الستة:
 
 ```text
 magic_ui_get_connection_status
 magic_ui_create_frame
 magic_ui_read_node
+magic_ui_initialize_project
+magic_ui_validate_design_spec
+magic_ui_render_design
 ```
 
 ملفات الـPlugin الجاهزة في `packages/plugin/dist/`: `manifest.json` و`main.js` و`ui.js` و`ui.html`. الـHTML يحتوي JavaScript وCSS داخله عشان يشتغل في iframe من غير ملفات شبكة إضافية. لا تستورد الـmanifest الموجود في فولدر المصدر؛ استورد النسخة داخل `dist`.
@@ -45,7 +48,7 @@ magic_ui_read_node
 pnpm smoke:figma
 ```
 
-الأمر يبدأ **الخادم الحقيقي المبني** عبر stdio، ويعرض الأدوات الثلاث، وينتظر اتصال الـPlugin. لا تشغّل `pnpm --filter mcp-server start` بالتوازي؛ أداة الاختبار بدأت الخادم بالفعل.
+الأمر يبدأ **الخادم الحقيقي المبني** عبر stdio، ويعرض الأدوات الستة، وينتظر اتصال الـPlugin. لا تشغّل `pnpm --filter mcp-server start` بالتوازي؛ أداة الاختبار بدأت الخادم بالفعل.
 
 بعد ما يبدأ، في Terminal تانية انسخ token للحافظة بدون طباعته في سجل الطرفية:
 

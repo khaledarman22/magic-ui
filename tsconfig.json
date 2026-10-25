@@ -27,6 +27,7 @@
   ],
   "exclude": [
     "packages/plugin/src/main.ts",
+    "packages/plugin/src/designRenderer.ts",
     "packages/plugin/src/pluginCommandHandlers.ts",
     "**/dist",
     "node_modules"

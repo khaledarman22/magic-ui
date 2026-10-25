@@ -50,7 +50,7 @@ describe('MCP → real WebSocket bridge → fake plugin', () => {
     await server?.close();
     await bridge?.close();
   });
-  it('lists exactly three tools, reports session, creates and reads the same frame', async () => {
+  it('lists the phase tools, reports session, creates and reads the same frame', async () => {
     const tools = (await client.listTools()).tools;
     expect(tools.map((tool) => tool.name)).toEqual([...TOOL_NAMES]);
     expect(tools.every((tool) => tool.inputSchema && tool.outputSchema)).toBe(

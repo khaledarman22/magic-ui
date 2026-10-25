@@ -85,3 +85,9 @@ describe('shared boundary validation', () => {
     },
   );
 });
+
+it('counts UTF-8 bytes without browser or Node globals in the shared helper', async () => {
+  const { utf8ByteLength } = await import('../packages/shared/src/index.js');
+  for (const value of ['ascii', 'مرحبا', '🎨', '\ud800', 'a🎨مرحبا'])
+    expect(utf8ByteLength(value)).toBe(Buffer.byteLength(value));
+});

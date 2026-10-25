@@ -1,0 +1,781 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "projectId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+    },
+    "pages": {
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "screens": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+                },
+                "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+                "layout": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "default": "absolute",
+                      "type": "string",
+                      "enum": ["auto-layout", "absolute"]
+                    },
+                    "positioning": {
+                      "default": "auto",
+                      "type": "string",
+                      "enum": ["auto", "absolute"]
+                    },
+                    "direction": {
+                      "default": "vertical",
+                      "type": "string",
+                      "enum": ["horizontal", "vertical"]
+                    },
+                    "width": {
+                      "default": 100,
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": 0,
+                          "maximum": 100000
+                        },
+                        { "type": "string", "enum": ["hug", "fill"] }
+                      ]
+                    },
+                    "height": {
+                      "default": 100,
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": 0,
+                          "maximum": 100000
+                        },
+                        { "type": "string", "enum": ["hug", "fill"] }
+                      ]
+                    },
+                    "x": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    },
+                    "y": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    },
+                    "padding": {
+                      "default": {
+                        "top": 0,
+                        "right": 0,
+                        "bottom": 0,
+                        "left": 0
+                      },
+                      "type": "object",
+                      "properties": {
+                        "top": { "type": "number", "minimum": 0 },
+                        "right": { "type": "number", "minimum": 0 },
+                        "bottom": { "type": "number", "minimum": 0 },
+                        "left": { "type": "number", "minimum": 0 }
+                      },
+                      "required": ["top", "right", "bottom", "left"],
+                      "additionalProperties": false
+                    },
+                    "itemSpacing": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000
+                    },
+                    "alignment": {
+                      "default": "start",
+                      "type": "string",
+                      "enum": ["start", "center", "end"]
+                    },
+                    "primaryAlignment": {
+                      "default": "start",
+                      "type": "string",
+                      "enum": ["start", "center", "end", "space-between"]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "styling": {
+                  "default": {
+                    "fills": [],
+                    "strokes": [],
+                    "strokeWeight": 1,
+                    "cornerRadius": 0,
+                    "opacity": 1
+                  },
+                  "type": "object",
+                  "properties": {
+                    "fills": {
+                      "default": [],
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-fA-F]{6}$"
+                          },
+                          "opacity": {
+                            "default": 1,
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          }
+                        },
+                        "required": ["color"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "strokes": {
+                      "default": [],
+                      "maxItems": 16,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-fA-F]{6}$"
+                          },
+                          "opacity": {
+                            "default": 1,
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          }
+                        },
+                        "required": ["color"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "strokeWeight": {
+                      "default": 1,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "cornerRadius": {
+                      "default": 0,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100000
+                    },
+                    "opacity": {
+                      "default": 1,
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "direction": {
+                  "default": "ltr",
+                  "type": "string",
+                  "enum": ["ltr", "rtl"]
+                },
+                "nodes": {
+                  "maxItems": 500,
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/__schema0" }
+                }
+              },
+              "required": ["id", "name", "layout", "nodes"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["id", "name", "screens"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schemaVersion", "projectId", "pages"],
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+            },
+            "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "layout": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "default": "absolute",
+                  "type": "string",
+                  "enum": ["auto-layout", "absolute"]
+                },
+                "positioning": {
+                  "default": "auto",
+                  "type": "string",
+                  "enum": ["auto", "absolute"]
+                },
+                "direction": {
+                  "default": "vertical",
+                  "type": "string",
+                  "enum": ["horizontal", "vertical"]
+                },
+                "width": {
+                  "default": 100,
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    { "type": "string", "enum": ["hug", "fill"] }
+                  ]
+                },
+                "height": {
+                  "default": 100,
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    { "type": "string", "enum": ["hug", "fill"] }
+                  ]
+                },
+                "x": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "padding": {
+                  "default": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                  "type": "object",
+                  "properties": {
+                    "top": { "type": "number", "minimum": 0 },
+                    "right": { "type": "number", "minimum": 0 },
+                    "bottom": { "type": "number", "minimum": 0 },
+                    "left": { "type": "number", "minimum": 0 }
+                  },
+                  "required": ["top", "right", "bottom", "left"],
+                  "additionalProperties": false
+                },
+                "itemSpacing": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "alignment": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": ["start", "center", "end"]
+                },
+                "primaryAlignment": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": ["start", "center", "end", "space-between"]
+                }
+              },
+              "additionalProperties": false
+            },
+            "styling": {
+              "default": {
+                "fills": [],
+                "strokes": [],
+                "strokeWeight": 1,
+                "cornerRadius": 0,
+                "opacity": 1
+              },
+              "type": "object",
+              "properties": {
+                "fills": {
+                  "default": [],
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "opacity": {
+                        "default": 1,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": ["color"],
+                    "additionalProperties": false
+                  }
+                },
+                "strokes": {
+                  "default": [],
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "opacity": {
+                        "default": 1,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": ["color"],
+                    "additionalProperties": false
+                  }
+                },
+                "strokeWeight": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "cornerRadius": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "opacity": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "type": { "type": "string", "const": "frame" },
+            "nodes": {
+              "maxItems": 500,
+              "type": "array",
+              "items": { "$ref": "#/$defs/__schema0" }
+            }
+          },
+          "required": ["id", "name", "layout", "type", "nodes"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+            },
+            "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "layout": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "default": "absolute",
+                  "type": "string",
+                  "enum": ["auto-layout", "absolute"]
+                },
+                "positioning": {
+                  "default": "auto",
+                  "type": "string",
+                  "enum": ["auto", "absolute"]
+                },
+                "direction": {
+                  "default": "vertical",
+                  "type": "string",
+                  "enum": ["horizontal", "vertical"]
+                },
+                "width": {
+                  "default": 100,
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    { "type": "string", "enum": ["hug", "fill"] }
+                  ]
+                },
+                "height": {
+                  "default": 100,
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    { "type": "string", "enum": ["hug", "fill"] }
+                  ]
+                },
+                "x": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "padding": {
+                  "default": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                  "type": "object",
+                  "properties": {
+                    "top": { "type": "number", "minimum": 0 },
+                    "right": { "type": "number", "minimum": 0 },
+                    "bottom": { "type": "number", "minimum": 0 },
+                    "left": { "type": "number", "minimum": 0 }
+                  },
+                  "required": ["top", "right", "bottom", "left"],
+                  "additionalProperties": false
+                },
+                "itemSpacing": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "alignment": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": ["start", "center", "end"]
+                },
+                "primaryAlignment": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": ["start", "center", "end", "space-between"]
+                }
+              },
+              "additionalProperties": false
+            },
+            "styling": {
+              "default": {
+                "fills": [],
+                "strokes": [],
+                "strokeWeight": 1,
+                "cornerRadius": 0,
+                "opacity": 1
+              },
+              "type": "object",
+              "properties": {
+                "fills": {
+                  "default": [],
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "opacity": {
+                        "default": 1,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": ["color"],
+                    "additionalProperties": false
+                  }
+                },
+                "strokes": {
+                  "default": [],
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "opacity": {
+                        "default": 1,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": ["color"],
+                    "additionalProperties": false
+                  }
+                },
+                "strokeWeight": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "cornerRadius": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "opacity": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "type": { "type": "string", "const": "text" },
+            "content": { "type": "string", "maxLength": 20000 },
+            "fontFamily": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "fontStyle": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "fontSize": {
+              "default": 16,
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000
+            },
+            "lineHeight": {
+              "default": "auto",
+              "anyOf": [
+                { "type": "string", "const": "auto" },
+                { "type": "number", "exclusiveMinimum": 0, "maximum": 10000 }
+              ]
+            },
+            "letterSpacing": {
+              "default": 0,
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000
+            },
+            "textAlign": {
+              "default": "start",
+              "type": "string",
+              "enum": ["start", "end", "left", "right", "center", "justified"]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "layout",
+            "type",
+            "content",
+            "fontFamily",
+            "fontStyle"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+            },
+            "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+            "layout": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "default": "absolute",
+                  "type": "string",
+                  "enum": ["auto-layout", "absolute"]
+                },
+                "positioning": {
+                  "default": "auto",
+                  "type": "string",
+                  "enum": ["auto", "absolute"]
+                },
+                "direction": {
+                  "default": "vertical",
+                  "type": "string",
+                  "enum": ["horizontal", "vertical"]
+                },
+                "width": {
+                  "default": 100,
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    { "type": "string", "enum": ["hug", "fill"] }
+                  ]
+                },
+                "height": {
+                  "default": 100,
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 100000
+                    },
+                    { "type": "string", "enum": ["hug", "fill"] }
+                  ]
+                },
+                "x": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "y": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": -1000000,
+                  "maximum": 1000000
+                },
+                "padding": {
+                  "default": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+                  "type": "object",
+                  "properties": {
+                    "top": { "type": "number", "minimum": 0 },
+                    "right": { "type": "number", "minimum": 0 },
+                    "bottom": { "type": "number", "minimum": 0 },
+                    "left": { "type": "number", "minimum": 0 }
+                  },
+                  "required": ["top", "right", "bottom", "left"],
+                  "additionalProperties": false
+                },
+                "itemSpacing": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "alignment": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": ["start", "center", "end"]
+                },
+                "primaryAlignment": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": ["start", "center", "end", "space-between"]
+                }
+              },
+              "additionalProperties": false
+            },
+            "styling": {
+              "default": {
+                "fills": [],
+                "strokes": [],
+                "strokeWeight": 1,
+                "cornerRadius": 0,
+                "opacity": 1
+              },
+              "type": "object",
+              "properties": {
+                "fills": {
+                  "default": [],
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "opacity": {
+                        "default": 1,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": ["color"],
+                    "additionalProperties": false
+                  }
+                },
+                "strokes": {
+                  "default": [],
+                  "maxItems": 16,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "color": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      },
+                      "opacity": {
+                        "default": 1,
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      }
+                    },
+                    "required": ["color"],
+                    "additionalProperties": false
+                  }
+                },
+                "strokeWeight": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "cornerRadius": {
+                  "default": 0,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "opacity": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "type": { "type": "string", "const": "rectangle" }
+          },
+          "required": ["id", "name", "layout", "type"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,15 @@
 import { z } from 'zod';
-import { PROTOCOL_VERSION, identifierSchema, tokenSchema, portSchema } from './constants.js';
-import { documentSchema, commandSchema, commandResultSchema } from '../commands/commands.js';
+import {
+  PROTOCOL_VERSION,
+  identifierSchema,
+  tokenSchema,
+  portSchema,
+} from './constants.js';
+import {
+  documentSchema,
+  commandSchema,
+  commandResultSchema,
+} from '../commands/commands.js';
 import { errorSchema } from '../errors/errors.js';
 const envelopeFields = {
   protocolVersion: z.literal(PROTOCOL_VERSION),

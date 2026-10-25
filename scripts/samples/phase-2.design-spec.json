@@ -1,0 +1,286 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "phase2-smoke",
+  "pages": [
+    {
+      "id": "app",
+      "name": "App",
+      "screens": [
+        {
+          "id": "home",
+          "name": "Magic UI Phase 2 smoke",
+          "layout": {
+            "type": "auto-layout",
+            "positioning": "auto",
+            "direction": "vertical",
+            "width": 400,
+            "height": "hug",
+            "x": 500,
+            "y": 40,
+            "padding": {
+              "top": 24,
+              "right": 24,
+              "bottom": 24,
+              "left": 24
+            },
+            "itemSpacing": 24,
+            "alignment": "start",
+            "primaryAlignment": "start"
+          },
+          "styling": {
+            "fills": [
+              {
+                "color": "#FFFFFF",
+                "opacity": 1
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "cornerRadius": 16,
+            "opacity": 1
+          },
+          "direction": "ltr",
+          "nodes": [
+            {
+              "id": "header",
+              "name": "Header",
+              "layout": {
+                "type": "absolute",
+                "positioning": "auto",
+                "direction": "vertical",
+                "width": "fill",
+                "height": "hug",
+                "x": 0,
+                "y": 0,
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "itemSpacing": 0,
+                "alignment": "start",
+                "primaryAlignment": "start"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#172033",
+                    "opacity": 1
+                  }
+                ],
+                "strokes": [],
+                "strokeWeight": 1,
+                "cornerRadius": 0,
+                "opacity": 1
+              },
+              "type": "text",
+              "content": "Your workspace",
+              "fontFamily": "Inter",
+              "fontStyle": "Bold",
+              "fontSize": 24,
+              "lineHeight": "auto",
+              "letterSpacing": 0,
+              "textAlign": "start"
+            },
+            {
+              "id": "list",
+              "name": "List",
+              "layout": {
+                "type": "auto-layout",
+                "positioning": "auto",
+                "direction": "vertical",
+                "width": "fill",
+                "height": "hug",
+                "x": 0,
+                "y": 0,
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "itemSpacing": 12,
+                "alignment": "start",
+                "primaryAlignment": "start"
+              },
+              "styling": {
+                "fills": [],
+                "strokes": [],
+                "strokeWeight": 1,
+                "cornerRadius": 0,
+                "opacity": 1
+              },
+              "type": "frame",
+              "nodes": [
+                {
+                  "id": "item-one",
+                  "name": "First item",
+                  "layout": {
+                    "type": "absolute",
+                    "positioning": "auto",
+                    "direction": "vertical",
+                    "width": "fill",
+                    "height": "hug",
+                    "x": 0,
+                    "y": 0,
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "itemSpacing": 0,
+                    "alignment": "start",
+                    "primaryAlignment": "start"
+                  },
+                  "styling": {
+                    "fills": [
+                      {
+                        "color": "#344054",
+                        "opacity": 1
+                      }
+                    ],
+                    "strokes": [],
+                    "strokeWeight": 1,
+                    "cornerRadius": 0,
+                    "opacity": 1
+                  },
+                  "type": "text",
+                  "content": "Design specification ready",
+                  "fontFamily": "Inter",
+                  "fontStyle": "Regular",
+                  "fontSize": 16,
+                  "lineHeight": "auto",
+                  "letterSpacing": 0,
+                  "textAlign": "start"
+                },
+                {
+                  "id": "item-two",
+                  "name": "Second item",
+                  "layout": {
+                    "type": "absolute",
+                    "positioning": "auto",
+                    "direction": "vertical",
+                    "width": "fill",
+                    "height": "hug",
+                    "x": 0,
+                    "y": 0,
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "itemSpacing": 0,
+                    "alignment": "start",
+                    "primaryAlignment": "start"
+                  },
+                  "styling": {
+                    "fills": [
+                      {
+                        "color": "#344054",
+                        "opacity": 1
+                      }
+                    ],
+                    "strokes": [],
+                    "strokeWeight": 1,
+                    "cornerRadius": 0,
+                    "opacity": 1
+                  },
+                  "type": "text",
+                  "content": "Stable identities connected",
+                  "fontFamily": "Inter",
+                  "fontStyle": "Regular",
+                  "fontSize": 16,
+                  "lineHeight": "auto",
+                  "letterSpacing": 0,
+                  "textAlign": "start"
+                }
+              ]
+            },
+            {
+              "id": "button",
+              "name": "Continue button",
+              "layout": {
+                "type": "auto-layout",
+                "positioning": "auto",
+                "direction": "horizontal",
+                "width": "fill",
+                "height": 48,
+                "x": 0,
+                "y": 0,
+                "padding": {
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "left": 0
+                },
+                "itemSpacing": 0,
+                "alignment": "center",
+                "primaryAlignment": "center"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#2463EB",
+                    "opacity": 1
+                  }
+                ],
+                "strokes": [],
+                "strokeWeight": 1,
+                "cornerRadius": 8,
+                "opacity": 1
+              },
+              "type": "frame",
+              "nodes": [
+                {
+                  "id": "button-label",
+                  "name": "Button label",
+                  "layout": {
+                    "type": "absolute",
+                    "positioning": "auto",
+                    "direction": "vertical",
+                    "width": "hug",
+                    "height": "hug",
+                    "x": 0,
+                    "y": 0,
+                    "padding": {
+                      "top": 0,
+                      "right": 0,
+                      "bottom": 0,
+                      "left": 0
+                    },
+                    "itemSpacing": 0,
+                    "alignment": "start",
+                    "primaryAlignment": "start"
+                  },
+                  "styling": {
+                    "fills": [
+                      {
+                        "color": "#FFFFFF",
+                        "opacity": 1
+                      }
+                    ],
+                    "strokes": [],
+                    "strokeWeight": 1,
+                    "cornerRadius": 0,
+                    "opacity": 1
+                  },
+                  "type": "text",
+                  "content": "Continue",
+                  "fontFamily": "Inter",
+                  "fontStyle": "Bold",
+                  "fontSize": 16,
+                  "lineHeight": "auto",
+                  "letterSpacing": 0,
+                  "textAlign": "start"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

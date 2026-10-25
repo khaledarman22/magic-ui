@@ -1,3 +1,5 @@
+import { renderDesignSystem, readComponents, readVariables } from './designSystemRenderer';
+import { renderDesign } from './designRenderer';
 import {
   MagicUiError,
   failure,
@@ -25,6 +27,14 @@ export async function executePluginCommand(
   if (isCancelled())
     throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
   switch (command.command) {
+    case 'renderDesignSystem': return {command:'renderDesignSystem',result:await renderDesignSystem(command.input,isCancelled)};
+    case 'readComponents': return {command:'readComponents',result:readComponents(command.input.projectId)};
+    case 'readVariables': return {command:'readVariables',result:await readVariables(command.input.projectId)};
+    case 'renderDesign':
+      return {
+        command: 'renderDesign',
+        result: await renderDesign(command.input, isCancelled),
+      };
     case 'ping':
       return { command: 'ping', result: { alive: true } };
     case 'createFrame': {
