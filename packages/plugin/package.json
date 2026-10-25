@@ -1,0 +1,18 @@
+{
+  "name": "@magic-ui/plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node --import tsx build.ts"
+  },
+  "dependencies": {
+    "@magic-ui/shared": "workspace:*",
+    "preact": "^10.27.2",
+    "@preact/signals": "^2.5.1"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.119.0",
+    "vite": "^7.2.2"
+  }
+}

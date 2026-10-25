@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "types": ["@figma/plugin-typings"], "lib": ["ES2022"] },
+  "include": [
+    "src/main.ts",
+    "src/pluginCommandHandlers.ts",
+    "../shared/src/**/*.ts"
+  ],
+  "exclude": []
+}

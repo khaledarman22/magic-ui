@@ -1,0 +1,86 @@
+:global(*) {
+  box-sizing: border-box;
+}
+:global(body) {
+  margin: 0;
+  background: var(--figma-color-bg, #fff);
+  color: var(--figma-color-text, #202124);
+  font:
+    13px/1.5 Inter,
+    system-ui,
+    sans-serif;
+}
+:global(::selection) {
+  background: var(--figma-color-bg-selected, #dceaff);
+}
+.panel {
+  padding: 20px;
+}
+.panel h1 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.document {
+  margin: 4px 0 20px;
+  color: var(--figma-color-text-secondary, #595959);
+  overflow-wrap: anywhere;
+}
+.connection {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--figma-color-border, #ddd);
+}
+.connection p {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+.panel label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.panel input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid var(--figma-color-border, #767676);
+  border-radius: 6px;
+  padding: 8px;
+  color: inherit;
+  background: var(--figma-color-bg, #fff);
+  caret-color: var(--figma-color-text-brand, #0759bf);
+  font: inherit;
+}
+.hint {
+  font-size: 11px;
+  margin: 6px 0 16px;
+  color: var(--figma-color-text-secondary, #595959);
+}
+.hint code {
+  overflow-wrap: anywhere;
+}
+.panel button {
+  width: 100%;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--figma-color-bg-brand, #0759bf);
+  color: var(--figma-color-text-onbrand, #fff);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.panel button:hover:not(:disabled) {
+  background: var(--figma-color-bg-brand-hover, #064898);
+}
+.panel button:disabled {
+  background: var(--figma-color-bg-disabled, #e5e5e5);
+  color: var(--figma-color-text-disabled, #666);
+  cursor: default;
+}
+.panel input:focus-visible,
+.panel button:focus-visible {
+  outline: 2px solid var(--figma-color-border-brand, #0759bf);
+  outline-offset: 3px;
+}

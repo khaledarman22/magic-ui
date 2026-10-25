@@ -1,0 +1,13 @@
+{
+  "name": "Magic UI",
+  "id": "magic-ui-local",
+  "api": "1.0.0",
+  "editorType": ["figma"],
+  "main": "main.js",
+  "ui": "ui.html",
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": ["ws://localhost:3845"]
+  }
+}

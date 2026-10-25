@@ -1,0 +1,8 @@
+node_modules
+**/dist
+pnpm-lock.yaml
+AGENTS.md
+MAGIC UI.md
+prompts
+docs/ARCHITECTURE.md
+.impeccable

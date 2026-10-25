@@ -1,0 +1,16 @@
+{
+  "name": "mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx src/index.ts",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@magic-ui/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.25.0",
+    "zod": "^4.1.13",
+    "ws": "^8.18.3"
+  }
+}
