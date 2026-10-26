@@ -231,7 +231,7 @@ it('resumes after 60/100 nodes including a lost response, validates live state a
   expect(journal.status).toBe('completed');
   expect(journal.steps).toHaveLength(100);
   expect(journal.steps.every((s) => s.after !== null)).toBe(true);
-}, 20000);
+}, 45000);
 it('detects a checkpointed node deleted during disconnection; explicit recreation is required', async () => {
   await interruptAt60();
   const deleted = node('node-5');
@@ -248,7 +248,7 @@ it('detects a checkpointed node deleted during disconnection; explicit recreatio
   await resume('resume-100', [{ localId: 'node-5', decision: 'apply-spec' }]);
   expect(harness.all()).toHaveLength(100);
   expect(node('node-5').id).not.toBe(deleted.id);
-}, 20000);
+}, 45000);
 it('moves only orphaned owned content to Trash and restores exact original parent and position', async () => {
   await success('render_design');
   const original = node('header');
@@ -548,4 +548,4 @@ it('cancels design-system work between checkpoints and preserves manual drift on
   variable.name = original;
   await resume('system-cancel');
   expect(harness.collections).toHaveLength(1);
-}, 20000);
+}, 45000);

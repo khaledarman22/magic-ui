@@ -1,3 +1,11 @@
+import {
+  assetChildrenSnapshot,
+  boundAsset,
+  preflightAsset,
+  applyAsset,
+  assetSource,
+} from './assetManager';
+import type { AssetResolution } from '@magic-ui/shared';
 import { applyInstance, findVariant } from './designSystemRenderer';
 import {
   applyTokenBindings,
@@ -230,6 +238,8 @@ export function snapshot(node: SceneNode): string {
         });
     }
   }
+  const assetContents = assetChildrenSnapshot(node);
+  if (assetContents) properties.assetContents = assetContents;
   return canonicalJson(properties);
 }
 function assertActive(pageId: string, isCancelled: () => boolean) {
@@ -284,6 +294,7 @@ export function applyProperties(
   node: RenderNode,
   spec: Resolved<NodeSpecification>,
   direction: 'ltr' | 'rtl',
+  asset?: AssetResolution,
 ) {
   const l = spec.layout;
   setProperty(node, 'name', spec.name);
@@ -418,6 +429,24 @@ export function applyProperties(
   if (node.type !== 'TEXT')
     setProperty(node, 'cornerRadius', spec.styling.cornerRadius);
   setProperty(node, 'opacity', spec.styling.opacity);
+  if (
+    readData(node, 'assetResolution') &&
+    !(spec.type === 'frame' && spec.assetId) &&
+    'children' in node
+  ) {
+    for (const child of node.children)
+      if (readData(child, 'assetChild')) child.visible = false;
+    writeData(node, 'assetResolution', '');
+  }
+  if (
+    spec.type === 'frame' &&
+    spec.assetId &&
+    (node.type === 'FRAME' || node.type === 'COMPONENT')
+  ) {
+    const resolution =
+      asset ?? boundAsset(readData(node, 'projectId'), spec.assetId);
+    applyAsset(node, resolution, assetSource(resolution.hash));
+  }
 }
 export async function renderDesign(
   raw: RenderDesignInput,
@@ -468,6 +497,7 @@ export async function renderDesign(
       for (const mode of input.specification.tokens.modes)
         await loadSpecificationFonts(
           resolveTokenReferences(node, input.specification.tokens, mode),
+          input.projectId,
         );
       if (node.type === 'component-instance')
         await findVariant(input.projectId, node.componentId, node.variant);
@@ -591,7 +621,41 @@ export async function renderDesign(
       })),
       input.specification.tokens,
     );
+    for (const operation of plan.operations)
+      if (
+        operation.specification.type === 'frame' &&
+        operation.specification.assetId
+      ) {
+        operation.intent = canonicalJson({
+          ...(JSON.parse(operation.intent) as Record<string, unknown>),
+          assetResolution: boundAsset(
+            input.projectId,
+            operation.specification.assetId,
+          ),
+        });
+        const existing = byId.get(operation.id);
+        operation.action = !existing
+          ? 'create'
+          : readData(existing, 'intent') === operation.intent
+            ? 'unchanged'
+            : 'update';
+      }
+    const missingAssets = entries.flatMap((e) =>
+      e.specification.type === 'frame' &&
+      e.specification.assetId &&
+      !boundAsset(input.projectId, e.specification.assetId).hash
+        ? [
+            {
+              localId: e.id,
+              assetId: e.specification.assetId,
+              status: 'missing' as const,
+            },
+          ]
+        : [],
+    );
     const result: RenderDesignResult = {
+      missingAssets,
+      assetsComplete: missingAssets.length === 0,
       nodeCount: 0,
       created: 0,
       updated: 0,
@@ -696,7 +760,10 @@ export async function renderDesign(
 
 export async function loadSpecificationFonts(
   node: Resolved<NodeSpecification>,
+  projectId?: string,
 ) {
+  if (projectId && node.type === 'frame' && node.assetId)
+    await preflightAsset(boundAsset(projectId, node.assetId));
   if (node.type === 'text') {
     const key = canonicalJson([node.fontFamily, node.fontStyle]);
     if (!loadedFonts.has(key)) {
@@ -717,7 +784,8 @@ export async function loadSpecificationFonts(
     }
   }
   if ('nodes' in node)
-    for (const child of node.nodes) await loadSpecificationFonts(child);
+    for (const child of node.nodes)
+      await loadSpecificationFonts(child, projectId);
 }
 export function ownedDescendants(
   root: FrameNode | ComponentSetNode,

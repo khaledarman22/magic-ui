@@ -96,6 +96,10 @@ export class FakePluginClient {
         if (this.dropCommands) return;
         if (
           [
+            'assetBindings',
+            'assetChunk',
+            'projectLayout',
+            'presentScreen',
             'renderDesign',
             'renderDesignSystem',
             'advanceDesignSystem',

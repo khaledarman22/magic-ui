@@ -27,6 +27,8 @@
   ],
   "exclude": [
     "packages/plugin/src/main.ts",
+    "packages/plugin/src/assetManager.ts",
+    "packages/plugin/src/projectLayout.ts",
     "packages/plugin/src/designSystemRecovery.ts",
     "packages/plugin/src/syncController.ts",
     "packages/plugin/src/figmaReader.ts",

@@ -1,4 +1,16 @@
 import {
+  assetBindingsSchema,
+  assetBindingsResultSchema,
+  assetChunkSchema,
+  assetChunkResultSchema,
+} from './assetCommands.js';
+import {
+  projectLayoutSchema,
+  projectLayoutResultSchema,
+  presentScreenSchema,
+  presentScreenResultSchema,
+} from './projectCommands.js';
+import {
   systemRecoveryInputSchema,
   systemRecoveryResultSchema,
 } from './designSystemRecoveryCommands.js';
@@ -43,6 +55,18 @@ export const createFrameSchema = z
 export const readNodeSchema = z.object({ nodeId: identifierSchema }).strict();
 export const pingSchema = z.object({}).strict();
 export const commandSchema = z.discriminatedUnion('command', [
+  z
+    .object({ command: z.literal('assetBindings'), input: assetBindingsSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('assetChunk'), input: assetChunkSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('projectLayout'), input: projectLayoutSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('presentScreen'), input: presentScreenSchema })
+    .strict(),
   z
     .object({
       command: z.literal('advanceDesignSystem'),
@@ -99,6 +123,30 @@ export const nodeSnapshotSchema = z
   })
   .strict();
 export const commandResultSchema = z.discriminatedUnion('command', [
+  z
+    .object({
+      command: z.literal('assetBindings'),
+      result: assetBindingsResultSchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('assetChunk'),
+      result: assetChunkResultSchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('projectLayout'),
+      result: projectLayoutResultSchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('presentScreen'),
+      result: presentScreenResultSchema,
+    })
+    .strict(),
   z
     .object({
       command: z.literal('advanceDesignSystem'),
@@ -179,6 +227,10 @@ export const connectionStatusSchema = z
   .strict();
 
 export const commandPermissions = {
+  assetBindings: 'write',
+  assetChunk: 'write',
+  projectLayout: 'write',
+  presentScreen: 'write',
   advanceDesignSystem: 'write',
   inspectSync: 'read',
   syncStep: 'write',

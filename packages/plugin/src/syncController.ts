@@ -1,3 +1,5 @@
+import { preflightAsset, assetChildrenSnapshot } from './assetManager';
+import { pageWorkspace } from './projectLayout';
 import {
   canonicalJson,
   syncHash,
@@ -41,6 +43,8 @@ function managedIndex(node: SceneNode) {
 export function ownedSnapshot(node: SceneNode): string {
   const data = JSON.parse(snapshot(node)) as Record<string, unknown>;
   data.managedIndex = managedIndex(node);
+  const assetChildren = assetChildrenSnapshot(node);
+  if (assetChildren) data.assetChildren = assetChildren;
   for (const key of [
     'children',
     'visible',
@@ -61,6 +65,8 @@ export function ownedSnapshot(node: SceneNode): string {
 function guardSnapshot(node: SceneNode): string {
   const data = JSON.parse(snapshot(node)) as Record<string, unknown>;
   data.managedIndex = managedIndex(node);
+  const assetChildren = assetChildrenSnapshot(node);
+  if (assetChildren) data.assetChildren = assetChildren;
   delete data.children; // Children have their own independent checkpoints.
   if (node.type === 'TEXT')
     data.segments = node.getStyledTextSegments([
@@ -156,6 +162,11 @@ export async function inspectSync(
   const node = nodes.find((n) => read(n, 'id') === input.localId);
   return {
     documentId: read(figma.root, 'documentId'),
+    projectPageId: read(
+      figma.root.children.find((p) => p.id === input.pageId) ??
+        figma.currentPage,
+      'projectPageId',
+    ),
     rootNodeId: read(
       figma.root.children.find((p) => p.id === input.pageId) ??
         figma.currentPage,
@@ -214,7 +225,8 @@ export async function syncStep(
     const resolved = resolveTokenReferences(spec, input.tokens);
     const parent = input.entry.parentId
       ? nodes.find((n) => read(n, 'id') === input.entry.parentId)
-      : figma.currentPage;
+      : (pageWorkspace(figma.currentPage, input.projectId) ??
+        figma.currentPage);
     if (
       input.action === 'apply-spec' &&
       (!parent || !('insertChild' in parent) || isTrashed(parent))
@@ -229,6 +241,7 @@ export async function syncStep(
     )
       drift('Node type changes require a separate explicit migration.');
     await loadSpecificationFonts(resolved);
+    await preflightAsset(input.asset);
     const source =
       spec.type === 'component-instance'
         ? await findVariant(input.projectId, spec.componentId, spec.variant)
@@ -296,10 +309,12 @@ export async function syncStep(
         node as FrameNode | TextNode | RectangleNode | InstanceNode,
         resolved,
         input.direction,
+        input.asset,
       );
       if (node.type === 'INSTANCE' && spec.type === 'component-instance')
         await applyInstance(node, spec, input.projectId, () => active(input));
       await applyTokenBindings(node, spec, input.tokens, variables, styles);
+
       active(input);
     }
     return commitBaseline(node, input);
@@ -356,6 +371,16 @@ export async function trashNode(
       // Moving a container also moves descendants: refuse even one user node.
       const check = (child: SceneNode) => {
         if (
+          child !== node &&
+          child.parent &&
+          read(child.parent, 'assetResolution') &&
+          read(child.parent, 'projectId') === input.projectId &&
+          read(child.parent, 'screenId') === input.screenId &&
+          ((read(child, 'assetChild') === 'missing' && child.type === 'TEXT') ||
+            (read(child, 'assetChild') === 'icon' && child.type === 'INSTANCE'))
+        )
+          return;
+        if (
           read(child, 'projectId') !== input.projectId ||
           read(child, 'screenId') !== input.screenId ||
           !read(child, 'id')
@@ -397,7 +422,7 @@ export async function trashNode(
         write(page, 'projectId', input.projectId);
       }
       write(node, 'trash', JSON.stringify(original));
-      page.appendChild(node);
+      (pageWorkspace(page, input.projectId) ?? page).appendChild(node);
     }
     // Preserve the original sync baseline so restore or manual edits are visible.
     return live(node);

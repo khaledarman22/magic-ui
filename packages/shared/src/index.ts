@@ -14,3 +14,8 @@ export * from './commands/readerCommands.js';
 export * from './commands/syncCommands.js';
 
 export * from './commands/designSystemRecoveryCommands.js';
+
+export * from './commands/assetCommands.js';
+export * from './commands/projectCommands.js';
+export * from './designSpecification/svgSanitizer.js';
+export * from './designSpecification/sha256.js';

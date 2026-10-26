@@ -111,7 +111,11 @@ export const rectangleSpecificationSchema = z
   .object({ ...common, type: z.literal('rectangle') })
   .strict();
 const frameBaseSchema = z
-  .object({ ...common, type: z.literal('frame') })
+  .object({
+    ...common,
+    type: z.literal('frame'),
+    assetId: stableIdSchema.optional(),
+  })
   .strict();
 export const instanceSpecificationSchema = z
   .object({
@@ -181,6 +185,7 @@ export const componentSpecificationSchema = z
         z
           .object({
             id: stableIdSchema,
+            kind: z.enum(['app', 'website', 'dashboard']).optional(),
             name: z.string().min(1).max(256),
             values: z.record(
               z.string(),
@@ -211,6 +216,7 @@ export const designSpecificationSchema = z
         z
           .object({
             id: stableIdSchema,
+            kind: z.enum(['app', 'website', 'dashboard']).optional(),
             name: z.string().min(1).max(256),
             screens: z.array(screenSpecificationSchema).max(100),
           })
@@ -273,6 +279,17 @@ export const designSpecificationSchema = z
             node.type === 'frame' ||
             node.type === 'component-instance';
           const l = node.layout;
+          if (
+            'assetId' in node &&
+            node.assetId &&
+            'nodes' in node &&
+            node.nodes.length
+          )
+            ctx.addIssue({
+              code: 'custom',
+              path: p,
+              message: 'Asset frames cannot contain spec children.',
+            });
           if (
             'type' in node &&
             node.type === 'text' &&

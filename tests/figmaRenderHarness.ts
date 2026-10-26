@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 // Test-only Figma surface. The production renderer itself runs inside an isolated VM.
 import { buildSync } from 'esbuild';
 import { runInNewContext } from 'node:vm';
@@ -148,6 +149,15 @@ export function createRenderHarness() {
     createInstance() {
       const instance = create('INSTANCE');
       instance.mainComponent = this;
+      if (this.getSharedPluginData('magic_ui', 'mockupDevice'))
+        for (const child of this.children) {
+          const copy = create(child.type);
+          copy.data = new Map(child.data);
+          copy.name = child.name;
+          copy.width = child.width;
+          copy.height = child.height;
+          instance.appendChild(copy);
+        }
       for (const [k, p] of Object.entries(
         this.parent?.componentPropertyDefinitions ?? {},
       ))
@@ -228,6 +238,7 @@ export function createRenderHarness() {
   const variables: HarnessVariable[] = [],
     collections: HarnessCollection[] = [],
     styles: HarnessNode[] = [];
+  const imageCache = new Map<string, { hash: string }>();
   const api = {
     root: document,
     base64Encode: (bytes: Uint8Array) => Buffer.from(bytes).toString('base64'),
@@ -289,6 +300,14 @@ export function createRenderHarness() {
     ),
     mixed: Symbol('mixed'),
     currentPage: page,
+    getImageByHash: (hash: string) => imageCache.get(hash) ?? null,
+    createImage: vi.fn((bytes: Uint8Array) => {
+      const hash = createHash('sha1').update(bytes).digest('hex');
+      const image = { hash };
+      imageCache.set(hash, image);
+      return image;
+    }),
+    createNodeFromSvg: vi.fn((_svg: string) => create('FRAME')),
     createFrame: vi.fn(() => create('FRAME')),
     createText: vi.fn(() => create('TEXT')),
     createRectangle: vi.fn(() => create('RECTANGLE')),

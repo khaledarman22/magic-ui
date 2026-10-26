@@ -1,3 +1,5 @@
+import { AssetRegistry } from './assetRegistry.js';
+import { canonicalJson } from '@magic-ui/shared';
 import { randomUUID } from 'node:crypto';
 import {
   classifySync,
@@ -21,6 +23,7 @@ export class SyncEngine {
   constructor(
     private bridge: BridgeServer,
     private workspace: DesignWorkspace,
+    private assets = new AssetRegistry(workspace),
   ) {}
   private async exclusive<T>(action: () => Promise<T>) {
     if (this.busy)
@@ -52,6 +55,24 @@ export class SyncEngine {
       throw new Error('Unexpected sync response');
     return response.result;
   }
+  private assetUsages(specification: DesignSpecification) {
+    const usages = new Map<string, string[]>();
+    const visit = (node: import('@magic-ui/shared').NodeSpecification) => {
+      if (node.type === 'frame' && node.assetId)
+        usages.set(node.assetId, [
+          ...(usages.get(node.assetId) ?? []),
+          node.id,
+        ]);
+      if ('nodes' in node) node.nodes.forEach(visit);
+    };
+    specification.pages.forEach((p) =>
+      p.screens.forEach((s) => s.nodes.forEach(visit)),
+    );
+    specification.components.forEach((c) =>
+      c.variants.forEach((v) => visit(v.root)),
+    );
+    return usages;
+  }
   private entries(spec: DesignSpecification, screenId: string) {
     const screen = spec.pages
       .flatMap((p) => p.screens)
@@ -82,6 +103,31 @@ export class SyncEngine {
     const specification =
       spec ?? (await this.workspace.readSpecification(scope.projectId));
     const { screen, entries } = this.entries(specification, scope.screenId);
+    const assetIds = entries.flatMap((e) =>
+      e.specification.type === 'frame' && e.specification.assetId
+        ? [e.specification.assetId]
+        : [],
+    );
+    const resolutions = assetIds.length
+      ? await this.assets.resolve(scope.projectId, assetIds)
+      : [];
+    const assetById = new Map(
+      resolutions.map((a) => [a.id, { id: a.id, hash: a.hash }]),
+    );
+    const missingAssets = entries.flatMap((e) => {
+      const asset =
+        e.specification.type === 'frame' && e.specification.assetId
+          ? assetById.get(e.specification.assetId)
+          : undefined;
+      if (asset)
+        e.intent = canonicalJson({
+          ...(JSON.parse(e.intent) as Record<string, unknown>),
+          assetResolution: asset,
+        });
+      return asset && !asset.hash
+        ? [{ localId: e.id, assetId: asset.id, status: 'missing' as const }]
+        : [];
+    });
     const stateFile = await this.workspace.readSyncData(scope.projectId);
     const state = stateFile.screens.find((s) => s.screenId === scope.screenId);
     const scan = await this.inspect(input.sessionId, scope, signal);
@@ -91,6 +137,16 @@ export class SyncEngine {
     )
       throw new MagicUiError(
         failure('DRIFT_DETECTED', 'Project is bound to another document/page.'),
+      );
+    const declaredPage = specification.pages.find((p) =>
+      p.screens.some((s) => s.id === scope.screenId),
+    );
+    if (declaredPage?.kind && scan.projectPageId !== declaredPage.id)
+      throw new MagicUiError(
+        failure(
+          'PAGE_CHANGED',
+          'Prepare project pages and select the declared screen page before rendering.',
+        ),
       );
     const desired = new Map(entries.map((e) => [e.id, e]));
     const ids = new Set([
@@ -112,6 +168,9 @@ export class SyncEngine {
     }
     const report: SyncReport = {
       status: 'preview',
+      ...(assetIds.length
+        ? { missingAssets, assetsComplete: missingAssets.length === 0 }
+        : {}),
       completedSteps: 0,
       totalSteps: entries.length,
       operations: [],
@@ -163,6 +222,7 @@ export class SyncEngine {
       specification,
       screen,
       entries,
+      assetById,
       stateFile,
       state,
       scan,
@@ -316,6 +376,26 @@ export class SyncEngine {
         );
       await saveJournal();
       try {
+        if (context.assetById.size) {
+          const uploaded = await this.assets.upload(
+            this.bridge,
+            input.sessionId,
+            input.projectId,
+            input.pageId,
+            journal.documentId,
+            [...context.assetById.keys()],
+            signal,
+          );
+          if (
+            canonicalJson(uploaded) !==
+            canonicalJson([...context.assetById.values()])
+          )
+            throw new Error('Assets changed during preflight; retry.');
+        }
+        await this.assets.recordUsage(
+          input.projectId,
+          this.assetUsages(specification),
+        );
         for (const entry of entries) {
           if (signal.aborted)
             throw new MagicUiError(
@@ -411,6 +491,14 @@ export class SyncEngine {
                   documentId: journal.documentId,
                   operationId: journal.operationId,
                   entry,
+                  ...(entry.specification.type === 'frame' &&
+                  entry.specification.assetId
+                    ? {
+                        asset: context.assetById.get(
+                          entry.specification.assetId,
+                        )!,
+                      }
+                    : {}),
                   tokens: specification.tokens,
                   direction: screen.direction,
                   specVersion: specification.schemaVersion,
@@ -565,9 +653,38 @@ export class SyncEngine {
           'design-progress.json',
           journals,
         );
+      const componentAssets = new Map<string, string[]>();
+      const collectAssets = (
+        node: import('@magic-ui/shared').NodeSpecification,
+      ) => {
+        if (node.type === 'frame' && node.assetId)
+          componentAssets.set(node.assetId, [
+            ...(componentAssets.get(node.assetId) ?? []),
+            node.id,
+          ]);
+        if ('nodes' in node) node.nodes.forEach(collectAssets);
+      };
+      specification.components.forEach((c) =>
+        c.variants.forEach((v) => collectAssets(v.root)),
+      );
       const plan = designSystemStepIds(specification);
       await save();
       try {
+        if (componentAssets.size) {
+          await this.assets.upload(
+            this.bridge,
+            input.sessionId,
+            input.projectId,
+            input.pageId,
+            commandInput.documentId,
+            [...componentAssets.keys()],
+            signal,
+          );
+        }
+        await this.assets.recordUsage(
+          input.projectId,
+          this.assetUsages(specification),
+        );
         while (true) {
           if (signal.aborted)
             throw new MagicUiError(
@@ -711,6 +828,12 @@ export class SyncEngine {
       .map((r) => ({ id: r.localId, nodeId: r.figmaNodeId! }));
     return {
       operationId: report.operationId,
+      ...(report.missingAssets
+        ? {
+            missingAssets: report.missingAssets,
+            assetsComplete: report.assetsComplete,
+          }
+        : {}),
       nodeCount: mapping.length,
       mapping,
       created: report.operations.filter((r) => r.action === 'create').length,

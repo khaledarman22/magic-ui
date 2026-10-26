@@ -1,3 +1,4 @@
+import { missingAssetsSchema } from './assetCommands.js';
 import { z } from 'zod';
 import { identifierSchema } from '../protocol/constants.js';
 import {
@@ -38,6 +39,8 @@ export const nodeMappingSchema = z
 export const renderDesignResultSchema = z
   .object({
     operationId: identifierSchema.optional(),
+    missingAssets: missingAssetsSchema.optional(),
+    assetsComplete: z.boolean().optional(),
     nodeCount: z.number().int().min(0),
     created: z.number().int().min(0),
     updated: z.number().int().min(0),

@@ -1,0 +1,169 @@
+{
+  "target": {
+    "name": "Untitled",
+    "pageId": "1:2",
+    "pageName": "App - Sample"
+  },
+  "asset": {
+    "id": "sample-image",
+    "name": "Smoke image",
+    "path": "sample.png",
+    "hash": "bfae81e366d0e2aaaffd0d38f78ecaf2bc87e44261694da755e1feaa2a545ca8",
+    "mime": "image/png",
+    "width": 256,
+    "height": 256,
+    "size": 56019,
+    "source": "Deterministic gradient fixture in scripts/samples/createSamplePng.ts",
+    "license": "CC0 test fixture",
+    "usages": [],
+    "optimization": "original",
+    "figma": []
+  },
+  "pages": {
+    "pages": [
+      {
+        "id": "mobile",
+        "nodeId": "1:2",
+        "workspaceId": "1:3"
+      },
+      {
+        "id": "components",
+        "nodeId": "1:4",
+        "workspaceId": "1:5"
+      },
+      {
+        "id": "references",
+        "nodeId": "1:6",
+        "workspaceId": "1:7"
+      },
+      {
+        "id": "trash",
+        "nodeId": "1:8",
+        "workspaceId": "1:9"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "rendered": {
+        "operationId": "433230e4-1cae-4e28-bdb8-ef228455141f",
+        "missingAssets": [],
+        "assetsComplete": true,
+        "nodeCount": 4,
+        "created": 4,
+        "updated": 0,
+        "unchanged": 0,
+        "orphaned": 0,
+        "mapping": [
+          {
+            "id": "screen-1",
+            "nodeId": "1:10"
+          },
+          {
+            "id": "title-1",
+            "nodeId": "1:11"
+          },
+          {
+            "id": "image-1",
+            "nodeId": "1:12"
+          },
+          {
+            "id": "caption-1",
+            "nodeId": "1:13"
+          }
+        ],
+        "orphanedNodes": []
+      },
+      "presentation": {
+        "componentId": "1:14",
+        "instanceId": "1:17",
+        "presentationId": "1:16",
+        "sourceNodeId": "1:10",
+        "sourceHash": "01050233fed7a898a7c3e4b08db01ef0db951755f396ed4ebf8bc6cde03eb5b5",
+        "mockupSource": "basic-shapes",
+        "refresh": "explicit"
+      }
+    },
+    {
+      "rendered": {
+        "operationId": "478c4865-5a5d-4cfd-8c10-829b0664d0ee",
+        "missingAssets": [],
+        "assetsComplete": true,
+        "nodeCount": 4,
+        "created": 4,
+        "updated": 0,
+        "unchanged": 0,
+        "orphaned": 0,
+        "mapping": [
+          {
+            "id": "screen-2",
+            "nodeId": "1:19"
+          },
+          {
+            "id": "title-2",
+            "nodeId": "1:20"
+          },
+          {
+            "id": "image-2",
+            "nodeId": "1:21"
+          },
+          {
+            "id": "caption-2",
+            "nodeId": "1:22"
+          }
+        ],
+        "orphanedNodes": []
+      },
+      "presentation": {
+        "componentId": "1:14",
+        "instanceId": "1:24",
+        "presentationId": "1:23",
+        "sourceNodeId": "1:19",
+        "sourceHash": "9fc64f580411cfd18c183be7d03ae428dece7023268874c7680e8936e6e5f2eb",
+        "mockupSource": "basic-shapes",
+        "refresh": "explicit"
+      }
+    },
+    {
+      "rendered": {
+        "operationId": "ab64c9e1-e129-4c30-a57d-e2036c3e8841",
+        "missingAssets": [],
+        "assetsComplete": true,
+        "nodeCount": 4,
+        "created": 4,
+        "updated": 0,
+        "unchanged": 0,
+        "orphaned": 0,
+        "mapping": [
+          {
+            "id": "screen-3",
+            "nodeId": "1:26"
+          },
+          {
+            "id": "title-3",
+            "nodeId": "1:27"
+          },
+          {
+            "id": "image-3",
+            "nodeId": "1:28"
+          },
+          {
+            "id": "caption-3",
+            "nodeId": "1:29"
+          }
+        ],
+        "orphanedNodes": []
+      },
+      "presentation": {
+        "componentId": "1:14",
+        "instanceId": "1:31",
+        "presentationId": "1:30",
+        "sourceNodeId": "1:26",
+        "sourceHash": "7ab0caf33a15f0b42125a970f48a4ff51e5b86abfea44c99c91156d7db825344",
+        "mockupSource": "basic-shapes",
+        "refresh": "explicit"
+      }
+    }
+  ],
+  "visualVerification": "Requires User Action"
+}

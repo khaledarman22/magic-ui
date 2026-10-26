@@ -1,0 +1,354 @@
+Window: "Untitled", App: Figma.
+0 standard window Untitled, Secondary Actions: Raise
+	1 container Untitled
+		2 container
+			3 HTML content Figma, URL: file:///Applications/Figma.app/Contents/Resources/app.asar/shell.html
+				4 container
+					5 tab group Tab bar
+						6 container
+							7 tab (settable, integer) Description: Home, Value: 0
+							8 tab (settable, integer) Description: test4, Value: 0
+							9 tab (settable, integer) Description: Untitled, Value: 0
+							10 tab (selected) Description: Untitled, Value: 1
+								11 button Close tab
+							12 button New file
+						13 pop up button Open tabs and recently closed items
+			14 HTML content Untitled – Figma, URL: figma.com/design/mo3pQKE6Rz5W5NkyJ7twTD/Untitled?node-id=1-16&viewport=605%2C158%2C0.11&t=ASrudVbA5FdOufRM-0
+				15 container
+					16 container
+						17 container
+						18 container Figma Design, 1 item selected
+						19 text Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+						20 container Comments on canvas
+							21 button Create new comment
+						22 container Left sidebar
+							23 toolbar Navigation Bar
+								24 pop up button Main menu
+									25 image
+								26 button File
+									27 image
+								28 button Agents
+								29 button Assets
+									30 image
+								31 button Tools
+									32 image
+								33 button Variables
+									34 image
+							35 container
+								36 button Untitled, file name
+								37 text File name
+								38 pop up button Edit file menu
+								39 button Minimize UI
+								40 link Description: Drafts, Value: figma.com/files/team/1210308858011346004/project/157355972
+								41 button Free
+								42 container
+									43 heading Pages Find Add new page, Value: 2
+										44 button Pages
+										45 button Find
+										46 button Add new page
+									47 container
+										48 container
+											49 table
+												50 row Page 1
+													51 cell
+														52 button Page 1
+												53 row App - Sample
+													54 cell
+														55 button App - Sample
+												56 row Components
+													57 cell
+														58 button Components
+												59 row References
+													60 cell
+														61 button References
+												62 row Trash
+													63 cell
+														64 button Trash
+										65 slider Description: Resize handle, Value: 100, Details: 168 pixels, Secondary Actions: Increment, Decrement
+								66 container
+									67 heading Layers Collapse layers, Value: 2
+										68 button Layers
+										69 button Collapse layers
+									70 tree grid
+										71 container
+											72 row Main Workspace
+												73 container
+													74 cell
+														75 text Main Workspace
+											76 row Profile
+												77 container
+													78 cell
+														79 text Profile
+											80 row Title
+												81 container
+													82 cell
+														83 text Title
+											84 row Shared sample image
+												85 container
+													86 cell
+														87 text Shared sample image
+											88 row Caption
+												89 container
+													90 cell
+														91 text Caption
+											92 row Saved
+												93 container
+													94 cell
+														95 text Saved
+											96 row Title
+												97 container
+													98 cell
+														99 text Title
+											100 row Shared sample image
+												101 container
+													102 cell
+														103 text Shared sample image
+											104 row Caption
+												105 container
+													106 cell
+														107 text Caption
+											108 row Discover
+												109 container
+													110 cell
+														111 text Discover
+											112 row Title
+												113 container
+													114 cell
+														115 text Title
+											116 row Shared sample image
+												117 container
+													118 cell
+														119 text Shared sample image
+											120 row Caption
+												121 container
+													122 cell
+														123 text Caption
+											124 row (selected) Presentation / Discover
+												125 container
+													126 cell
+														127 text Presentation / Discover
+											128 row (selected) iPhone / Basic shapes
+												129 container
+													130 cell
+														131 text iPhone / Basic shapes
+											132 row Presentation / Saved
+												133 container
+													134 cell
+														135 text Presentation / Saved
+											136 row iPhone / Basic shapes
+												137 container
+													138 cell
+														139 text iPhone / Basic shapes
+											140 row Presentation / Profile
+												141 container
+													142 cell
+														143 text Presentation / Profile
+											144 row iPhone / Basic shapes
+												145 container
+													146 cell
+														147 text iPhone / Basic shapes
+								148 slider Description: Resize handle, Value: 280, Details: 280 pixels, Secondary Actions: Increment, Decrement
+						149 container Right sidebar
+							150 container
+								151 container
+									152 pop up button Multiplayer tools
+										153 image
+									154 container Prototype view
+										155 button Present
+										156 pop up button Prototype view
+									157 button Share
+									158 tab group
+										159 tab (selected) Design, Value: 1
+										160 tab (settable, integer) Prototype, Value: 0
+									161 pop up button 11%, zoom and view options
+									162 container
+										163 pop up button Frame, Frame Dimension Presets
+										164 button Select matching layers
+										165 button Create component
+										166 checkbox Use as mask, Value: 0
+										167 text Use as mask
+										168 container Boolean operations
+											169 button Union
+											170 pop up button Boolean operations
+										171 heading Position, Value: 2
+											172 text Position
+										173 checkbox Ignore auto layout, Value: 0
+										174 text Ignore auto layout
+										175 container Alignment
+											176 text Alignment
+											177 button (disabled) Align left
+												178 image
+											179 button (disabled) Align horizontal centers
+												180 image
+											181 button (disabled) Align right
+												182 image
+											183 button (disabled) Align top
+												184 image
+											185 button (disabled) Align vertical centers
+												186 image
+											187 button (disabled) Align bottom
+												188 image
+											189 button More actions
+										190 container Position
+											191 text Position
+											192 stepper (disabled) Description: X-position, Value: 0, Secondary Actions: Increment, Decrement
+											193 stepper (disabled) Description: Y-position, Value: 2700, Secondary Actions: Increment, Decrement
+										194 container Rotation
+											195 text Rotation
+											196 stepper (settable, float) Description: Rotation, Value: 0, Details: 0°
+											197 button Rotate 90˚ right
+												198 image
+											199 button Flip horizontal
+												200 image
+											201 button Flip vertical
+												202 image
+										203 heading Auto layout, Value: 2
+											204 text Auto layout
+										205 checkbox Toggle auto layout, Value: 1
+										206 text Toggle auto layout
+										207 container Flow
+											208 text Flow
+											209 Layout
+												210 text Layout
+												211 radio button Freeform, Value: 0
+												212 radio button Vertical, Value: 1
+												213 radio button Horizontal, Value: 0
+												214 radio button Grid, Value: 0
+											215 checkbox Wrap, Value: 0
+											216 text Wrap
+										217 container Resizing
+											218 text Resizing
+											219 container
+												220 list box
+												221 container Horizontal resizing
+													222 combo box (settable) Description: Horizontal resizing, Value: 425
+													223 text Hug
+											224 container
+												225 list box
+												226 container Vertical resizing
+													227 combo box (settable) Description: Vertical resizing, Value: 900
+													228 text Hug
+											229 checkbox Lock aspect ratio, Value: 0
+											230 text Lock aspect ratio
+										231 Alignment
+											232 text Alignment
+											233 container
+												234 radio button Align top left, Value: 1
+												235 radio button Align top center, Value: 0
+												236 radio button Align top right, Value: 0
+												237 radio button Align left, Value: 0
+												238 radio button Align center, Value: 0
+												239 radio button Align right, Value: 0
+												240 radio button Align bottom left, Value: 0
+												241 radio button Align bottom center, Value: 0
+												242 radio button Align bottom right, Value: 0
+										243 list box
+										244 container Vertical gap between objects
+											245 combo box (settable) Description: Vertical gap between objects, Value: 0
+										246 pop up button Auto layout settings
+										247 container Horizontal padding
+											248 text field (settable) Description: Horizontal padding, Value: 0
+										249 container Vertical padding
+											250 text field (settable) Description: Vertical padding, Value: 0
+										251 pop up button Individual padding
+										252 checkbox Clip content, Value: 1
+										253 image
+										254 image
+										255 text Clip content
+										256 heading Appearance, Value: 2
+											257 text Appearance
+										258 checkbox Hide, Value: 0
+										259 text Hide
+										260 pop up button Apply blend mode
+										261 container Opacity
+											262 image
+											263 text field (settable) Description: Opacity, Value: 100%
+										264 container Corner radius
+											265 text field (settable) Description: Corner radius, Value: 0
+										266 pop up button Individual corners
+										267 button Fill
+											268 heading Fill, Value: 2
+												269 text Fill
+										270 pop up button Fill, Apply styles and variables
+										271 button Add fill
+										272 button Stroke
+											273 heading Stroke, Value: 2
+												274 text Stroke
+										275 pop up button Stroke, Apply styles and variables
+										276 button Add stroke
+										277 container
+											278 button Effects
+												279 heading Effects, Value: 2
+													280 text Effects
+											281 pop up button Effects, Apply styles
+											282 button Add effect
+										283 heading Selection colors, Value: 2
+											284 text Selection colors
+										285 button Solid color hex: 141417
+										286 text Color
+										287 combo box (settable) Description: Color, Value: 141417
+										288 container Opacity
+											289 text field (settable) Opacity, Value: 100
+											290 text %
+										291 button Layout guide
+											292 heading Layout guide, Value: 2
+												293 text Layout guide
+										294 pop up button Layout guide, Apply styles
+										295 button Add layout guide
+										296 button Export
+										297 button Add export settings
+								298 slider Description: Resize handle, Value: 241, Details: 241 pixels (min), Secondary Actions: Increment, Decrement
+					299 container Application toolbar
+						300 toolbar Editor
+							301 container Move
+								302 toggle button Description: Move, Value: 1
+									303 image
+								304 toggle button Description: Move tools, Value: 0
+							305 container Frame
+								306 toggle button Description: Frame, Value: 0
+									307 image
+								308 toggle button Description: Region tools, Value: 0
+							309 container Rectangle
+								310 toggle button Description: Rectangle, Value: 0
+									311 image
+								312 toggle button Description: Shape tools, Value: 0
+							313 container Pen
+								314 toggle button Description: Pen, Value: 0
+									315 image
+								316 toggle button Description: Creation tools, Value: 0
+							317 container Text
+								318 toggle button Description: Text, Value: 0
+									319 image
+								320 toggle button Description: Type tools, Value: 0
+							321 toggle button Description: Comment, Value: 0
+								322 image
+							323 toggle button Description: Actions, Value: 0
+								324 image
+							325 Toolbelt Mode
+								326 text Toolbelt Mode
+								327 radio button Draw, Value: 0
+								328 radio button Design, Value: 1
+								329 radio button Motion, Value: 0
+								330 radio button Dev Mode, Value: 0
+					331 container Help/zoom toolbar
+						332 toolbar Help/zoom toolbar
+							333 pop up button Help
+								334 image
+	335 close button
+	336 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	337 minimize button
+338 menu bar
+	339 Figma
+	340 File
+	341 Edit
+	342 View
+	343 Object
+	344 Text
+	345 Arrange
+	346 Vector
+	347 Plugins
+	348 Widgets
+	349 Window
+	350 Help
+
+The focused UI element is 14 HTML content Untitled – Figma, URL: figma.com/design/mo3pQKE6Rz5W5NkyJ7twTD/Untitled?node-id=1-16&viewport=605%2C158%2C0.11&t=ASrudVbA5FdOufRM-0

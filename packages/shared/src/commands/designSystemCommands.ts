@@ -1,3 +1,4 @@
+import { missingAssetsSchema } from './assetCommands.js';
 import { z } from 'zod';
 import { identifierSchema } from '../protocol/constants.js';
 import {
@@ -107,6 +108,8 @@ export const variablesResultSchema = z
   })
   .strict();
 export const designSystemResultSchema = componentRegistrySchema.safeExtend({
+  missingAssets: missingAssetsSchema.optional(),
+  assetsComplete: z.boolean().optional(),
   operationId: identifierSchema.optional(),
   variables: variablesResultSchema,
   componentCount: z.number().int(),

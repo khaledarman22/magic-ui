@@ -303,3 +303,74 @@ it('blocks design-system recovery commands in a read-only Main session', async (
   });
   expect(figmaHarness.createFrame).not.toHaveBeenCalled();
 });
+
+it('blocks asset uploads, bindings, page preparation and presentations in read-only Main', async () => {
+  const { sampleSpecification } =
+    await import('./fixtures/sampleSpecification.js');
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('ready', 'readonly-assets', 'auth-assets', {
+      heartbeatIntervalMs: 5000,
+      readOnly: true,
+    }),
+  });
+  const commands: import('../packages/shared/src/index.js').Command[] = [
+    {
+      command: 'assetChunk',
+      input: {
+        projectId: 'test',
+        pageId: '0:1',
+        documentId: 'doc',
+        assetId: 'image',
+        hash: 'a'.repeat(64),
+        transferHash: 'a'.repeat(64),
+        mime: 'image/png',
+        offset: 0,
+        total: 1,
+        bytes: [0],
+      },
+    },
+    {
+      command: 'assetBindings',
+      input: {
+        projectId: 'test',
+        pageId: '0:1',
+        documentId: 'doc',
+        assets: [],
+      },
+    },
+    {
+      command: 'projectLayout',
+      input: {
+        projectId: 'test',
+        pageId: '0:1',
+        specification: sampleSpecification(),
+      },
+    },
+    {
+      command: 'presentScreen',
+      input: {
+        projectId: 'test',
+        pageId: '0:1',
+        screenId: 'home',
+        device: 'iphone',
+      },
+    },
+  ];
+  for (const command of commands) {
+    await figmaHarness.ui.onmessage({
+      kind: 'bridge',
+      message: envelope(
+        'command',
+        'readonly-assets',
+        `assets-${command.command}`,
+        command,
+      ),
+    });
+    expect(replies.at(-1)).toMatchObject({
+      kind: 'bridge',
+      message: { type: 'error', payload: { code: 'PERMISSION_DENIED' } },
+    });
+  }
+  expect(figmaHarness.createFrame).not.toHaveBeenCalled();
+});

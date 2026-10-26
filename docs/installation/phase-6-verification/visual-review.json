@@ -1,0 +1,45 @@
+{
+  "status": "Passed",
+  "method": "Visual inspection of six PNGs exported by the real Magic UI read-only bridge; Figma Desktop Layers panel inspected separately.",
+  "fileUrl": "https://www.figma.com/design/mo3pQKE6Rz5W5NkyJ7twTD/Untitled?node-id=1-2",
+  "checks": [
+    "Three distinct editable source frames: Discover, Saved, Profile",
+    "Three iPhone instances reference component 1:14",
+    "Source images share imageHash 06c81b9efb466ada1dd106bdc19068887def94ff",
+    "Images and captions visible without clipping in original screens and presentation screen slots",
+    "Components Layers panel contains one iPhone / Basic shapes component and Screen slot",
+    "Original smoke report visualVerification was pending before this subsequent inspection"
+  ],
+  "images": [
+    {
+      "path": "presentation-1.png",
+      "width": 425,
+      "height": 900
+    },
+    {
+      "path": "presentation-2.png",
+      "width": 425,
+      "height": 900
+    },
+    {
+      "path": "presentation-3.png",
+      "width": 425,
+      "height": 900
+    },
+    {
+      "path": "screen-1.png",
+      "width": 393,
+      "height": 852
+    },
+    {
+      "path": "screen-2.png",
+      "width": 393,
+      "height": 852
+    },
+    {
+      "path": "screen-3.png",
+      "width": 393,
+      "height": 852
+    }
+  ]
+}

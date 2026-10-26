@@ -19,7 +19,8 @@
     "smoke:figma": "node --import tsx scripts/figma-smoke-test.ts",
     "schema:generate": "node --import tsx scripts/generate-design-schema.ts",
     "smoke:render": "node --import tsx scripts/render-smoke-test.ts",
-    "smoke:design-system": "node --import tsx scripts/design-system-smoke-test.ts"
+    "smoke:design-system": "node --import tsx scripts/design-system-smoke-test.ts",
+    "smoke:assets": "node --import tsx scripts/assets-smoke-test.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "phase6-sample",
+  "pages": [
+    {
+      "id": "mobile",
+      "kind": "app",
+      "name": "Sample",
+      "screens": [
+        {
+          "id": "screen-1",
+          "name": "Discover",
+          "layout": {
+            "type": "auto-layout",
+            "width": 393,
+            "height": 852,
+            "padding": {
+              "top": 40,
+              "right": 24,
+              "bottom": 24,
+              "left": 24
+            },
+            "itemSpacing": 24
+          },
+          "styling": {
+            "fills": [
+              {
+                "color": "#F6F7FA"
+              }
+            ]
+          },
+          "nodes": [
+            {
+              "id": "title-1",
+              "name": "Title",
+              "type": "text",
+              "content": "Discover",
+              "fontFamily": "Inter",
+              "fontStyle": "Regular",
+              "fontSize": 28,
+              "layout": {
+                "width": "fill",
+                "height": "hug"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#172238"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "image-1",
+              "name": "Shared sample image",
+              "type": "frame",
+              "assetId": "sample-image",
+              "layout": {
+                "width": "fill",
+                "height": 320
+              },
+              "styling": {
+                "cornerRadius": 24
+              },
+              "nodes": []
+            },
+            {
+              "id": "caption-1",
+              "name": "Caption",
+              "type": "text",
+              "content": "One registered image, reused across three editable screens.",
+              "fontFamily": "Inter",
+              "fontStyle": "Regular",
+              "fontSize": 16,
+              "layout": {
+                "width": "fill",
+                "height": "hug"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#43516A"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "screen-2",
+          "name": "Saved",
+          "layout": {
+            "type": "auto-layout",
+            "width": 393,
+            "height": 852,
+            "padding": {
+              "top": 40,
+              "right": 24,
+              "bottom": 24,
+              "left": 24
+            },
+            "itemSpacing": 24
+          },
+          "styling": {
+            "fills": [
+              {
+                "color": "#F6F7FA"
+              }
+            ]
+          },
+          "nodes": [
+            {
+              "id": "title-2",
+              "name": "Title",
+              "type": "text",
+              "content": "Saved",
+              "fontFamily": "Inter",
+              "fontStyle": "Regular",
+              "fontSize": 28,
+              "layout": {
+                "width": "fill",
+                "height": "hug"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#172238"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "image-2",
+              "name": "Shared sample image",
+              "type": "frame",
+              "assetId": "sample-image",
+              "layout": {
+                "width": "fill",
+                "height": 320
+              },
+              "styling": {
+                "cornerRadius": 24
+              },
+              "nodes": []
+            },
+            {
+              "id": "caption-2",
+              "name": "Caption",
+              "type": "text",
+              "content": "One registered image, reused across three editable screens.",
+              "fontFamily": "Inter",
+              "fontStyle": "Regular",
+              "fontSize": 16,
+              "layout": {
+                "width": "fill",
+                "height": "hug"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#43516A"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "screen-3",
+          "name": "Profile",
+          "layout": {
+            "type": "auto-layout",
+            "width": 393,
+            "height": 852,
+            "padding": {
+              "top": 40,
+              "right": 24,
+              "bottom": 24,
+              "left": 24
+            },
+            "itemSpacing": 24
+          },
+          "styling": {
+            "fills": [
+              {
+                "color": "#F6F7FA"
+              }
+            ]
+          },
+          "nodes": [
+            {
+              "id": "title-3",
+              "name": "Title",
+              "type": "text",
+              "content": "Profile",
+              "fontFamily": "Inter",
+              "fontStyle": "Regular",
+              "fontSize": 28,
+              "layout": {
+                "width": "fill",
+                "height": "hug"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#172238"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "image-3",
+              "name": "Shared sample image",
+              "type": "frame",
+              "assetId": "sample-image",
+              "layout": {
+                "width": "fill",
+                "height": 320
+              },
+              "styling": {
+                "cornerRadius": 24
+              },
+              "nodes": []
+            },
+            {
+              "id": "caption-3",
+              "name": "Caption",
+              "type": "text",
+              "content": "One registered image, reused across three editable screens.",
+              "fontFamily": "Inter",
+              "fontStyle": "Regular",
+              "fontSize": 16,
+              "layout": {
+                "width": "fill",
+                "height": "hug"
+              },
+              "styling": {
+                "fills": [
+                  {
+                    "color": "#43516A"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,12 @@
+import { AssetRegistry } from './assetRegistry.js';
+import {
+  registerAssetSchema,
+  assetRecordSchema,
+  prepareProjectToolSchema,
+  projectLayoutResultSchema,
+  presentScreenToolSchema,
+  presentScreenResultSchema,
+} from '@magic-ui/shared';
 import { SyncEngine } from './syncEngine.js';
 import {
   syncToolSchema,
@@ -58,7 +67,8 @@ export function createMcpServer(
     process.env.MAGIC_UI_WORKSPACE_ROOT ?? process.cwd(),
   ),
 ) {
-  const sync = new SyncEngine(bridge, workspace);
+  const assets = new AssetRegistry(workspace);
+  const sync = new SyncEngine(bridge, workspace, assets);
   const server = new McpServer({ name: 'magic-ui', version: '0.1.0' });
   server.registerTool(
     'magic_ui_get_connection_status',
@@ -286,6 +296,79 @@ export function createMcpServer(
           ),
         ),
     );
+
+  if (!bridge.readOnly) {
+    const writeAnnotations = {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    };
+    server.registerTool(
+      'magic_ui_register_asset',
+      {
+        description:
+          'Validate a project-relative PNG, JPEG or sanitized SVG and register it once by SHA-256. Paths stay inside the project. Source and license are required; original quality is preserved.',
+        inputSchema: registerAssetSchema,
+        outputSchema: assetRecordSchema,
+        annotations: writeAnnotations,
+      },
+      (input) => localResult(() => assets.register(input)),
+    );
+    server.registerTool(
+      'magic_ui_prepare_project',
+      {
+        description:
+          'Create only declared app, website and dashboard pages plus Components, References and Trash, each with an auto-layout workspace. Keeps the current page selected. Select a returned page before rendering its screens.',
+        inputSchema: prepareProjectToolSchema,
+        outputSchema: projectLayoutResultSchema,
+        annotations: writeAnnotations,
+      },
+      (input, extra) =>
+        localResult(async () => {
+          const specification = await workspace.readSpecification(
+            input.projectId,
+          );
+          const response = await bridge.request(
+            input.sessionId,
+            {
+              command: 'projectLayout',
+              input: {
+                projectId: input.projectId,
+                pageId: input.pageId,
+                specification,
+              },
+            },
+            extra.signal,
+          );
+          if (response.command !== 'projectLayout')
+            throw new Error('Unexpected project response.');
+          return response.result;
+        }),
+    );
+    server.registerTool(
+      'magic_ui_present_screen',
+      {
+        description:
+          'Create or explicitly refresh a presentation using one reusable basic-shape iPhone or Laptop component and an image linked to the original editable screen. Refuses manual presentation drift. Reports source ID and image hash.',
+        inputSchema: presentScreenToolSchema,
+        outputSchema: presentScreenResultSchema,
+        annotations: writeAnnotations,
+      },
+      ({ sessionId, ...input }, extra) =>
+        localResult(async () => {
+          await assets.writeMockupSources(input.projectId);
+          const response = await bridge.request(
+            sessionId,
+            { command: 'presentScreen', input },
+            extra.signal,
+          );
+          if (response.command !== 'presentScreen')
+            throw new Error('Unexpected presentation response.');
+          return response.result;
+        }),
+    );
+  }
 
   const annotations = {
     readOnlyHint: true,

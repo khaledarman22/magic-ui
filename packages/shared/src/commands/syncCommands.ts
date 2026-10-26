@@ -1,3 +1,4 @@
+import { assetResolutionSchema, missingAssetsSchema } from './assetCommands.js';
 import { systemJournalSchema } from './designSystemRecoveryCommands.js';
 import { z } from 'zod';
 import { identifierSchema } from '../protocol/constants.js';
@@ -72,6 +73,7 @@ export const syncInspectResultSchema = z
   .object({
     documentId: z.string(),
     rootNodeId: z.string(),
+    projectPageId: z.string().optional(),
     nodes: z.array(
       z
         .object({ localId: stableIdSchema, figmaNodeId: identifierSchema })
@@ -81,6 +83,7 @@ export const syncInspectResultSchema = z
   })
   .strict();
 export const syncStepSchema = syncScopeSchema.extend({
+  asset: assetResolutionSchema.optional(),
   documentId: identifierSchema,
   operationId: identifierSchema,
   entry: syncEntrySchema,
@@ -127,6 +130,8 @@ export const syncReportSchema = z
   .object({
     operationId: z.string().optional(),
     status: z.enum(['preview', 'completed', 'interrupted']),
+    missingAssets: missingAssetsSchema.optional(),
+    assetsComplete: z.boolean().optional(),
     completedSteps: z.number().int().min(0),
     totalSteps: z.number().int().min(0),
     operations: z.array(syncReportRowSchema),

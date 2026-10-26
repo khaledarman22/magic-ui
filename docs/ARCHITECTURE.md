@@ -38,6 +38,7 @@ Magic UI نظام محلي يربط AI Coding Agents بـ Figma في اتجاه�
 | D10 | Session auth للـ bridge | الـ server يولّد token عشوائي ويخزنه في `~/.magic-ui/session.json` بصلاحيات `0600`، والـ Plugin يستلمه من المستخدم مرة واحدة ويحفظه في `figma.clientStorage` | Origin check فقط | Locked |
 | D11 | MCP registration في الـ setup | استخدام الـ CLI الرسمي لكل client (زي `claude mcp add`)، والتعديل اليدوي للـ config فقط لو مفيش CLI، مع backup | تعديل config files مباشرة | Proposed |
 | D12 | Spec schema | Zod schemas في `packages/shared`، ومنها يتولّد JSON Schema للـ Agents باستخدام `z.toJSONSchema` الموجود في Zod 4 (من غير dependency جديدة) | JSON Schema مكتوب يدويًا | Locked |
+| D13 | عمر bridge token وإعادة الاتصال | إنشاء token عشوائي آمن مرة واحدة وحفظه في `~/.magic-ui/session.json` بصلاحيات `0600` داخل مجلد `0700`؛ تعيد كل instances استخدامه ويظل بعد إغلاق الخادم. تحديث بيانات hub لا يغيّر token. تغيير صريح عبر أمر rotate عند توقف جميع instances، ثم إعادة pairing للـPlugin؛ لا تسجيل token في logs. الإنشاء المتزامن محمي والملف غير الصالح يُرفض دون استبدال صامت. هذا يكمّل D10 مع إبقاء مسار التخزين والمصادقة | pairing code قصير لتبادل token، أو token جديد مع كل تشغيل كما في الكود الحالي | Proposed |
 
 ---
 

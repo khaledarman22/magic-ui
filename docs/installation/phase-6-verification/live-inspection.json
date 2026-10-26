@@ -1,0 +1,2649 @@
+{
+  "status": {
+    "connected": true,
+    "sessionId": "938619404864e287662df8aa154c28f1",
+    "document": {
+      "name": "Untitled",
+      "pageId": "1:2",
+      "pageName": "App - Sample"
+    }
+  },
+  "presentations": [
+    {
+      "componentId": "1:14",
+      "instanceId": "1:17",
+      "presentationId": "1:16",
+      "sourceNodeId": "1:10",
+      "sourceHash": "01050233fed7a898a7c3e4b08db01ef0db951755f396ed4ebf8bc6cde03eb5b5",
+      "mockupSource": "basic-shapes",
+      "refresh": "explicit"
+    },
+    {
+      "componentId": "1:14",
+      "instanceId": "1:24",
+      "presentationId": "1:23",
+      "sourceNodeId": "1:19",
+      "sourceHash": "9fc64f580411cfd18c183be7d03ae428dece7023268874c7680e8936e6e5f2eb",
+      "mockupSource": "basic-shapes",
+      "refresh": "explicit"
+    },
+    {
+      "componentId": "1:14",
+      "instanceId": "1:31",
+      "presentationId": "1:30",
+      "sourceNodeId": "1:26",
+      "sourceHash": "7ab0caf33a15f0b42125a970f48a4ff51e5b86abfea44c99c91156d7db825344",
+      "mockupSource": "basic-shapes",
+      "refresh": "explicit"
+    }
+  ],
+  "extractions": [
+    {
+      "document": {
+        "id": "0:0",
+        "name": "Untitled"
+      },
+      "roots": ["1:2"],
+      "nodes": [
+        {
+          "id": "1:2",
+          "name": "App - Sample",
+          "type": "PAGE",
+          "parentId": "0:0",
+          "childIds": ["1:3"],
+          "properties": {
+            "explicitVariableModes": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "mobile",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:3",
+          "name": "Main Workspace",
+          "type": "FRAME",
+          "parentId": "1:2",
+          "childIds": ["1:26", "1:19", "1:10", "1:16", "1:23", "1:30"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 425,
+            "height": 5496,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 48,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "workspace",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:26",
+          "name": "Profile",
+          "type": "FRAME",
+          "parentId": "1:3",
+          "childIds": ["1:27", "1:28", "1:29"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "FIXED",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 40,
+            "paddingRight": 24,
+            "paddingBottom": 24,
+            "paddingLeft": 24,
+            "itemSpacing": 24,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.9647058844566345,
+                  "g": 0.9686274528503418,
+                  "b": 0.9803921580314636
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "screen-3",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-3",
+            "intent": "{\"direction\":\"ltr\",\"id\":\"screen-3\",\"index\":0,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":852,\"itemSpacing\":24,\"padding\":{\"bottom\":24,\"left\":24,\"right\":24,\"top\":40},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"auto-layout\",\"width\":393,\"x\":0,\"y\":0},\"name\":\"Profile\",\"parentId\":null,\"parentLayout\":null,\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#F6F7FA\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"type\":\"frame\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"bottomLeftRadius\":0,\"bottomRightRadius\":0,\"boundVariables\":{},\"children\":[],\"clipsContent\":true,\"componentPropertyReferences\":null,\"cornerRadius\":0,\"counterAxisAlignItems\":\"MIN\",\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.9803921580314636,\"g\":0.9686274528503418,\"r\":0.9647058844566345},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"height\":852,\"itemSpacing\":24,\"layoutMode\":\"VERTICAL\",\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FIXED\",\"layoutSizingVertical\":\"FIXED\",\"layoutWrap\":\"NO_WRAP\",\"locked\":false,\"name\":\"Profile\",\"opacity\":1,\"paddingBottom\":24,\"paddingLeft\":24,\"paddingRight\":24,\"paddingTop\":40,\"parentId\":\"1:3\",\"primaryAxisAlignItems\":\"MIN\",\"rotation\":0,\"strokeAlign\":\"INSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"topLeftRadius\":0,\"topRightRadius\":0,\"type\":\"FRAME\",\"visible\":true,\"width\":393}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:27",
+          "name": "Title",
+          "type": "TEXT",
+          "parentId": "1:26",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 40,
+            "width": 345,
+            "height": 34,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 40]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.09019608050584793,
+                  "g": 0.13333334028720856,
+                  "b": 0.21960784494876862
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "OUTSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "textStyleId": "",
+            "characters": "Profile",
+            "fontName": {
+              "family": "Inter",
+              "style": "Regular",
+              "variationSettings": {
+                "slnt": 0,
+                "wght": 400
+              }
+            },
+            "fontSize": 28,
+            "lineHeight": {
+              "unit": "AUTO"
+            },
+            "letterSpacing": {
+              "unit": "PIXELS",
+              "value": 0
+            },
+            "textAlignHorizontal": "LEFT",
+            "textAlignVertical": "TOP",
+            "textAutoResize": "HEIGHT",
+            "textCase": "ORIGINAL",
+            "textDecoration": "NONE",
+            "paragraphSpacing": 0,
+            "paragraphIndent": 0,
+            "componentPropertyReferences": null,
+            "exportSettings": [],
+            "styledTextSegments": [
+              {
+                "characters": "Profile",
+                "start": 0,
+                "end": 7,
+                "fontSize": 28,
+                "fontName": {
+                  "family": "Inter",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "slnt": 0,
+                    "wght": 400
+                  }
+                },
+                "textDecoration": "NONE",
+                "textCase": "ORIGINAL",
+                "lineHeight": {
+                  "unit": "AUTO"
+                },
+                "letterSpacing": {
+                  "unit": "PIXELS",
+                  "value": 0
+                },
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "visible": true,
+                    "opacity": 1,
+                    "blendMode": "NORMAL",
+                    "color": {
+                      "r": 0.09019608050584793,
+                      "g": 0.13333334028720856,
+                      "b": 0.21960784494876862
+                    },
+                    "boundVariables": {}
+                  }
+                ],
+                "textStyleId": "",
+                "listOptions": {
+                  "type": "NONE"
+                },
+                "indentation": 0,
+                "hyperlink": null
+              }
+            ]
+          },
+          "identity": {
+            "id": "title-3",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-3",
+            "intent": "{\"content\":\"Profile\",\"direction\":\"ltr\",\"fontFamily\":\"Inter\",\"fontSize\":28,\"fontStyle\":\"Regular\",\"id\":\"title-3\",\"index\":0,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":\"hug\",\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"letterSpacing\":0,\"lineHeight\":\"auto\",\"name\":\"Title\",\"parentId\":\"screen-3\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#172238\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"textAlign\":\"start\",\"type\":\"text\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"boundVariables\":{},\"characters\":\"Profile\",\"componentPropertyReferences\":null,\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.21960784494876862,\"g\":0.13333334028720856,\"r\":0.09019608050584793},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"fontName\":{\"family\":\"Inter\",\"style\":\"Regular\",\"variationSettings\":{\"slnt\":0,\"wght\":400}},\"fontSize\":28,\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"HUG\",\"letterSpacing\":{\"unit\":\"PIXELS\",\"value\":0},\"lineHeight\":{\"unit\":\"AUTO\"},\"locked\":false,\"name\":\"Title\",\"opacity\":1,\"parentId\":\"1:26\",\"rotation\":0,\"strokeAlign\":\"OUTSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"textAlignHorizontal\":\"LEFT\",\"textAutoResize\":\"HEIGHT\",\"textCase\":\"ORIGINAL\",\"textDecoration\":\"NONE\",\"textStyleId\":\"\",\"type\":\"TEXT\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:28",
+          "name": "Shared sample image",
+          "type": "FRAME",
+          "parentId": "1:26",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 98,
+            "width": 345,
+            "height": 320,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 98]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [
+              {
+                "type": "IMAGE",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "scaleMode": "FILL",
+                "scalingFactor": 1,
+                "rotation": 0,
+                "filters": {
+                  "exposure": 0,
+                  "contrast": 0,
+                  "saturation": 0,
+                  "temperature": 0,
+                  "tint": 0,
+                  "highlights": 0,
+                  "shadows": 0
+                },
+                "imageTransform": [
+                  [1, 0, 0],
+                  [0, 1, 0]
+                ],
+                "imageHash": "06c81b9efb466ada1dd106bdc19068887def94ff"
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 24,
+            "topLeftRadius": 24,
+            "topRightRadius": 24,
+            "bottomLeftRadius": 24,
+            "bottomRightRadius": 24,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "image-3",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-3",
+            "intent": "{\"assetId\":\"sample-image\",\"assetResolution\":{\"hash\":\"bfae81e366d0e2aaaffd0d38f78ecaf2bc87e44261694da755e1feaa2a545ca8\",\"id\":\"sample-image\"},\"direction\":\"ltr\",\"id\":\"image-3\",\"index\":1,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":320,\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"name\":\"Shared sample image\",\"parentId\":\"screen-3\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":24,\"fills\":[],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"type\":\"frame\"}",
+            "snapshot": "{\"assetContents\":\"[]\",\"blendMode\":\"PASS_THROUGH\",\"bottomLeftRadius\":24,\"bottomRightRadius\":24,\"boundVariables\":{},\"children\":[],\"clipsContent\":true,\"componentPropertyReferences\":null,\"cornerRadius\":24,\"counterAxisAlignItems\":\"MIN\",\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"filters\":{\"contrast\":0,\"exposure\":0,\"highlights\":0,\"saturation\":0,\"shadows\":0,\"temperature\":0,\"tint\":0},\"imageHash\":\"06c81b9efb466ada1dd106bdc19068887def94ff\",\"imageTransform\":[[1,0,0],[0,1,0]],\"opacity\":1,\"rotation\":0,\"scaleMode\":\"FILL\",\"scalingFactor\":1,\"type\":\"IMAGE\",\"visible\":true}],\"height\":320,\"itemSpacing\":0,\"layoutMode\":\"NONE\",\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"FIXED\",\"layoutWrap\":\"NO_WRAP\",\"locked\":false,\"name\":\"Shared sample image\",\"opacity\":1,\"paddingBottom\":0,\"paddingLeft\":0,\"paddingRight\":0,\"paddingTop\":0,\"parentId\":\"1:26\",\"primaryAxisAlignItems\":\"MIN\",\"rotation\":0,\"strokeAlign\":\"INSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"topLeftRadius\":24,\"topRightRadius\":24,\"type\":\"FRAME\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:29",
+          "name": "Caption",
+          "type": "TEXT",
+          "parentId": "1:26",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 442,
+            "width": 345,
+            "height": 38,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 442]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.26274511218070984,
+                  "g": 0.3176470696926117,
+                  "b": 0.4156862795352936
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "OUTSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "textStyleId": "",
+            "characters": "One registered image, reused across three editable screens.",
+            "fontName": {
+              "family": "Inter",
+              "style": "Regular",
+              "variationSettings": {
+                "slnt": 0,
+                "wght": 400
+              }
+            },
+            "fontSize": 16,
+            "lineHeight": {
+              "unit": "AUTO"
+            },
+            "letterSpacing": {
+              "unit": "PIXELS",
+              "value": 0
+            },
+            "textAlignHorizontal": "LEFT",
+            "textAlignVertical": "TOP",
+            "textAutoResize": "HEIGHT",
+            "textCase": "ORIGINAL",
+            "textDecoration": "NONE",
+            "paragraphSpacing": 0,
+            "paragraphIndent": 0,
+            "componentPropertyReferences": null,
+            "exportSettings": [],
+            "styledTextSegments": [
+              {
+                "characters": "One registered image, reused across three editable screens.",
+                "start": 0,
+                "end": 59,
+                "fontSize": 16,
+                "fontName": {
+                  "family": "Inter",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "slnt": 0,
+                    "wght": 400
+                  }
+                },
+                "textDecoration": "NONE",
+                "textCase": "ORIGINAL",
+                "lineHeight": {
+                  "unit": "AUTO"
+                },
+                "letterSpacing": {
+                  "unit": "PIXELS",
+                  "value": 0
+                },
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "visible": true,
+                    "opacity": 1,
+                    "blendMode": "NORMAL",
+                    "color": {
+                      "r": 0.26274511218070984,
+                      "g": 0.3176470696926117,
+                      "b": 0.4156862795352936
+                    },
+                    "boundVariables": {}
+                  }
+                ],
+                "textStyleId": "",
+                "listOptions": {
+                  "type": "NONE"
+                },
+                "indentation": 0,
+                "hyperlink": null
+              }
+            ]
+          },
+          "identity": {
+            "id": "caption-3",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-3",
+            "intent": "{\"content\":\"One registered image, reused across three editable screens.\",\"direction\":\"ltr\",\"fontFamily\":\"Inter\",\"fontSize\":16,\"fontStyle\":\"Regular\",\"id\":\"caption-3\",\"index\":2,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":\"hug\",\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"letterSpacing\":0,\"lineHeight\":\"auto\",\"name\":\"Caption\",\"parentId\":\"screen-3\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#43516A\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"textAlign\":\"start\",\"type\":\"text\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"boundVariables\":{},\"characters\":\"One registered image, reused across three editable screens.\",\"componentPropertyReferences\":null,\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.4156862795352936,\"g\":0.3176470696926117,\"r\":0.26274511218070984},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"fontName\":{\"family\":\"Inter\",\"style\":\"Regular\",\"variationSettings\":{\"slnt\":0,\"wght\":400}},\"fontSize\":16,\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"HUG\",\"letterSpacing\":{\"unit\":\"PIXELS\",\"value\":0},\"lineHeight\":{\"unit\":\"AUTO\"},\"locked\":false,\"name\":\"Caption\",\"opacity\":1,\"parentId\":\"1:26\",\"rotation\":0,\"strokeAlign\":\"OUTSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"textAlignHorizontal\":\"LEFT\",\"textAutoResize\":\"HEIGHT\",\"textCase\":\"ORIGINAL\",\"textDecoration\":\"NONE\",\"textStyleId\":\"\",\"type\":\"TEXT\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:19",
+          "name": "Saved",
+          "type": "FRAME",
+          "parentId": "1:3",
+          "childIds": ["1:20", "1:21", "1:22"],
+          "properties": {
+            "x": 0,
+            "y": 900,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 900]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "FIXED",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 40,
+            "paddingRight": 24,
+            "paddingBottom": 24,
+            "paddingLeft": 24,
+            "itemSpacing": 24,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.9647058844566345,
+                  "g": 0.9686274528503418,
+                  "b": 0.9803921580314636
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "screen-2",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-2",
+            "intent": "{\"direction\":\"ltr\",\"id\":\"screen-2\",\"index\":0,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":852,\"itemSpacing\":24,\"padding\":{\"bottom\":24,\"left\":24,\"right\":24,\"top\":40},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"auto-layout\",\"width\":393,\"x\":0,\"y\":0},\"name\":\"Saved\",\"parentId\":null,\"parentLayout\":null,\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#F6F7FA\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"type\":\"frame\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"bottomLeftRadius\":0,\"bottomRightRadius\":0,\"boundVariables\":{},\"children\":[],\"clipsContent\":true,\"componentPropertyReferences\":null,\"cornerRadius\":0,\"counterAxisAlignItems\":\"MIN\",\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.9803921580314636,\"g\":0.9686274528503418,\"r\":0.9647058844566345},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"height\":852,\"itemSpacing\":24,\"layoutMode\":\"VERTICAL\",\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FIXED\",\"layoutSizingVertical\":\"FIXED\",\"layoutWrap\":\"NO_WRAP\",\"locked\":false,\"name\":\"Saved\",\"opacity\":1,\"paddingBottom\":24,\"paddingLeft\":24,\"paddingRight\":24,\"paddingTop\":40,\"parentId\":\"1:3\",\"primaryAxisAlignItems\":\"MIN\",\"rotation\":0,\"strokeAlign\":\"INSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"topLeftRadius\":0,\"topRightRadius\":0,\"type\":\"FRAME\",\"visible\":true,\"width\":393}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:20",
+          "name": "Title",
+          "type": "TEXT",
+          "parentId": "1:19",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 40,
+            "width": 345,
+            "height": 34,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 40]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.09019608050584793,
+                  "g": 0.13333334028720856,
+                  "b": 0.21960784494876862
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "OUTSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "textStyleId": "",
+            "characters": "Saved",
+            "fontName": {
+              "family": "Inter",
+              "style": "Regular",
+              "variationSettings": {
+                "slnt": 0,
+                "wght": 400
+              }
+            },
+            "fontSize": 28,
+            "lineHeight": {
+              "unit": "AUTO"
+            },
+            "letterSpacing": {
+              "unit": "PIXELS",
+              "value": 0
+            },
+            "textAlignHorizontal": "LEFT",
+            "textAlignVertical": "TOP",
+            "textAutoResize": "HEIGHT",
+            "textCase": "ORIGINAL",
+            "textDecoration": "NONE",
+            "paragraphSpacing": 0,
+            "paragraphIndent": 0,
+            "componentPropertyReferences": null,
+            "exportSettings": [],
+            "styledTextSegments": [
+              {
+                "characters": "Saved",
+                "start": 0,
+                "end": 5,
+                "fontSize": 28,
+                "fontName": {
+                  "family": "Inter",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "slnt": 0,
+                    "wght": 400
+                  }
+                },
+                "textDecoration": "NONE",
+                "textCase": "ORIGINAL",
+                "lineHeight": {
+                  "unit": "AUTO"
+                },
+                "letterSpacing": {
+                  "unit": "PIXELS",
+                  "value": 0
+                },
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "visible": true,
+                    "opacity": 1,
+                    "blendMode": "NORMAL",
+                    "color": {
+                      "r": 0.09019608050584793,
+                      "g": 0.13333334028720856,
+                      "b": 0.21960784494876862
+                    },
+                    "boundVariables": {}
+                  }
+                ],
+                "textStyleId": "",
+                "listOptions": {
+                  "type": "NONE"
+                },
+                "indentation": 0,
+                "hyperlink": null
+              }
+            ]
+          },
+          "identity": {
+            "id": "title-2",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-2",
+            "intent": "{\"content\":\"Saved\",\"direction\":\"ltr\",\"fontFamily\":\"Inter\",\"fontSize\":28,\"fontStyle\":\"Regular\",\"id\":\"title-2\",\"index\":0,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":\"hug\",\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"letterSpacing\":0,\"lineHeight\":\"auto\",\"name\":\"Title\",\"parentId\":\"screen-2\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#172238\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"textAlign\":\"start\",\"type\":\"text\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"boundVariables\":{},\"characters\":\"Saved\",\"componentPropertyReferences\":null,\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.21960784494876862,\"g\":0.13333334028720856,\"r\":0.09019608050584793},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"fontName\":{\"family\":\"Inter\",\"style\":\"Regular\",\"variationSettings\":{\"slnt\":0,\"wght\":400}},\"fontSize\":28,\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"HUG\",\"letterSpacing\":{\"unit\":\"PIXELS\",\"value\":0},\"lineHeight\":{\"unit\":\"AUTO\"},\"locked\":false,\"name\":\"Title\",\"opacity\":1,\"parentId\":\"1:19\",\"rotation\":0,\"strokeAlign\":\"OUTSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"textAlignHorizontal\":\"LEFT\",\"textAutoResize\":\"HEIGHT\",\"textCase\":\"ORIGINAL\",\"textDecoration\":\"NONE\",\"textStyleId\":\"\",\"type\":\"TEXT\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:21",
+          "name": "Shared sample image",
+          "type": "FRAME",
+          "parentId": "1:19",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 98,
+            "width": 345,
+            "height": 320,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 98]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [
+              {
+                "type": "IMAGE",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "scaleMode": "FILL",
+                "scalingFactor": 1,
+                "rotation": 0,
+                "filters": {
+                  "exposure": 0,
+                  "contrast": 0,
+                  "saturation": 0,
+                  "temperature": 0,
+                  "tint": 0,
+                  "highlights": 0,
+                  "shadows": 0
+                },
+                "imageTransform": [
+                  [1, 0, 0],
+                  [0, 1, 0]
+                ],
+                "imageHash": "06c81b9efb466ada1dd106bdc19068887def94ff"
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 24,
+            "topLeftRadius": 24,
+            "topRightRadius": 24,
+            "bottomLeftRadius": 24,
+            "bottomRightRadius": 24,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "image-2",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-2",
+            "intent": "{\"assetId\":\"sample-image\",\"assetResolution\":{\"hash\":\"bfae81e366d0e2aaaffd0d38f78ecaf2bc87e44261694da755e1feaa2a545ca8\",\"id\":\"sample-image\"},\"direction\":\"ltr\",\"id\":\"image-2\",\"index\":1,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":320,\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"name\":\"Shared sample image\",\"parentId\":\"screen-2\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":24,\"fills\":[],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"type\":\"frame\"}",
+            "snapshot": "{\"assetContents\":\"[]\",\"blendMode\":\"PASS_THROUGH\",\"bottomLeftRadius\":24,\"bottomRightRadius\":24,\"boundVariables\":{},\"children\":[],\"clipsContent\":true,\"componentPropertyReferences\":null,\"cornerRadius\":24,\"counterAxisAlignItems\":\"MIN\",\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"filters\":{\"contrast\":0,\"exposure\":0,\"highlights\":0,\"saturation\":0,\"shadows\":0,\"temperature\":0,\"tint\":0},\"imageHash\":\"06c81b9efb466ada1dd106bdc19068887def94ff\",\"imageTransform\":[[1,0,0],[0,1,0]],\"opacity\":1,\"rotation\":0,\"scaleMode\":\"FILL\",\"scalingFactor\":1,\"type\":\"IMAGE\",\"visible\":true}],\"height\":320,\"itemSpacing\":0,\"layoutMode\":\"NONE\",\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"FIXED\",\"layoutWrap\":\"NO_WRAP\",\"locked\":false,\"name\":\"Shared sample image\",\"opacity\":1,\"paddingBottom\":0,\"paddingLeft\":0,\"paddingRight\":0,\"paddingTop\":0,\"parentId\":\"1:19\",\"primaryAxisAlignItems\":\"MIN\",\"rotation\":0,\"strokeAlign\":\"INSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"topLeftRadius\":24,\"topRightRadius\":24,\"type\":\"FRAME\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:22",
+          "name": "Caption",
+          "type": "TEXT",
+          "parentId": "1:19",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 442,
+            "width": 345,
+            "height": 38,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 442]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.26274511218070984,
+                  "g": 0.3176470696926117,
+                  "b": 0.4156862795352936
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "OUTSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "textStyleId": "",
+            "characters": "One registered image, reused across three editable screens.",
+            "fontName": {
+              "family": "Inter",
+              "style": "Regular",
+              "variationSettings": {
+                "slnt": 0,
+                "wght": 400
+              }
+            },
+            "fontSize": 16,
+            "lineHeight": {
+              "unit": "AUTO"
+            },
+            "letterSpacing": {
+              "unit": "PIXELS",
+              "value": 0
+            },
+            "textAlignHorizontal": "LEFT",
+            "textAlignVertical": "TOP",
+            "textAutoResize": "HEIGHT",
+            "textCase": "ORIGINAL",
+            "textDecoration": "NONE",
+            "paragraphSpacing": 0,
+            "paragraphIndent": 0,
+            "componentPropertyReferences": null,
+            "exportSettings": [],
+            "styledTextSegments": [
+              {
+                "characters": "One registered image, reused across three editable screens.",
+                "start": 0,
+                "end": 59,
+                "fontSize": 16,
+                "fontName": {
+                  "family": "Inter",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "slnt": 0,
+                    "wght": 400
+                  }
+                },
+                "textDecoration": "NONE",
+                "textCase": "ORIGINAL",
+                "lineHeight": {
+                  "unit": "AUTO"
+                },
+                "letterSpacing": {
+                  "unit": "PIXELS",
+                  "value": 0
+                },
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "visible": true,
+                    "opacity": 1,
+                    "blendMode": "NORMAL",
+                    "color": {
+                      "r": 0.26274511218070984,
+                      "g": 0.3176470696926117,
+                      "b": 0.4156862795352936
+                    },
+                    "boundVariables": {}
+                  }
+                ],
+                "textStyleId": "",
+                "listOptions": {
+                  "type": "NONE"
+                },
+                "indentation": 0,
+                "hyperlink": null
+              }
+            ]
+          },
+          "identity": {
+            "id": "caption-2",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-2",
+            "intent": "{\"content\":\"One registered image, reused across three editable screens.\",\"direction\":\"ltr\",\"fontFamily\":\"Inter\",\"fontSize\":16,\"fontStyle\":\"Regular\",\"id\":\"caption-2\",\"index\":2,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":\"hug\",\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"letterSpacing\":0,\"lineHeight\":\"auto\",\"name\":\"Caption\",\"parentId\":\"screen-2\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#43516A\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"textAlign\":\"start\",\"type\":\"text\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"boundVariables\":{},\"characters\":\"One registered image, reused across three editable screens.\",\"componentPropertyReferences\":null,\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.4156862795352936,\"g\":0.3176470696926117,\"r\":0.26274511218070984},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"fontName\":{\"family\":\"Inter\",\"style\":\"Regular\",\"variationSettings\":{\"slnt\":0,\"wght\":400}},\"fontSize\":16,\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"HUG\",\"letterSpacing\":{\"unit\":\"PIXELS\",\"value\":0},\"lineHeight\":{\"unit\":\"AUTO\"},\"locked\":false,\"name\":\"Caption\",\"opacity\":1,\"parentId\":\"1:19\",\"rotation\":0,\"strokeAlign\":\"OUTSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"textAlignHorizontal\":\"LEFT\",\"textAutoResize\":\"HEIGHT\",\"textCase\":\"ORIGINAL\",\"textDecoration\":\"NONE\",\"textStyleId\":\"\",\"type\":\"TEXT\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:10",
+          "name": "Discover",
+          "type": "FRAME",
+          "parentId": "1:3",
+          "childIds": ["1:11", "1:12", "1:13"],
+          "properties": {
+            "x": 0,
+            "y": 1800,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 1800]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "FIXED",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 40,
+            "paddingRight": 24,
+            "paddingBottom": 24,
+            "paddingLeft": 24,
+            "itemSpacing": 24,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.9647058844566345,
+                  "g": 0.9686274528503418,
+                  "b": 0.9803921580314636
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "screen-1",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-1",
+            "intent": "{\"direction\":\"ltr\",\"id\":\"screen-1\",\"index\":0,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":852,\"itemSpacing\":24,\"padding\":{\"bottom\":24,\"left\":24,\"right\":24,\"top\":40},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"auto-layout\",\"width\":393,\"x\":0,\"y\":0},\"name\":\"Discover\",\"parentId\":null,\"parentLayout\":null,\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#F6F7FA\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"type\":\"frame\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"bottomLeftRadius\":0,\"bottomRightRadius\":0,\"boundVariables\":{},\"children\":[],\"clipsContent\":true,\"componentPropertyReferences\":null,\"cornerRadius\":0,\"counterAxisAlignItems\":\"MIN\",\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.9803921580314636,\"g\":0.9686274528503418,\"r\":0.9647058844566345},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"height\":852,\"itemSpacing\":24,\"layoutMode\":\"VERTICAL\",\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FIXED\",\"layoutSizingVertical\":\"FIXED\",\"layoutWrap\":\"NO_WRAP\",\"locked\":false,\"name\":\"Discover\",\"opacity\":1,\"paddingBottom\":24,\"paddingLeft\":24,\"paddingRight\":24,\"paddingTop\":40,\"parentId\":\"1:3\",\"primaryAxisAlignItems\":\"MIN\",\"rotation\":0,\"strokeAlign\":\"INSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"topLeftRadius\":0,\"topRightRadius\":0,\"type\":\"FRAME\",\"visible\":true,\"width\":393}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:11",
+          "name": "Title",
+          "type": "TEXT",
+          "parentId": "1:10",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 40,
+            "width": 345,
+            "height": 34,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 40]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.09019608050584793,
+                  "g": 0.13333334028720856,
+                  "b": 0.21960784494876862
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "OUTSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "textStyleId": "",
+            "characters": "Discover",
+            "fontName": {
+              "family": "Inter",
+              "style": "Regular",
+              "variationSettings": {
+                "slnt": 0,
+                "wght": 400
+              }
+            },
+            "fontSize": 28,
+            "lineHeight": {
+              "unit": "AUTO"
+            },
+            "letterSpacing": {
+              "unit": "PIXELS",
+              "value": 0
+            },
+            "textAlignHorizontal": "LEFT",
+            "textAlignVertical": "TOP",
+            "textAutoResize": "HEIGHT",
+            "textCase": "ORIGINAL",
+            "textDecoration": "NONE",
+            "paragraphSpacing": 0,
+            "paragraphIndent": 0,
+            "componentPropertyReferences": null,
+            "exportSettings": [],
+            "styledTextSegments": [
+              {
+                "characters": "Discover",
+                "start": 0,
+                "end": 8,
+                "fontSize": 28,
+                "fontName": {
+                  "family": "Inter",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "slnt": 0,
+                    "wght": 400
+                  }
+                },
+                "textDecoration": "NONE",
+                "textCase": "ORIGINAL",
+                "lineHeight": {
+                  "unit": "AUTO"
+                },
+                "letterSpacing": {
+                  "unit": "PIXELS",
+                  "value": 0
+                },
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "visible": true,
+                    "opacity": 1,
+                    "blendMode": "NORMAL",
+                    "color": {
+                      "r": 0.09019608050584793,
+                      "g": 0.13333334028720856,
+                      "b": 0.21960784494876862
+                    },
+                    "boundVariables": {}
+                  }
+                ],
+                "textStyleId": "",
+                "listOptions": {
+                  "type": "NONE"
+                },
+                "indentation": 0,
+                "hyperlink": null
+              }
+            ]
+          },
+          "identity": {
+            "id": "title-1",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-1",
+            "intent": "{\"content\":\"Discover\",\"direction\":\"ltr\",\"fontFamily\":\"Inter\",\"fontSize\":28,\"fontStyle\":\"Regular\",\"id\":\"title-1\",\"index\":0,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":\"hug\",\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"letterSpacing\":0,\"lineHeight\":\"auto\",\"name\":\"Title\",\"parentId\":\"screen-1\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#172238\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"textAlign\":\"start\",\"type\":\"text\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"boundVariables\":{},\"characters\":\"Discover\",\"componentPropertyReferences\":null,\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.21960784494876862,\"g\":0.13333334028720856,\"r\":0.09019608050584793},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"fontName\":{\"family\":\"Inter\",\"style\":\"Regular\",\"variationSettings\":{\"slnt\":0,\"wght\":400}},\"fontSize\":28,\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"HUG\",\"letterSpacing\":{\"unit\":\"PIXELS\",\"value\":0},\"lineHeight\":{\"unit\":\"AUTO\"},\"locked\":false,\"name\":\"Title\",\"opacity\":1,\"parentId\":\"1:10\",\"rotation\":0,\"strokeAlign\":\"OUTSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"textAlignHorizontal\":\"LEFT\",\"textAutoResize\":\"HEIGHT\",\"textCase\":\"ORIGINAL\",\"textDecoration\":\"NONE\",\"textStyleId\":\"\",\"type\":\"TEXT\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:12",
+          "name": "Shared sample image",
+          "type": "FRAME",
+          "parentId": "1:10",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 98,
+            "width": 345,
+            "height": 320,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 98]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [
+              {
+                "type": "IMAGE",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "scaleMode": "FILL",
+                "scalingFactor": 1,
+                "rotation": 0,
+                "filters": {
+                  "exposure": 0,
+                  "contrast": 0,
+                  "saturation": 0,
+                  "temperature": 0,
+                  "tint": 0,
+                  "highlights": 0,
+                  "shadows": 0
+                },
+                "imageTransform": [
+                  [1, 0, 0],
+                  [0, 1, 0]
+                ],
+                "imageHash": "06c81b9efb466ada1dd106bdc19068887def94ff"
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 24,
+            "topLeftRadius": 24,
+            "topRightRadius": 24,
+            "bottomLeftRadius": 24,
+            "bottomRightRadius": 24,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "image-1",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-1",
+            "intent": "{\"assetId\":\"sample-image\",\"assetResolution\":{\"hash\":\"bfae81e366d0e2aaaffd0d38f78ecaf2bc87e44261694da755e1feaa2a545ca8\",\"id\":\"sample-image\"},\"direction\":\"ltr\",\"id\":\"image-1\",\"index\":1,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":320,\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"name\":\"Shared sample image\",\"parentId\":\"screen-1\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":24,\"fills\":[],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"type\":\"frame\"}",
+            "snapshot": "{\"assetContents\":\"[]\",\"blendMode\":\"PASS_THROUGH\",\"bottomLeftRadius\":24,\"bottomRightRadius\":24,\"boundVariables\":{},\"children\":[],\"clipsContent\":true,\"componentPropertyReferences\":null,\"cornerRadius\":24,\"counterAxisAlignItems\":\"MIN\",\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"filters\":{\"contrast\":0,\"exposure\":0,\"highlights\":0,\"saturation\":0,\"shadows\":0,\"temperature\":0,\"tint\":0},\"imageHash\":\"06c81b9efb466ada1dd106bdc19068887def94ff\",\"imageTransform\":[[1,0,0],[0,1,0]],\"opacity\":1,\"rotation\":0,\"scaleMode\":\"FILL\",\"scalingFactor\":1,\"type\":\"IMAGE\",\"visible\":true}],\"height\":320,\"itemSpacing\":0,\"layoutMode\":\"NONE\",\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"FIXED\",\"layoutWrap\":\"NO_WRAP\",\"locked\":false,\"name\":\"Shared sample image\",\"opacity\":1,\"paddingBottom\":0,\"paddingLeft\":0,\"paddingRight\":0,\"paddingTop\":0,\"parentId\":\"1:10\",\"primaryAxisAlignItems\":\"MIN\",\"rotation\":0,\"strokeAlign\":\"INSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"topLeftRadius\":24,\"topRightRadius\":24,\"type\":\"FRAME\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:13",
+          "name": "Caption",
+          "type": "TEXT",
+          "parentId": "1:10",
+          "childIds": [],
+          "properties": {
+            "x": 24,
+            "y": 442,
+            "width": 345,
+            "height": 38,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 24],
+              [0, 1, 442]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FILL",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.26274511218070984,
+                  "g": 0.3176470696926117,
+                  "b": 0.4156862795352936
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "OUTSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "textStyleId": "",
+            "characters": "One registered image, reused across three editable screens.",
+            "fontName": {
+              "family": "Inter",
+              "style": "Regular",
+              "variationSettings": {
+                "slnt": 0,
+                "wght": 400
+              }
+            },
+            "fontSize": 16,
+            "lineHeight": {
+              "unit": "AUTO"
+            },
+            "letterSpacing": {
+              "unit": "PIXELS",
+              "value": 0
+            },
+            "textAlignHorizontal": "LEFT",
+            "textAlignVertical": "TOP",
+            "textAutoResize": "HEIGHT",
+            "textCase": "ORIGINAL",
+            "textDecoration": "NONE",
+            "paragraphSpacing": 0,
+            "paragraphIndent": 0,
+            "componentPropertyReferences": null,
+            "exportSettings": [],
+            "styledTextSegments": [
+              {
+                "characters": "One registered image, reused across three editable screens.",
+                "start": 0,
+                "end": 59,
+                "fontSize": 16,
+                "fontName": {
+                  "family": "Inter",
+                  "style": "Regular",
+                  "variationSettings": {
+                    "slnt": 0,
+                    "wght": 400
+                  }
+                },
+                "textDecoration": "NONE",
+                "textCase": "ORIGINAL",
+                "lineHeight": {
+                  "unit": "AUTO"
+                },
+                "letterSpacing": {
+                  "unit": "PIXELS",
+                  "value": 0
+                },
+                "fills": [
+                  {
+                    "type": "SOLID",
+                    "visible": true,
+                    "opacity": 1,
+                    "blendMode": "NORMAL",
+                    "color": {
+                      "r": 0.26274511218070984,
+                      "g": 0.3176470696926117,
+                      "b": 0.4156862795352936
+                    },
+                    "boundVariables": {}
+                  }
+                ],
+                "textStyleId": "",
+                "listOptions": {
+                  "type": "NONE"
+                },
+                "indentation": 0,
+                "hyperlink": null
+              }
+            ]
+          },
+          "identity": {
+            "id": "caption-1",
+            "projectId": "phase6-7f29ca93",
+            "screenId": "screen-1",
+            "intent": "{\"content\":\"One registered image, reused across three editable screens.\",\"direction\":\"ltr\",\"fontFamily\":\"Inter\",\"fontSize\":16,\"fontStyle\":\"Regular\",\"id\":\"caption-1\",\"index\":2,\"layout\":{\"alignment\":\"start\",\"direction\":\"vertical\",\"height\":\"hug\",\"itemSpacing\":0,\"padding\":{\"bottom\":0,\"left\":0,\"right\":0,\"top\":0},\"positioning\":\"auto\",\"primaryAlignment\":\"start\",\"type\":\"absolute\",\"width\":\"fill\",\"x\":0,\"y\":0},\"letterSpacing\":0,\"lineHeight\":\"auto\",\"name\":\"Caption\",\"parentId\":\"screen-1\",\"parentLayout\":{\"direction\":\"vertical\",\"type\":\"auto-layout\"},\"styling\":{\"cornerRadius\":0,\"fills\":[{\"color\":\"#43516A\",\"opacity\":1}],\"opacity\":1,\"strokeWeight\":1,\"strokes\":[]},\"textAlign\":\"start\",\"type\":\"text\"}",
+            "snapshot": "{\"blendMode\":\"PASS_THROUGH\",\"boundVariables\":{},\"characters\":\"One registered image, reused across three editable screens.\",\"componentPropertyReferences\":null,\"dashPattern\":[],\"effectStyleId\":\"\",\"effects\":[],\"fillStyleId\":\"\",\"fills\":[{\"blendMode\":\"NORMAL\",\"boundVariables\":{},\"color\":{\"b\":0.4156862795352936,\"g\":0.3176470696926117,\"r\":0.26274511218070984},\"opacity\":1,\"type\":\"SOLID\",\"visible\":true}],\"fontName\":{\"family\":\"Inter\",\"style\":\"Regular\",\"variationSettings\":{\"slnt\":0,\"wght\":400}},\"fontSize\":16,\"layoutPositioning\":\"AUTO\",\"layoutSizingHorizontal\":\"FILL\",\"layoutSizingVertical\":\"HUG\",\"letterSpacing\":{\"unit\":\"PIXELS\",\"value\":0},\"lineHeight\":{\"unit\":\"AUTO\"},\"locked\":false,\"name\":\"Caption\",\"opacity\":1,\"parentId\":\"1:10\",\"rotation\":0,\"strokeAlign\":\"OUTSIDE\",\"strokeStyleId\":\"\",\"strokeWeight\":1,\"strokes\":[],\"textAlignHorizontal\":\"LEFT\",\"textAutoResize\":\"HEIGHT\",\"textCase\":\"ORIGINAL\",\"textDecoration\":\"NONE\",\"textStyleId\":\"\",\"type\":\"TEXT\",\"visible\":true}",
+            "specVersion": "1.0.0"
+          }
+        },
+        {
+          "id": "1:16",
+          "name": "Presentation / Discover",
+          "type": "FRAME",
+          "parentId": "1:3",
+          "childIds": ["1:17"],
+          "properties": {
+            "x": 0,
+            "y": 2700,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 2700]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "presentation:screen-1:iphone"
+          }
+        },
+        {
+          "id": "1:17",
+          "name": "iPhone / Basic shapes",
+          "type": "INSTANCE",
+          "parentId": "1:16",
+          "childIds": ["I1:17;1:15"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": false,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.07999999821186066,
+                  "g": 0.07999999821186066,
+                  "b": 0.09000000357627869
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 48,
+            "topLeftRadius": 48,
+            "topRightRadius": 48,
+            "bottomLeftRadius": 48,
+            "bottomRightRadius": 48,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "variantProperties": null,
+            "exportSettings": [],
+            "componentProperties": {},
+            "overrides": [
+              {
+                "id": "1:17",
+                "overriddenFields": ["pluginData"]
+              },
+              {
+                "id": "I1:17;1:15",
+                "overriddenFields": ["fills"]
+              }
+            ],
+            "mainComponentId": "1:14"
+          },
+          "identity": {
+            "id": "mockup-instance:screen-1:iphone",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "I1:17;1:15",
+          "name": "Screen slot",
+          "type": "RECTANGLE",
+          "parentId": "1:17",
+          "childIds": [],
+          "properties": {
+            "x": 16,
+            "y": 24,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 16],
+              [0, 1, 24]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "IMAGE",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "scaleMode": "FIT",
+                "scalingFactor": 1,
+                "rotation": 0,
+                "filters": {
+                  "exposure": 0,
+                  "contrast": 0,
+                  "saturation": 0,
+                  "temperature": 0,
+                  "tint": 0,
+                  "highlights": 0,
+                  "shadows": 0
+                },
+                "imageTransform": [
+                  [1, 0, 0],
+                  [0, 1, 0]
+                ],
+                "imageHash": "294b568ccbad4aa4d10c3aed37211cccb066e69c"
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 32,
+            "topLeftRadius": 32,
+            "topRightRadius": 32,
+            "bottomLeftRadius": 32,
+            "bottomRightRadius": 32,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "mockup-slot:iphone"
+          }
+        },
+        {
+          "id": "1:23",
+          "name": "Presentation / Saved",
+          "type": "FRAME",
+          "parentId": "1:3",
+          "childIds": ["1:24"],
+          "properties": {
+            "x": 0,
+            "y": 3648,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 3648]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "presentation:screen-2:iphone"
+          }
+        },
+        {
+          "id": "1:24",
+          "name": "iPhone / Basic shapes",
+          "type": "INSTANCE",
+          "parentId": "1:23",
+          "childIds": ["I1:24;1:15"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": false,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.07999999821186066,
+                  "g": 0.07999999821186066,
+                  "b": 0.09000000357627869
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 48,
+            "topLeftRadius": 48,
+            "topRightRadius": 48,
+            "bottomLeftRadius": 48,
+            "bottomRightRadius": 48,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "variantProperties": null,
+            "exportSettings": [],
+            "componentProperties": {},
+            "overrides": [
+              {
+                "id": "1:24",
+                "overriddenFields": ["pluginData"]
+              },
+              {
+                "id": "I1:24;1:15",
+                "overriddenFields": ["fills"]
+              }
+            ],
+            "mainComponentId": "1:14"
+          },
+          "identity": {
+            "id": "mockup-instance:screen-2:iphone",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "I1:24;1:15",
+          "name": "Screen slot",
+          "type": "RECTANGLE",
+          "parentId": "1:24",
+          "childIds": [],
+          "properties": {
+            "x": 16,
+            "y": 24,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 16],
+              [0, 1, 24]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "IMAGE",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "scaleMode": "FIT",
+                "scalingFactor": 1,
+                "rotation": 0,
+                "filters": {
+                  "exposure": 0,
+                  "contrast": 0,
+                  "saturation": 0,
+                  "temperature": 0,
+                  "tint": 0,
+                  "highlights": 0,
+                  "shadows": 0
+                },
+                "imageTransform": [
+                  [1, 0, 0],
+                  [0, 1, 0]
+                ],
+                "imageHash": "7f7c05c002aa20a063b2d10e86ad0ac67a73da84"
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 32,
+            "topLeftRadius": 32,
+            "topRightRadius": 32,
+            "bottomLeftRadius": 32,
+            "bottomRightRadius": 32,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "mockup-slot:iphone"
+          }
+        },
+        {
+          "id": "1:30",
+          "name": "Presentation / Profile",
+          "type": "FRAME",
+          "parentId": "1:3",
+          "childIds": ["1:31"],
+          "properties": {
+            "x": 0,
+            "y": 4596,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 4596]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "presentation:screen-3:iphone"
+          }
+        },
+        {
+          "id": "1:31",
+          "name": "iPhone / Basic shapes",
+          "type": "INSTANCE",
+          "parentId": "1:30",
+          "childIds": ["I1:31;1:15"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": false,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.07999999821186066,
+                  "g": 0.07999999821186066,
+                  "b": 0.09000000357627869
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 48,
+            "topLeftRadius": 48,
+            "topRightRadius": 48,
+            "bottomLeftRadius": 48,
+            "bottomRightRadius": 48,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "variantProperties": null,
+            "exportSettings": [],
+            "componentProperties": {},
+            "overrides": [
+              {
+                "id": "1:31",
+                "overriddenFields": ["pluginData"]
+              },
+              {
+                "id": "I1:31;1:15",
+                "overriddenFields": ["fills"]
+              }
+            ],
+            "mainComponentId": "1:14"
+          },
+          "identity": {
+            "id": "mockup-instance:screen-3:iphone",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "I1:31;1:15",
+          "name": "Screen slot",
+          "type": "RECTANGLE",
+          "parentId": "1:31",
+          "childIds": [],
+          "properties": {
+            "x": 16,
+            "y": 24,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 16],
+              [0, 1, 24]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "IMAGE",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "scaleMode": "FIT",
+                "scalingFactor": 1,
+                "rotation": 0,
+                "filters": {
+                  "exposure": 0,
+                  "contrast": 0,
+                  "saturation": 0,
+                  "temperature": 0,
+                  "tint": 0,
+                  "highlights": 0,
+                  "shadows": 0
+                },
+                "imageTransform": [
+                  [1, 0, 0],
+                  [0, 1, 0]
+                ],
+                "imageHash": "54f898a8717ccc1649cc4f7ae7515a0f5b6f59de"
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 32,
+            "topLeftRadius": 32,
+            "topRightRadius": 32,
+            "bottomLeftRadius": 32,
+            "bottomRightRadius": 32,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "mockup-slot:iphone"
+          }
+        }
+      ],
+      "variables": [],
+      "collections": [],
+      "styles": [],
+      "registries": []
+    },
+    {
+      "document": {
+        "id": "0:0",
+        "name": "Untitled"
+      },
+      "roots": ["1:4"],
+      "nodes": [
+        {
+          "id": "1:4",
+          "name": "Components",
+          "type": "PAGE",
+          "parentId": "0:0",
+          "childIds": ["1:5"],
+          "properties": {
+            "explicitVariableModes": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "components",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:5",
+          "name": "Main Workspace",
+          "type": "FRAME",
+          "parentId": "1:4",
+          "childIds": ["1:14"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 48,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "workspace",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:14",
+          "name": "iPhone / Basic shapes",
+          "type": "COMPONENT",
+          "parentId": "1:5",
+          "childIds": ["1:15"],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 425,
+            "height": 900,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "NONE",
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "FIXED",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 0,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": false,
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.07999999821186066,
+                  "g": 0.07999999821186066,
+                  "b": 0.09000000357627869
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 48,
+            "topLeftRadius": 48,
+            "topRightRadius": 48,
+            "bottomLeftRadius": 48,
+            "bottomRightRadius": 48,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": {},
+            "variantProperties": null,
+            "exportSettings": [],
+            "componentPropertyDefinitions": {}
+          },
+          "identity": {
+            "id": "mockup:iphone",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:15",
+          "name": "Screen slot",
+          "type": "RECTANGLE",
+          "parentId": "1:14",
+          "childIds": [],
+          "properties": {
+            "x": 16,
+            "y": 24,
+            "width": 393,
+            "height": 852,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 16],
+              [0, 1, 24]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutSizingHorizontal": "FIXED",
+            "layoutSizingVertical": "FIXED",
+            "layoutPositioning": "AUTO",
+            "fills": [
+              {
+                "type": "SOLID",
+                "visible": true,
+                "opacity": 1,
+                "blendMode": "NORMAL",
+                "color": {
+                  "r": 0.8509804010391235,
+                  "g": 0.8509804010391235,
+                  "b": 0.8509804010391235
+                },
+                "boundVariables": {}
+              }
+            ],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 32,
+            "topLeftRadius": 32,
+            "topRightRadius": 32,
+            "bottomLeftRadius": 32,
+            "bottomRightRadius": 32,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "mockup-slot:iphone"
+          }
+        }
+      ],
+      "variables": [],
+      "collections": [],
+      "styles": [],
+      "registries": []
+    },
+    {
+      "document": {
+        "id": "0:0",
+        "name": "Untitled"
+      },
+      "roots": ["1:6"],
+      "nodes": [
+        {
+          "id": "1:6",
+          "name": "References",
+          "type": "PAGE",
+          "parentId": "0:0",
+          "childIds": ["1:7"],
+          "properties": {
+            "explicitVariableModes": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "references",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:7",
+          "name": "Main Workspace",
+          "type": "FRAME",
+          "parentId": "1:6",
+          "childIds": [],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 100,
+            "height": 100,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 48,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "workspace",
+            "projectId": "phase6-7f29ca93"
+          }
+        }
+      ],
+      "variables": [],
+      "collections": [],
+      "styles": [],
+      "registries": []
+    },
+    {
+      "document": {
+        "id": "0:0",
+        "name": "Untitled"
+      },
+      "roots": ["1:8"],
+      "nodes": [
+        {
+          "id": "1:8",
+          "name": "Trash",
+          "type": "PAGE",
+          "parentId": "0:0",
+          "childIds": ["1:9"],
+          "properties": {
+            "explicitVariableModes": {},
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "trash",
+            "projectId": "phase6-7f29ca93"
+          }
+        },
+        {
+          "id": "1:9",
+          "name": "Main Workspace",
+          "type": "FRAME",
+          "parentId": "1:8",
+          "childIds": [],
+          "properties": {
+            "x": 0,
+            "y": 0,
+            "width": 100,
+            "height": 100,
+            "visible": true,
+            "opacity": 1,
+            "rotation": 0,
+            "relativeTransform": [
+              [1, 0, 0],
+              [0, 1, 0]
+            ],
+            "constraints": {
+              "horizontal": "MIN",
+              "vertical": "MIN"
+            },
+            "layoutMode": "VERTICAL",
+            "layoutSizingHorizontal": "HUG",
+            "layoutSizingVertical": "HUG",
+            "layoutPositioning": "AUTO",
+            "primaryAxisAlignItems": "MIN",
+            "counterAxisAlignItems": "MIN",
+            "primaryAxisSizingMode": "AUTO",
+            "counterAxisSizingMode": "AUTO",
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "itemSpacing": 48,
+            "layoutWrap": "NO_WRAP",
+            "counterAxisSpacing": 0,
+            "clipsContent": true,
+            "fills": [],
+            "strokes": [],
+            "strokeWeight": 1,
+            "strokeAlign": "INSIDE",
+            "strokeCap": "NONE",
+            "strokeJoin": "MITER",
+            "dashPattern": [],
+            "cornerRadius": 0,
+            "topLeftRadius": 0,
+            "topRightRadius": 0,
+            "bottomLeftRadius": 0,
+            "bottomRightRadius": 0,
+            "effects": [],
+            "blendMode": "PASS_THROUGH",
+            "boundVariables": {},
+            "explicitVariableModes": {},
+            "resolvedVariableModes": {},
+            "fillStyleId": "",
+            "strokeStyleId": "",
+            "effectStyleId": "",
+            "componentPropertyReferences": null,
+            "exportSettings": []
+          },
+          "identity": {
+            "id": "workspace",
+            "projectId": "phase6-7f29ca93"
+          }
+        }
+      ],
+      "variables": [],
+      "collections": [],
+      "styles": [],
+      "registries": []
+    }
+  ],
+  "exported": [
+    {
+      "kind": "screen",
+      "index": 1,
+      "directory": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-assets-smoke-moObag/phase6-7f29ca93-Design/phase6-screen-1-export-pU7d9I/figma-export",
+      "files": ["assets/b37ae13e618cd2a9af595ca5.png"],
+      "missingCount": 0
+    },
+    {
+      "kind": "presentation",
+      "index": 1,
+      "directory": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-assets-smoke-moObag/phase6-7f29ca93-Design/phase6-presentation-1-export-UdEBwA/figma-export",
+      "files": ["assets/a8aa5f5b8b00b993bb07bc3a.png"],
+      "missingCount": 0
+    },
+    {
+      "kind": "screen",
+      "index": 2,
+      "directory": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-assets-smoke-moObag/phase6-7f29ca93-Design/phase6-screen-2-export-4ud6yU/figma-export",
+      "files": ["assets/d43675b995215b79c95f7295.png"],
+      "missingCount": 0
+    },
+    {
+      "kind": "presentation",
+      "index": 2,
+      "directory": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-assets-smoke-moObag/phase6-7f29ca93-Design/phase6-presentation-2-export-weGr4l/figma-export",
+      "files": ["assets/8d93bab675f4c1f0bc734623.png"],
+      "missingCount": 0
+    },
+    {
+      "kind": "screen",
+      "index": 3,
+      "directory": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-assets-smoke-moObag/phase6-7f29ca93-Design/phase6-screen-3-export-etG11A/figma-export",
+      "files": ["assets/f74bfaca4c3419b7e2c2c21e.png"],
+      "missingCount": 0
+    },
+    {
+      "kind": "presentation",
+      "index": 3,
+      "directory": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-assets-smoke-moObag/phase6-7f29ca93-Design/phase6-presentation-3-export-2mw48U/figma-export",
+      "files": ["assets/090dcce8b56e5998b22ac30c.png"],
+      "missingCount": 0
+    }
+  ],
+  "sharedImageHash": "06c81b9efb466ada1dd106bdc19068887def94ff"
+}

@@ -143,7 +143,7 @@ export class DesignWorkspace {
       specificationPath: join(directory, 'design-spec.json'),
     };
   }
-  private async projectDirectory(projectId: string) {
+  async projectDirectory(projectId: string) {
     stableIdSchema.parse(projectId);
     const root = await this.root();
     const matches: string[] = [];

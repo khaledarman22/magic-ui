@@ -365,6 +365,7 @@ export async function renderDesignSystem(
         for (const v of c.variants)
           await loadSpecificationFonts(
             resolveTokenReferences(v.root, spec.tokens, mode),
+            input.projectId,
           );
     for (const s of spec.tokens.typography) {
       try {
@@ -811,9 +812,38 @@ export async function renderDesignSystem(
       );
       write(figma.root, pendingKey, '');
     });
+    const missingAssets: {
+      localId: string;
+      assetId: string;
+      status: 'missing';
+    }[] = [];
+    for (const c of spec.components)
+      for (const v of c.variants) {
+        const visit = (raw: NodeSpecification, root = false) => {
+          if (raw.type === 'frame' && raw.assetId) {
+            const node = existingNodes.get(
+              `${c.id}:${root ? v.id : `${v.id}/${raw.id}`}`,
+            );
+            const resolved = node ? read(node, 'assetResolution') : '';
+            if (
+              !resolved ||
+              !(JSON.parse(resolved) as { hash: string | null }).hash
+            )
+              missingAssets.push({
+                localId: raw.id,
+                assetId: raw.assetId,
+                status: 'missing',
+              });
+          }
+          if ('nodes' in raw) raw.nodes.forEach((n) => visit(n));
+        };
+        visit(v.root, true);
+      }
     const result = await readVariables(input.projectId);
     return {
       ...registry,
+      missingAssets,
+      assetsComplete: missingAssets.length === 0,
       variables: result,
       componentCount: registry.components.reduce(
         (n, c) => n + c.variants.length,

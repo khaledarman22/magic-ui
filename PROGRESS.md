@@ -2,6 +2,10 @@
 
 ## Current Phase
 
+**Phase 7 — فحص البداية فقط (2026-10-26): Requires User Action.** Phase 6 مكتملة، لكن D6 وD11 ما زالتا Proposed. أُضيف D13 كاقتراح في `docs/ARCHITECTURE.md §2`؛ تنفيذ Phase 7 ينتظر تأكيد القرارات الثلاثة وفق شروط ملف المرحلة.
+
+**Phase 6 — مكتملة ومغلقة، بما فيها تجربة Figma الحقيقية DoD #8 (2026-10-26).** التنفيذ والتحقق الآلي وتجربة الصور والـmockups والـLayers: **Passed**. وافق صاحب المشروع صراحة على تأجيل تحقق Phase 5 والسماح ببدء Phase 6. تحقق Phase 5 الحقيقي يبقى **Requires User Action — مؤجل بموافقة**، ولا يُعتبر Passed.
+
 **Phase 5 — Sync/Preview/Apply وResume وTrash، مع استكمال جزئي للـdesign-system عبر checkpoints للموارد والـnodes.** التحقق الحقيقي داخل Figma: **Requires User Action**؛ المرحلة لم تُغلق. **Passed:** فحص النسخة النهائية: 132 اختبارًا في 15 ملفًا، مع نجاح typecheck وlint وbuild.
 
 **Phase 4 — مغلقة بموافقة صاحب المشروع مع استثناء تحقق موثّق (2026-10-26).** التنفيذ والتحقق الآلي والتصدير الحقيقي ومراجعة الـpackage: **Passed**. تأكيد مزامنة Figma وحالة version history المتزامنة: **Requires User Action — مؤجل بموافقة صريحة، ولا يمنع إغلاق المرحلة**؛ لم يُحوّل إلى Passed. D9 يظل Locked. بدأ تنفيذ Phase 5 بطلب صاحب المشروع في هذه الجلسة.
@@ -17,6 +21,52 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 2026-10-26: صاحب المشروع أكد D7 وD8 وD12 وبقوا **Locked**. D7 اتعدّل لـ `setSharedPluginData` بدل `setPluginData` (السبب مكتوب في §2). تم تنفيذ Phase 2 في هذه الجلسة بدون الاعتماد على قرارات Proposed.
 
 ## Done
+
+### Phase 7 — فحص البداية — 2026-10-26
+
+- **Passed:** قراءة `AGENTS.md` و`PROGRESS.md` و`prompts/phase-7.md`، وفحص القرارات في §2 وsetup في §16، والتأكد من إغلاق Phase 6 بما فيها التحقق الحقيقي.
+- **Requires User Action:** D6 (أول instance تصبح hub والبقية تتصل بها) وD11 (CLI رسمي للتسجيل، وconfig مع backup عند غياب CLI) ما زالتا Proposed؛ شرط البداية يطلب التوقف وسؤال صاحب المشروع.
+- **Requires User Action:** أُضيف D13 بحالة Proposed بناءً على الطلب الصريح في Phase 7: token ثابت مشترك يستمر بعد restart، محفوظ بنفس مسار D10 وصلاحية 0600، مع rotate صريح عند توقف instances وإعادة pairing. لا تنفيذ قبل الموافقة.
+- **Passed — فحص الكود الحالي:** `serverRuntime.ts` يولّد token جديدًا لكل تشغيل؛ `sessionCredentials.ts` يحذف ملف credentials عند shutdown؛ و`index.ts` يعيد خطأ عند `EADDRINUSE`. هذه فجوات التنفيذ الحالية بالنسبة لمتطلبات Phase 7، والتعديل المقترح بعد التأكيد هو إعادة استخدام credentials مع حفظها بعد shutdown وإضافة hub forwarding/failover. مسار المشروع الفعلي `magic-ui` ولا يحتوي مسافة، خلافًا لعبارة prompt؛ اختبار نسخة داخل مسار بمسافة يظل مطلوبًا.
+- لا تغييرات إنتاج أو dependencies أو إعدادات clients. تغييرات المراحل السابقة الموجودة في working tree محفوظة.
+- **Passed:** `git diff --check` — Exit 0 بعد تعديل التوثيق.
+- **Not Tested (توقف عند بوابة القرارات؛ تغييرات توثيق فقط):** `pnpm typecheck` و`pnpm lint` و`pnpm test` وDoD #2–#8 لم تُشغّل في هذه المحاولة؛ لا ادعاء بإتمام المرحلة.
+
+### Phase 6 — إغلاق التحقق الحقيقي — 2026-10-26
+
+- **Passed — فحوص الإغلاق بعد إضافة سكريبت الفحص:** `pnpm typecheck`؛ `pnpm lint` — `All matched files use Prettier code style!`؛ `pnpm test` — Exit 0: `Test Files 17 passed (17)`، `Tests 144 passed (144)`، Duration `44.93s`. `git diff --check` — Exit 0.
+- **Passed — DoD #8:** تشغيل `pnpm smoke:assets` على ملف Drafts جديد في Figma Desktop، Exit 0: `Passed: three editable screens and three mockup instances share one component.` الملف: https://www.figma.com/design/mo3pQKE6Rz5W5NkyJ7twTD/Untitled?node-id=1-2.
+- **Passed:** الفحص الحقيقي للـLayers وقراءة المستند عبر bridge بوضع read-only: 3 شاشات أصلية FRAME بهويات `1:10`, `1:19`, `1:26`، و3 instances بهويات `1:17`, `1:24`, `1:31` مرتبطة بنفس component `1:14`. صور المصادر تشترك في imageHash واحدة `06c81b9efb466ada1dd106bdc19068887def94ff`. صفحات App - Sample وComponents وReferences وTrash موجودة؛ لم تُنشأ Web أوDashboard.
+- **Passed:** فحص الصور الست المصدرة فعليًا من Figma: المصادر 393×852 والـpresentations 425×900؛ الصور والنصوص سليمة داخل screen slots دون قص غير مقصود. الأدلة في `docs/installation/phase-6-verification/`، و`visual-review.json` يسجل اكتمال الفحص البصري الذي كان pending وقت كتابة تقرير smoke الأول.
+- أُضيف `scripts/inspect-assets-smoke.ts` لإعادة قراءة نتائج التجربة وتصدير الصور عبر أدوات read-only. لا dependencies جديدة ولا تغيير في كود الإنتاج خلال هذه التجربة.
+- **Passed:** `pnpm build` — Exit 0، مع تحذيرات Zod/Rollup المعروفة فقط. انتهت عمليتا smoke والفحص بـExit 0، أُغلق Plugin ونُظفت credentials المؤقتة؛ لم تُحذف nodes أو إعدادات المستخدم.
+
+### Phase 6 — Assets + Mockups + Project Pages — 2026-10-26
+
+- Pre-check: موافقة صاحب المشروع «ماشى» سمحت ببدء Phase 6 مع تأجيل التحقق الحقيقي لـPhase 5. نتيجة التحقق المؤجل لم تتحول إلى Passed. لا قرارات معمارية جديدة، ولا اعتماد على D6/D11 المقترحتين، ولا dependencies جديدة.
+- عقود Zod في `packages/shared` للأصول والنقل والصفحات والـpresentations، و`assetId` اختياري للـframe الخالية من spec children، و`kind` اختياري للصفحات (app/website/dashboard) للحفاظ على توافق specs القديمة. JSON Schema أُعيد توليده.
+- `magic_ui_register_asset`: قراءة regular files محدودة داخل مجلد المشروع، رفض absolute/traversal/symlinks، فحص PNG/JPEG/SVG من المحتوى والأبعاد والحجم. PNG CRC وبيانات الضغط وحجم الصفوف متحققة؛ JPEG يتحقق من segments/dimensions/scan/EOI. Figma هو decoder النهائي، وليس هناك ادعاء بتنفيذ decoder مستقل كامل. الحدود: 8 MiB، 16384 لكل محور، 40 مليون pixel.
+- `assets/assets-manifest.json` يُكتب ذريًا بصلاحية 0600، ويحتوي ID والاسم والمسار وSHA-256 وMIME والأبعاد والمصدر والـlicense والاستخدامات وoptimization وموارد Figma حسب documentId. dedup يرجع نفس ID؛ تسجيل مسار جديد لنفس المحتوى يحدّث مسار السجل دون تكراره. ID اختياري لتسمية أصل منتظر. تغيير bytes لملف مسجل يُرفض حتى التسجيل الصريح بهوية جديدة. الاستخدامات تعكس spec للعملية؛ ليست بحثًا حيًا في كل ملفات Figma.
+- نقل بحد 8000 byte لكل chunk، مع تحقق SHA-256 في Main. cache دائمة لكل hash داخل المستند تحفظ imageHash أو componentId، وتتحقق من وجود المورد قبل إعادة استخدامه. إعادة تشغيل Plugin أو تكرار آخر chunk لا تكرر الاستيراد. الصور تعمل في الشاشات وداخل المكونات القابلة لإعادة الاستخدام، مع استمرار screen checkpoints وdesign-system checkpoints الحالية.
+- SVG sanitizer يعيد بناء subset محدودة من الأشكال؛ يزيل scripts/style/foreignObject blocks والأحداث وexternal refs قبل النقل، ثم يعيد التحقق في Main. لا CSS ولا entities ولا تحميل خارجي. الـSVG المستوردة داخل component على Components، واستخداماتها instances. subset وحدود التعقيد موثقة في دليل التشغيل.
+- الأصل غير المسجل/ملفه المفقود ينتج frame مكتوبًا عليها `Missing asset: <id>`، و`missingAssets` بحالة missing و`assetsComplete: false`. اكتمال خطوات العملية ليس اكتمالًا للأصول. تسجيل الملف لاحقًا يحدّث نفس frame؛ label القديمة تُخفى ولا تُحذف. guards تشمل محتوى الأصول المولّد وتحمي التعديلات اليدوية، بما فيها النقل إلى Trash.
+- `magic_ui_prepare_project` ينشئ صفحات الأنواع المطلوبة فقط، إضافةً إلى Components/References/Trash، مع Main Workspace Auto Layout وهويات ثابتة. يعيد استخدام Components الموجودة. الـscreens الجديدة داخل workspace الصفحة. حذف/نقل صفحة أو workspace مرتبطة لا يؤدي لإعادة إنشائها صامتًا. الفشل الجزئي الملتبس محفوظ للفحص ولا يُعد نجاحًا.
+- توافق مع قيد الكود الحالي: إنشاء/تجهيز الصفحات أداة مستقلة، ثم يختار المستخدم الصفحة ويرسم بـpageId صريح؛ لم يُلغَ شرط current-page ولم تُنقل الشاشات القديمة ضمنيًا. specs ذات `kind` تُرفض على صفحة أخرى. هذا يحل التعارض بين تجهيز عدة صفحات ومسار الرسم الحالي المقيّد بالصفحة المختارة.
+- `magic_ui_present_screen`: component واحد لكل iPhone/Laptop داخل Components، وpresentation frame تحتوي instance وscreen slot بصورة PNG مرتبطة بـsourceNodeId وSHA-256. الأصل يظل frame قابلة للتعديل ومنفصلة. refresh صريح بنفس الأداة يحافظ على identities ويمنع overwrite بعد تعديل presentation/mockup يدويًا. لا refresh تلقائي بين الاستدعاءات.
+- لم تُقدَّم ملفات mockups مرخصة؛ تُستخدم أشكال هندسية أصلية وتُسجّل `mockupSource: basic-shapes`، وتوضع بياناتها في `assets/mockups/basic-shapes.json`. لا استيراد ضمني لملفات طرف ثالث. لا compression/conversion، حفاظًا على الأصل؛ لا سبب لتغيير الجودة أو إضافة مكتبة.
+- ثلاث أدوات MCP جديدة: الإجمالي 26 عادية و15 read-only. أدوات الكتابة غير مسجلة في read-only؛ Main يرفض assetChunk/assetBindings/projectLayout/presentScreen أيضًا. لا حذف nodes أو تعديل إعدادات خارج المشروع.
+- **Passed — DoD #2–#7:** dedup لنفس الملف باسمين، رفض fake PNG وtraversal/symlink، sanitizer scripts وexternal xlink، 10 استخدامات تنادي createImage مرة واحدة مع إعادة تشغيل VM، 5 شاشات = component واحد و5 instances، app-only بدون Web/Dashboard.
+- **Passed:** missing → registration يحتفظ بهوية الـframe؛ manual label drift محفوظ؛ SVG sanitized فعلًا على الـwire ومكون واحد للاستخدامات؛ نقل PNG فعلية أكبر من 65,536 byte على chunks وإعادة آخر chunk دون تكرار؛ صور داخل component عبر checkpoints؛ refresh presentation بنفس الهوية ورفض manual slot fill؛ حظر الأوامر الأربعة داخل Main read-only.
+- **Passed — النسخة النهائية:** `pnpm typecheck`؛ `pnpm lint` — `All matched files use Prettier code style!`؛ `pnpm test` — Exit 0: `Test Files 17 passed (17)` و`Tests 144 passed (144)`، Duration `48.91s`. `pnpm build` — Exit 0 مع تحذيري Zod/Rollup السابقين فقط. `pnpm --filter mcp-server start --selftest` ونسخته `--read-only --selftest` — Exit 0، ويعرضان 26 و15 أداة بالترتيب. `git diff --check` — Exit 0 قبل تحديث هذا السجل.
+- **Failed ثم Passed بعد الإصلاح:** sandbox منع sockets بـ`listen EPERM 127.0.0.1`؛ أُعيد التحقق بصلاحية loopback. PNG fixture الأولى كان CRC الخاص بها غير صحيح فاستُبدلت بصورة صالحة. fake client لم يوجّه الأوامر الجديدة فحُدّث. اختبار large image كشف أن test harness يعيد base64 كـimageHash بدل hash قصيرة، فأُصلح المحاكي. قائمة أدوات الاختبار القديمة وunused import أُصلحا. timeouts تحت الحمل عولجت بعمال اختبار اثنين و30 ثانية للـsuite و45 ثانية لاختبارات recovery الطويلة، دون تغيير مهلة أو سلوك الإنتاج أو تعطيل assertions؛ اختبار design-system الكامل قيس منفردًا بنحو 13 ثانية. التشغيل السابق قبل اختبار حماية presentation: 143/143 Passed.
+- **سجل سابق قبل تجربة الإغلاق أعلاه — Requires User Action — DoD #8:** لم تُنفّذ تجربة Phase 6 في Figma Desktop. أُضيف `pnpm smoke:assets` مع sample بثلاث شاشات موبايل وPNG fixture حقيقية مشتركة، وiPhone presentations، وتقرير `assets-verification.json`. السكريبت يطلب الاتصال واختيار App - Sample؛ فحص الصور والـslots والـLayers بصريًا ما زال مطلوبًا. **Not Tested (يحتاج اتصال وتفاعل Figma):** تشغيل السكريبت الحي نفسه. دليل التشغيل: `docs/installation/assets-mockups-pages.md`.
+
+### Phase 6 — فحص البداية — 2026-10-26
+
+- **Passed:** قراءة `AGENTS.md` و`PROGRESS.md` و`prompts/phase-6.md`.
+- **Requires User Action:** شرط البداية في `prompts/phase-6.md` يتطلب اكتمال Phase 5، بينما المرحلة ما زالت مفتوحة لتجربة Figma الحقيقية (DoD #8). يلزم إتمام التحقق أو موافقة صريحة على تأجيله والسماح ببدء Phase 6؛ طلب تنفيذ ملف التعليمات لا يُسجَّل كنجاح للتحقق أو موافقة على استثناء غير مذكور.
+- لم يبدأ تنفيذ Phase 6؛ لا تغييرات كود أو dependencies. التعديل الوحيد توثيق نتيجة فحص البداية.
+- **Not Tested (توقف عند شرط البداية؛ تعديل سجل فقط):** `pnpm typecheck` و`pnpm lint` و`pnpm test` وأوامر DoD الخاصة بـPhase 6 لم تُشغّل في هذه المحاولة.
 
 ### Phase 5 — استكمال جزئي للـdesign-system — 2026-10-26
 
@@ -206,6 +256,8 @@ magic_ui_export_design_package
 - دليل الاستيراد والتجربة اليدوية في `docs/installation/figma-plugin-import.md`، وأمر `pnpm smoke:figma` يشغل الخادم المبني ويختبر إنشاء/قراءة frame حقيقي بعد أن يوصّل المستخدم الـPlugin ويؤكد المستند المستهدف.
 
 ## In Progress
+
+- Phase 6 مغلقة؛ لا أعمال متبقية داخل نطاقها ولا جلسة smoke منتظرة. لم يبدأ تنفيذ Phase 7.
 
 - Phase 5: تجربة Figma الحقيقية بـ`pnpm smoke:sync` ما زالت Requires User Action. لا توجد عملية smoke شغالة أو جلسة تنتظر إدخالًا.
 
@@ -580,6 +632,12 @@ $ vitest run
 
 ## Blockers / Requires User Action
 
+- **Phase 7:** تأكيد D6 وD11 وD13 مطلوب قبل بدء التنفيذ وفق `prompts/phase-7.md › Pre-check`؛ جميعها Proposed حاليًا.
+
+- **Phase 6:** لا عوائق متبقية؛ DoD #8 **Passed** بالتجربة الحقيقية والفحص البصري والـLayers الموضحين أعلاه.
+
+- **Phase 5 — تحقق مؤجل بموافقة صاحب المشروع:** لا يمنع بدء Phase 6؛ الموافقة تخص التأجيل فقط ولا تحوّل التحقق الحقيقي إلى Passed.
+
 - **Phase 5:** DoD #8 Requires User Action: إعادة فتح الـPlugin المبني وتوصيله إلى scratch file، ثم `pnpm smoke:sync` والتعديل اليدوي المطلوب. لم تُغلق المرحلة. استكمال design-system الجديد نُفذ واختُبر آليًا؛ التحقق الحقيقي ما زال مطلوبًا.
 
 - **Phase 4 — بند تحقق مؤجل، وليس عائق إغلاق:** تأكيد مزامنة Figma وversion history المتزامنة يبقى Requires User Action؛ أُغلقت المرحلة بموافقة صريحة من صاحب المشروع بتاريخ 2026-10-26 على هذا الاستثناء. التصدير الحقيقي ومراجعة الـpackage والتقرير Passed، والقائمة الظاهرة متطابقة قبل/بعد.
@@ -588,7 +646,7 @@ $ vitest run
 
 - لا توجد عوائق متبقية لإغلاق Phase 1.
 - إعادة تشغيل الخادم تولّد token جديدًا؛ يحتاج نسخه إلى الـPlugin مرة أخرى. الـframe التجريبي لم يُحذف.
-- D6 وD11 فقط ما زالت Proposed ومؤجلة. D9 Locked ونُفّذ في Phase 4. لا multi-client hub ولا تسجيل clients أو setup آلي.
+- D6 وD11 وD13 ما زالت Proposed، وتنتظر التأكيد لبدء Phase 7. D9 Locked ونُفّذ في Phase 4. لا multi-client hub ولا تسجيل clients أو setup آلي.
 - لا توجد عوائق متبقية لـPhase 2؛ التحقق الحقيقي والمراجعة البصرية **Passed**، والمرحلة مغلقة.
 
 ## Not Verifiable in Agent Environment
@@ -596,6 +654,8 @@ $ vitest run
 - Node 24 LTS غير مثبت؛ لم تُشغّل الاختبارات عليه. هذا لا يغيّر نتيجة التجربة الحقيقية على البيئة الحالية.
 
 ## Dependencies Added (مع المبرر)
+
+**Phase 6: لا dependencies جديدة ولا تعديل على lockfile.** SHA-256 مشتركة وSVG subset sanitizer والتحقق البنيوي للصور باستخدام JavaScript وNode APIs المتاحة؛ لا ضغط أو تحويل.
 
 **Phase 5: لا dependencies جديدة ولا تعديل على lockfile.**
 
@@ -627,5 +687,5 @@ Playwright استُخدم من بيئة `webapp-testing` المثبتة مسبق
 
 ## Backlog
 
-- لا توسع خارج Phase 5. assets/mockups/multi-session للمراحل اللاحقة؛ sync/Trash للشاشات نُفذا هنا. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
+- لا توسع خارج Phase 7 المطلوبة حاليًا؛ تنفيذها ينتظر القرارات. assets/mockups/project pages نُفذت في Phase 6؛ multi-session ضمن Phase 7؛ skills/agents مؤجلة لـPhase 8. sync/Trash للشاشات نُفذا في Phase 5. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
 - تغيير نوع node وهجرة هويته ما زالا مرفوضين دون مسار صريح؛ no auto-merge. تسوية drift والاستكمال للشاشات نُفذا في Phase 5. استكمال design-system الجزئي على مستوى token/component نُفذ في الإدخال الأحدث؛ قيد بيانات Phase 3 القديمة بدون checkpoints موثق في دليل التشغيل.

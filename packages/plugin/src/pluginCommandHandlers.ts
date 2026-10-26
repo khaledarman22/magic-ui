@@ -1,3 +1,5 @@
+import { receiveAssetChunk, bindAssets } from './assetManager';
+import { prepareProject, presentScreen } from './projectLayout';
 import { advanceDesignSystem } from './designSystemRecovery';
 import { inspectSync, syncStep, trashNode } from './syncController';
 import { readFigma } from './figmaReader';
@@ -40,6 +42,26 @@ export async function executePluginCommand(
   if (isCancelled())
     throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
   switch (command.command) {
+    case 'assetBindings':
+      return {
+        command: 'assetBindings',
+        result: await bindAssets(command.input, isCancelled),
+      };
+    case 'assetChunk':
+      return {
+        command: 'assetChunk',
+        result: await receiveAssetChunk(command.input, isCancelled),
+      };
+    case 'projectLayout':
+      return {
+        command: 'projectLayout',
+        result: await prepareProject(command.input, isCancelled),
+      };
+    case 'presentScreen':
+      return {
+        command: 'presentScreen',
+        result: await presentScreen(command.input, isCancelled),
+      };
     case 'advanceDesignSystem':
       return {
         command: 'advanceDesignSystem',

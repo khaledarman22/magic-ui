@@ -170,6 +170,10 @@
                   "type": "string",
                   "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
                 },
+                "kind": {
+                  "type": "string",
+                  "enum": ["app", "website", "dashboard"]
+                },
                 "name": { "type": "string", "minLength": 1, "maxLength": 256 },
                 "values": {
                   "type": "object",
@@ -201,6 +205,7 @@
             "type": "string",
             "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
           },
+          "kind": { "type": "string", "enum": ["app", "website", "dashboard"] },
           "name": { "type": "string", "minLength": 1, "maxLength": 256 },
           "screens": {
             "maxItems": 100,
@@ -2518,6 +2523,10 @@
           "additionalProperties": false
         },
         "type": { "type": "string", "const": "frame" },
+        "assetId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$"
+        },
         "nodes": {
           "maxItems": 500,
           "type": "array",
