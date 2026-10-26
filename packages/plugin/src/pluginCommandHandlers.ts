@@ -1,6 +1,12 @@
-import { renderDesignSystem, readComponents, readVariables } from './designSystemRenderer';
+import { readFigma } from './figmaReader';
+import {
+  renderDesignSystem,
+  readComponents,
+  readVariables,
+} from './designSystemRenderer';
 import { renderDesign } from './designRenderer';
 import {
+  commandPermissions,
   MagicUiError,
   failure,
   nodeSnapshotSchema,
@@ -23,13 +29,28 @@ export function readNodeSnapshot(node: BaseNode): NodeSnapshot {
 export async function executePluginCommand(
   command: Command,
   isCancelled: () => boolean,
+  readOnly = false,
 ): Promise<CommandResult> {
+  if (readOnly && commandPermissions[command.command] !== 'read') throw new MagicUiError(failure('PERMISSION_DENIED', 'This session is read-only.'));
   if (isCancelled())
     throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
   switch (command.command) {
-    case 'renderDesignSystem': return {command:'renderDesignSystem',result:await renderDesignSystem(command.input,isCancelled)};
-    case 'readComponents': return {command:'readComponents',result:readComponents(command.input.projectId)};
-    case 'readVariables': return {command:'readVariables',result:await readVariables(command.input.projectId)};
+    case 'readFigma': return {command: 'readFigma', result: await readFigma(command.input, isCancelled)};
+    case 'renderDesignSystem':
+      return {
+        command: 'renderDesignSystem',
+        result: await renderDesignSystem(command.input, isCancelled),
+      };
+    case 'readComponents':
+      return {
+        command: 'readComponents',
+        result: readComponents(command.input.projectId),
+      };
+    case 'readVariables':
+      return {
+        command: 'readVariables',
+        result: await readVariables(command.input.projectId),
+      };
     case 'renderDesign':
       return {
         command: 'renderDesign',

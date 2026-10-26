@@ -1,5 +1,14 @@
 import { constants } from 'node:fs';
-import { lstat, mkdir, open, readdir, realpath } from 'node:fs/promises';
+import {
+  lstat,
+  mkdir,
+  open,
+  readdir,
+  realpath,
+  rename,
+  unlink,
+} from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import {
   MagicUiError,
@@ -9,6 +18,8 @@ import {
   migrateDesignSpecification,
   stableIdSchema,
   MAX_MESSAGE_BYTES,
+  componentRegistrySchema,
+  type ComponentRegistry,
 } from '@magic-ui/shared';
 
 export class DesignWorkspace {
@@ -127,7 +138,7 @@ export class DesignWorkspace {
       specificationPath: join(directory, 'design-spec.json'),
     };
   }
-  async readSpecification(projectId: string) {
+  private async projectDirectory(projectId: string) {
     stableIdSchema.parse(projectId);
     const root = await this.root();
     const matches: string[] = [];
@@ -155,8 +166,12 @@ export class DesignWorkspace {
           'Expected exactly one project with that ID inside the allowed workspace.',
         ),
       );
+    return matches[0]!;
+  }
+  async readSpecification(projectId: string) {
+    const directory = await this.projectDirectory(projectId);
     const spec = migrateDesignSpecification(
-      await this.readJson(join(matches[0]!, 'design-spec.json')),
+      await this.readJson(join(directory, 'design-spec.json')),
     );
     if (spec.projectId !== projectId)
       throw new MagicUiError(
@@ -166,5 +181,81 @@ export class DesignWorkspace {
         ),
       );
     return spec;
+  }
+  private async registryDirectory(projectId: string, create = false) {
+    const directory = join(
+      await this.projectDirectory(projectId),
+      'design-system',
+    );
+    if (create) await mkdir(directory, { recursive: true });
+    const stat = await lstat(directory);
+    if (
+      !stat.isDirectory() ||
+      stat.isSymbolicLink() ||
+      (await realpath(directory)) !== directory
+    )
+      throw new MagicUiError(
+        failure('WORKSPACE_ERROR', 'Registry directory must not be a symlink.'),
+      );
+    return directory;
+  }
+  async readRegistry(projectId: string): Promise<ComponentRegistry> {
+    try {
+      const result = componentRegistrySchema.parse(
+        await this.readJson(
+          join(await this.registryDirectory(projectId), 'components.json'),
+        ),
+      );
+      if (result.projectId !== projectId)
+        throw new Error('Registry project mismatch');
+      return result;
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      )
+        return { projectId, components: [] };
+      throw error;
+    }
+  }
+  async writeRegistry(registry: ComponentRegistry) {
+    const parsed = componentRegistrySchema.parse(registry);
+    const directory = await this.registryDirectory(parsed.projectId, true);
+    const destination = join(directory, 'components.json');
+    try {
+      const stat = await lstat(destination);
+      if (!stat.isFile() || stat.isSymbolicLink())
+        throw new Error('Registry must be a regular file');
+    } catch (e) {
+      if (!(e && typeof e === 'object' && 'code' in e && e.code === 'ENOENT'))
+        throw e;
+    }
+    const data = JSON.stringify(parsed, null, 2) + '\n';
+    if (Buffer.byteLength(data) > MAX_MESSAGE_BYTES)
+      throw new MagicUiError(
+        failure('MESSAGE_TOO_LARGE', 'Registry exceeds workspace limit.'),
+      );
+    const temporary = join(directory, `.components-${randomUUID()}.json`);
+    const handle = await open(
+      temporary,
+      constants.O_WRONLY |
+        constants.O_CREAT |
+        constants.O_EXCL |
+        constants.O_NOFOLLOW,
+      0o600,
+    );
+    try {
+      await handle.writeFile(data);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    try {
+      await rename(temporary, destination);
+    } finally {
+      await unlink(temporary).catch(() => {});
+    }
   }
 }

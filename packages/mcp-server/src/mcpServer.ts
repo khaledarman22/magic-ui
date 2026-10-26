@@ -1,3 +1,15 @@
+import { readerInputSchema, readerChunkSchema, readerToolSchema, exportPackageSchema, exportAssetSchema, exportResultSchema } from '@magic-ui/shared';
+import { exportDesignPackage, exportAsset } from './figmaExport.js';
+import {
+  designSystemToolSchema,
+  designSystemResultSchema,
+  readDesignSystemToolSchema,
+  componentRegistrySchema,
+  variablesResultSchema,
+  findComponentSchema,
+  findComponentResultSchema,
+  componentSimilarity,
+} from '@magic-ui/shared';
 import { DesignWorkspace } from './designWorkspace.js';
 import {
   initializeProjectSchema,
@@ -93,7 +105,7 @@ export function createMcpServer(
     'CANCELLED',
     'INTERNAL_ERROR',
   ];
-  server.registerTool(
+  if (!bridge.readOnly) server.registerTool(
     'magic_ui_create_frame',
     {
       description:
@@ -160,7 +172,7 @@ export function createMcpServer(
       };
     }
   }
-  server.registerTool(
+  if (!bridge.readOnly) server.registerTool(
     'magic_ui_initialize_project',
     {
       description:
@@ -208,7 +220,7 @@ export function createMcpServer(
     ({ specification }) =>
       localResult(() => validateDesignSpecification(specification)),
   );
-  server.registerTool(
+  if (!bridge.readOnly) server.registerTool(
     'magic_ui_render_design',
     {
       description:
@@ -229,6 +241,7 @@ export function createMcpServer(
           'PAGE_CHANGED',
           'SESSION_BUSY',
           'FONT_UNAVAILABLE',
+          'FIGMA_MODE_LIMIT',
           'DRIFT_DETECTED',
           'MESSAGE_TOO_LARGE',
           'PROJECT_NOT_FOUND',
@@ -254,6 +267,143 @@ export function createMcpServer(
       }
     },
   );
+
+  const annotations = {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  };
+  if (!bridge.readOnly) server.registerTool(
+    'magic_ui_render_design_system',
+    {
+      description:
+        'Render project tokens, typography styles and explicit component variants in dependency order. Persist the returned component registry locally. Requires an explicit active page and session.',
+      inputSchema: designSystemToolSchema,
+      outputSchema: designSystemResultSchema,
+      annotations: { ...annotations, readOnlyHint: false },
+      _meta: {
+        permission: 'write',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: [
+          ...sharedErrors,
+          'PAGE_CHANGED',
+          'DRIFT_DETECTED',
+          'FONT_UNAVAILABLE',
+          'FIGMA_MODE_LIMIT',
+          'WORKSPACE_ERROR',
+          'MESSAGE_TOO_LARGE',
+        ],
+      },
+    },
+    ({ sessionId, ...input }, extra) =>
+      localResult(async () => {
+        const specification = await workspace.readSpecification(
+          input.projectId,
+        );
+        const response = await bridge.request(
+          sessionId,
+          { command: 'renderDesignSystem', input: { ...input, specification } },
+          extra.signal,
+        );
+        if (response.command !== 'renderDesignSystem')
+          throw new Error('Unexpected response');
+        await workspace.writeRegistry(
+          componentRegistrySchema.parse({
+            projectId: input.projectId,
+            components: response.result.components,
+          }),
+        );
+        return response.result;
+      }),
+  );
+  server.registerTool(
+    'magic_ui_find_component',
+    {
+      description:
+        'Search the local component registry by name, category and property similarity before proposing a new component. Does not require Figma.',
+      inputSchema: findComponentSchema,
+      outputSchema: findComponentResultSchema,
+      annotations,
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: ['WORKSPACE_ERROR', 'PROJECT_NOT_FOUND'],
+      },
+    },
+    (input) =>
+      localResult(async () => {
+        const registry = await workspace.readRegistry(input.projectId);
+        return {
+          matches: registry.components
+            .filter((c) => !input.category || c.category === input.category)
+            .map((component) => ({
+              component,
+              similarity: componentSimilarity(input, component),
+            }))
+            .filter(
+              (m) =>
+                !input.name ||
+                m.similarity > 0.3 ||
+                m.component.name
+                  .toLowerCase()
+                  .includes(input.name.toLowerCase()),
+            )
+            .sort((a, b) => b.similarity - a.similarity),
+        };
+      }),
+  );
+  server.registerTool(
+    'magic_ui_read_components',
+    {
+      description:
+        'Read the project component registry stored in the explicitly selected Figma document.',
+      inputSchema: readDesignSystemToolSchema,
+      outputSchema: componentRegistrySchema,
+      annotations,
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: sharedErrors,
+      },
+    },
+    ({ sessionId, ...input }, extra) =>
+      execute(sessionId, { command: 'readComponents', input }, extra.signal),
+  );
+  server.registerTool(
+    'magic_ui_read_variables',
+    {
+      description:
+        'Read actual local Figma variables and modes owned by this project.',
+      inputSchema: readDesignSystemToolSchema,
+      outputSchema: variablesResultSchema,
+      annotations,
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: sharedErrors,
+      },
+    },
+    ({ sessionId, ...input }, extra) =>
+      execute(sessionId, { command: 'readVariables', input }, extra.signal),
+  );
+  const readTools = { magic_ui_read_document: 'document', magic_ui_list_pages: 'pages', magic_ui_read_page: 'page', magic_ui_read_selection: 'selection', magic_ui_read_styles: 'styles' } as const;
+  for (const [name, scope] of Object.entries(readTools)) server.registerTool(name, {
+    description: `Read Figma ${scope} without document writes. Returns a JSON fragment and nextCursor; repeat the identical scope with that cursor, concatenate data, then parse JSON. read_page accepts a page or subtree nodeId.`,
+    inputSchema: readerToolSchema.omit({scope:true}), outputSchema: readerChunkSchema, annotations,
+    _meta: {permission:'read', timeoutMs:REQUEST_TIMEOUT_MS, errorCodes:[...sharedErrors,'INVALID_CURSOR','NODE_NOT_FOUND','MESSAGE_TOO_LARGE']},
+  }, ({sessionId,...input},extra)=>execute(sessionId,{command:'readFigma',input:readerInputSchema.parse({...input,scope})},extra.signal));
+  const exportRoot=process.env.MAGIC_UI_WORKSPACE_ROOT ?? process.cwd();
+  server.registerTool('magic_ui_export_asset', {
+    description:'Export PNG or SVG without modifying Figma. Writes to a new private figma-export directory under MAGIC_UI_WORKSPACE_ROOT. SVG retains its vector dimensions; scale applies to PNG.',
+    inputSchema:exportAssetSchema,outputSchema:exportResultSchema,annotations,
+    _meta:{permission:'read',timeoutMs:REQUEST_TIMEOUT_MS,errorCodes:[...sharedErrors,'WORKSPACE_ERROR','MESSAGE_TOO_LARGE']},
+  },(input,extra)=>localResult(()=>exportAsset(bridge,exportRoot,input,extra.signal)));
+  server.registerTool('magic_ui_export_design_package', {
+    description:'Extract the specified page or subtree into a framework-independent figma-export package, including raw source, normalized design specification, assets, previews and loss reports. Does not modify Figma. Output uses a new private directory under MAGIC_UI_WORKSPACE_ROOT.',
+    inputSchema:exportPackageSchema,outputSchema:exportResultSchema,annotations,
+    _meta:{permission:'read',timeoutMs:REQUEST_TIMEOUT_MS,errorCodes:[...sharedErrors,'WORKSPACE_ERROR','MESSAGE_TOO_LARGE']},
+  },(input,extra)=>localResult(()=>exportDesignPackage(bridge,exportRoot,input,extra.signal)));
   return server;
 }
 

@@ -11,10 +11,10 @@ export const TOOL_NAMES = [
   'magic_ui_initialize_project',
   'magic_ui_validate_design_spec',
   'magic_ui_render_design',
- 'magic_ui_render_design_system',
- 'magic_ui_find_component',
- 'magic_ui_read_components',
- 'magic_ui_read_variables',
+  'magic_ui_render_design_system',
+  'magic_ui_find_component',
+  'magic_ui_read_components',
+  'magic_ui_read_variables',
 ] as const;
 export const identifierSchema = z.string().min(1).max(256);
 export const tokenSchema = z.string().regex(/^[a-f0-9]{64}$/);

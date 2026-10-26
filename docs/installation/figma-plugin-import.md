@@ -99,3 +99,7 @@ MAGIC_UI_BRIDGE_PORT=3846 pnpm smoke:figma
 ## تسجيل النتيجة
 
 بعد التجربة الحقيقية، حدّث `PROGRESS.md` بتاريخها، `nodeId`، ونتيجة كل خطوة: **Passed / Failed / Requires User Action / Not Tested (السبب)**. لا تضف token أو محتوى `session.json` إلى Git أو صور الشاشة أو الـlogs.
+
+## Phase 3
+
+الخادم يسجل الآن 10 أدوات. لتجربة Variables وComponents وInstances اتبع [دليل Phase 3](design-system-render.md)، وشغّل `pnpm smoke:design-system` بعد البناء.

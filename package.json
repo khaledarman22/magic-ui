@@ -16,7 +16,8 @@
     "fake-plugin": "node --import tsx scripts/fake-plugin-client.ts",
     "smoke:figma": "node --import tsx scripts/figma-smoke-test.ts",
     "schema:generate": "node --import tsx scripts/generate-design-schema.ts",
-    "smoke:render": "node --import tsx scripts/render-smoke-test.ts"
+    "smoke:render": "node --import tsx scripts/render-smoke-test.ts",
+    "smoke:design-system": "node --import tsx scripts/design-system-smoke-test.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

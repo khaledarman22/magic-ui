@@ -28,7 +28,10 @@ export class FakePluginClient {
     readonly url: string,
     readonly token: string,
     private readonly renderHandler?: (
-      command: Extract<Command, { command: 'renderDesign' }>,
+      command: Exclude<
+        Command,
+        { command: 'ping' | 'createFrame' | 'readNode' }
+      >,
     ) => Promise<CommandResult>,
   ) {}
   async connect() {
@@ -91,7 +94,17 @@ export class FakePluginClient {
           return;
         }
         if (this.dropCommands) return;
-        if (command.command === 'renderDesign' && this.renderHandler) {
+        if (
+          [
+            'renderDesign',
+            'renderDesignSystem',
+            'readComponents',
+            'readVariables',
+          ].includes(command.command) &&
+          command.command !== 'createFrame' &&
+          command.command !== 'readNode' &&
+          this.renderHandler
+        ) {
           void this.renderHandler(command)
             .then((result) =>
               this.send(

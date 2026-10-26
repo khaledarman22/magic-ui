@@ -1,0 +1,726 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "phase3-smoke",
+  "tokens": {
+    "modes": ["light", "dark"],
+    "values": [
+      {
+        "id": "primitive.white",
+        "type": "color",
+        "category": "primitive",
+        "values": {
+          "light": "#FFFFFF",
+          "dark": "#151923"
+        }
+      },
+      {
+        "id": "primitive.ink",
+        "type": "color",
+        "category": "primitive",
+        "values": {
+          "light": "#151923",
+          "dark": "#F0F4FF"
+        }
+      },
+      {
+        "id": "primitive.blue",
+        "type": "color",
+        "category": "primitive",
+        "values": {
+          "light": "#2463EB",
+          "dark": "#6795FF"
+        }
+      },
+      {
+        "id": "color.surface",
+        "type": "color",
+        "category": "semantic",
+        "values": {
+          "light": {
+            "token": "primitive.white"
+          },
+          "dark": {
+            "token": "primitive.white"
+          }
+        }
+      },
+      {
+        "id": "color.text",
+        "type": "color",
+        "category": "semantic",
+        "values": {
+          "light": {
+            "token": "primitive.ink"
+          },
+          "dark": {
+            "token": "primitive.ink"
+          }
+        }
+      },
+      {
+        "id": "color.action",
+        "type": "color",
+        "category": "semantic",
+        "values": {
+          "light": {
+            "token": "primitive.blue"
+          },
+          "dark": {
+            "token": "primitive.blue"
+          }
+        }
+      },
+      {
+        "id": "space.md",
+        "type": "number",
+        "category": "spacing",
+        "values": {
+          "light": 12,
+          "dark": 12
+        }
+      },
+      {
+        "id": "radius.md",
+        "type": "number",
+        "category": "radius",
+        "values": {
+          "light": 8,
+          "dark": 8
+        }
+      }
+    ],
+    "typography": [
+      {
+        "id": "body",
+        "name": "Body",
+        "fontFamily": "Inter",
+        "fontStyle": "Regular",
+        "fontSize": 16
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "button",
+      "name": "Button",
+      "category": "actions",
+      "properties": [
+        {
+          "id": "type",
+          "name": "Type",
+          "type": "VARIANT",
+          "defaultValue": "Primary"
+        },
+        {
+          "id": "size",
+          "name": "Size",
+          "type": "VARIANT",
+          "defaultValue": "Medium"
+        },
+        {
+          "id": "state",
+          "name": "State",
+          "type": "VARIANT",
+          "defaultValue": "Default"
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "type": "TEXT",
+          "defaultValue": "Continue",
+          "targetId": "label"
+        },
+        {
+          "id": "show-label",
+          "name": "Show label",
+          "type": "BOOLEAN",
+          "defaultValue": true,
+          "targetId": "label"
+        }
+      ],
+      "variants": [
+        {
+          "id": "primary-md-default",
+          "name": "primary-md-default",
+          "values": {
+            "type": "Primary",
+            "size": "Medium",
+            "state": "Default"
+          },
+          "root": {
+            "id": "button-root",
+            "name": "button-root",
+            "type": "frame",
+            "layout": {
+              "type": "auto-layout",
+              "width": 160,
+              "height": 48,
+              "direction": "horizontal",
+              "alignment": "center",
+              "primaryAlignment": "center",
+              "itemSpacing": {
+                "token": "space.md"
+              },
+              "padding": {
+                "top": {
+                  "token": "space.md"
+                },
+                "right": {
+                  "token": "space.md"
+                },
+                "bottom": {
+                  "token": "space.md"
+                },
+                "left": {
+                  "token": "space.md"
+                }
+              }
+            },
+            "styling": {
+              "fills": [
+                {
+                  "color": {
+                    "token": "color.action"
+                  }
+                }
+              ],
+              "cornerRadius": {
+                "token": "radius.md"
+              }
+            },
+            "nodes": [
+              {
+                "id": "label",
+                "name": "label",
+                "type": "text",
+                "content": "Continue",
+                "fontFamily": "Inter",
+                "fontStyle": "Regular",
+                "typography": "body",
+                "fontSize": 16,
+                "layout": {
+                  "width": "hug",
+                  "height": "hug"
+                },
+                "styling": {
+                  "fills": [
+                    {
+                      "color": {
+                        "token": "color.text"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "primary-sm-default",
+          "name": "primary-sm-default",
+          "values": {
+            "type": "Primary",
+            "size": "Small",
+            "state": "Default"
+          },
+          "root": {
+            "id": "button-root",
+            "name": "button-root",
+            "type": "frame",
+            "layout": {
+              "type": "auto-layout",
+              "width": 160,
+              "height": 40,
+              "direction": "horizontal",
+              "alignment": "center",
+              "primaryAlignment": "center",
+              "itemSpacing": {
+                "token": "space.md"
+              },
+              "padding": {
+                "top": {
+                  "token": "space.md"
+                },
+                "right": {
+                  "token": "space.md"
+                },
+                "bottom": {
+                  "token": "space.md"
+                },
+                "left": {
+                  "token": "space.md"
+                }
+              }
+            },
+            "styling": {
+              "fills": [
+                {
+                  "color": {
+                    "token": "color.action"
+                  }
+                }
+              ],
+              "cornerRadius": {
+                "token": "radius.md"
+              }
+            },
+            "nodes": [
+              {
+                "id": "label",
+                "name": "label",
+                "type": "text",
+                "content": "Continue",
+                "fontFamily": "Inter",
+                "fontStyle": "Regular",
+                "typography": "body",
+                "fontSize": 16,
+                "layout": {
+                  "width": "hug",
+                  "height": "hug"
+                },
+                "styling": {
+                  "fills": [
+                    {
+                      "color": {
+                        "token": "color.text"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "secondary-md-default",
+          "name": "secondary-md-default",
+          "values": {
+            "type": "Secondary",
+            "size": "Medium",
+            "state": "Default"
+          },
+          "root": {
+            "id": "button-root",
+            "name": "button-root",
+            "type": "frame",
+            "layout": {
+              "type": "auto-layout",
+              "width": 160,
+              "height": 48,
+              "direction": "horizontal",
+              "alignment": "center",
+              "primaryAlignment": "center",
+              "itemSpacing": {
+                "token": "space.md"
+              },
+              "padding": {
+                "top": {
+                  "token": "space.md"
+                },
+                "right": {
+                  "token": "space.md"
+                },
+                "bottom": {
+                  "token": "space.md"
+                },
+                "left": {
+                  "token": "space.md"
+                }
+              }
+            },
+            "styling": {
+              "fills": [
+                {
+                  "color": {
+                    "token": "color.surface"
+                  }
+                }
+              ],
+              "cornerRadius": {
+                "token": "radius.md"
+              }
+            },
+            "nodes": [
+              {
+                "id": "label",
+                "name": "label",
+                "type": "text",
+                "content": "Continue",
+                "fontFamily": "Inter",
+                "fontStyle": "Regular",
+                "typography": "body",
+                "fontSize": 16,
+                "layout": {
+                  "width": "hug",
+                  "height": "hug"
+                },
+                "styling": {
+                  "fills": [
+                    {
+                      "color": {
+                        "token": "color.text"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "primary-md-disabled",
+          "name": "primary-md-disabled",
+          "values": {
+            "type": "Primary",
+            "size": "Medium",
+            "state": "Disabled"
+          },
+          "root": {
+            "id": "button-root",
+            "name": "button-root",
+            "type": "frame",
+            "layout": {
+              "type": "auto-layout",
+              "width": 160,
+              "height": 48,
+              "direction": "horizontal",
+              "alignment": "center",
+              "primaryAlignment": "center",
+              "itemSpacing": {
+                "token": "space.md"
+              },
+              "padding": {
+                "top": {
+                  "token": "space.md"
+                },
+                "right": {
+                  "token": "space.md"
+                },
+                "bottom": {
+                  "token": "space.md"
+                },
+                "left": {
+                  "token": "space.md"
+                }
+              }
+            },
+            "styling": {
+              "fills": [
+                {
+                  "color": {
+                    "token": "color.action"
+                  }
+                }
+              ],
+              "cornerRadius": {
+                "token": "radius.md"
+              },
+              "opacity": 0.5
+            },
+            "nodes": [
+              {
+                "id": "label",
+                "name": "label",
+                "type": "text",
+                "content": "Continue",
+                "fontFamily": "Inter",
+                "fontStyle": "Regular",
+                "typography": "body",
+                "fontSize": 16,
+                "layout": {
+                  "width": "hug",
+                  "height": "hug"
+                },
+                "styling": {
+                  "fills": [
+                    {
+                      "color": {
+                        "token": "color.text"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "input",
+      "name": "Input",
+      "category": "forms",
+      "properties": [
+        {
+          "id": "value",
+          "name": "Value",
+          "type": "TEXT",
+          "defaultValue": "Enter name",
+          "targetId": "value"
+        }
+      ],
+      "variants": [
+        {
+          "id": "default",
+          "name": "Default",
+          "values": {},
+          "root": {
+            "id": "input-root",
+            "name": "input-root",
+            "type": "frame",
+            "layout": {
+              "type": "auto-layout",
+              "width": 240,
+              "height": 96,
+              "direction": "horizontal",
+              "alignment": "center",
+              "primaryAlignment": "center",
+              "itemSpacing": {
+                "token": "space.md"
+              },
+              "padding": {
+                "top": {
+                  "token": "space.md"
+                },
+                "right": {
+                  "token": "space.md"
+                },
+                "bottom": {
+                  "token": "space.md"
+                },
+                "left": {
+                  "token": "space.md"
+                }
+              }
+            },
+            "styling": {
+              "fills": [
+                {
+                  "color": {
+                    "token": "color.surface"
+                  }
+                }
+              ],
+              "cornerRadius": {
+                "token": "radius.md"
+              }
+            },
+            "nodes": [
+              {
+                "id": "value",
+                "name": "value",
+                "type": "text",
+                "content": "Enter name",
+                "fontFamily": "Inter",
+                "fontStyle": "Regular",
+                "typography": "body",
+                "fontSize": 16,
+                "layout": {
+                  "width": "hug",
+                  "height": "hug"
+                },
+                "styling": {
+                  "fills": [
+                    {
+                      "color": {
+                        "token": "color.text"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "card",
+      "name": "Card",
+      "category": "containers",
+      "properties": [
+        {
+          "id": "action",
+          "name": "Action",
+          "type": "INSTANCE_SWAP",
+          "defaultValue": "button",
+          "targetId": "card-action"
+        }
+      ],
+      "variants": [
+        {
+          "id": "default",
+          "name": "Default",
+          "values": {},
+          "root": {
+            "id": "card-root",
+            "name": "card-root",
+            "type": "frame",
+            "layout": {
+              "type": "auto-layout",
+              "width": 420,
+              "height": 120,
+              "direction": "horizontal",
+              "alignment": "center",
+              "primaryAlignment": "center",
+              "itemSpacing": {
+                "token": "space.md"
+              },
+              "padding": {
+                "top": {
+                  "token": "space.md"
+                },
+                "right": {
+                  "token": "space.md"
+                },
+                "bottom": {
+                  "token": "space.md"
+                },
+                "left": {
+                  "token": "space.md"
+                }
+              }
+            },
+            "styling": {
+              "fills": [
+                {
+                  "color": {
+                    "token": "color.surface"
+                  }
+                }
+              ],
+              "cornerRadius": {
+                "token": "radius.md"
+              }
+            },
+            "nodes": [
+              {
+                "id": "title",
+                "name": "title",
+                "type": "text",
+                "content": "Your profile",
+                "fontFamily": "Inter",
+                "fontStyle": "Regular",
+                "typography": "body",
+                "fontSize": 16,
+                "layout": {
+                  "width": "hug",
+                  "height": "hug"
+                },
+                "styling": {
+                  "fills": [
+                    {
+                      "color": {
+                        "token": "color.text"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "card-action",
+                "name": "card-action",
+                "type": "component-instance",
+                "componentId": "button",
+                "variant": "primary-md-default",
+                "layout": {
+                  "width": 160,
+                  "height": 48
+                },
+                "overrides": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "id": "app",
+      "name": "App",
+      "screens": [
+        {
+          "id": "home",
+          "name": "Phase 3 sample",
+          "layout": {
+            "type": "auto-layout",
+            "width": 520,
+            "height": "hug",
+            "direction": "vertical",
+            "alignment": "start",
+            "primaryAlignment": "center",
+            "itemSpacing": {
+              "token": "space.md"
+            },
+            "padding": {
+              "top": {
+                "token": "space.md"
+              },
+              "right": {
+                "token": "space.md"
+              },
+              "bottom": {
+                "token": "space.md"
+              },
+              "left": {
+                "token": "space.md"
+              }
+            },
+            "x": 1000,
+            "y": 40
+          },
+          "styling": {
+            "fills": [
+              {
+                "color": {
+                  "token": "color.surface"
+                }
+              }
+            ]
+          },
+          "nodes": [
+            {
+              "id": "home-button",
+              "name": "home-button",
+              "type": "component-instance",
+              "componentId": "button",
+              "variant": "primary-md-default",
+              "layout": {
+                "width": 160,
+                "height": 48
+              },
+              "overrides": {
+                "label": "Save profile"
+              }
+            },
+            {
+              "id": "home-input",
+              "name": "home-input",
+              "type": "component-instance",
+              "componentId": "input",
+              "variant": "default",
+              "layout": {
+                "width": 460,
+                "height": 64
+              },
+              "overrides": {}
+            },
+            {
+              "id": "home-card",
+              "name": "home-card",
+              "type": "component-instance",
+              "componentId": "card",
+              "variant": "default",
+              "layout": {
+                "width": 460,
+                "height": 144
+              },
+              "overrides": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

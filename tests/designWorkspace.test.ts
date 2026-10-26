@@ -118,3 +118,31 @@ it('does not race two initializations with the same project identity', async () 
   ).toHaveLength(1);
   expect(await readdir(root)).toHaveLength(1);
 });
+it('persists registry atomically with private permissions and refuses directory/file symlinks', async () => {
+  const { stat } = await import('node:fs/promises');
+  const project = await workspace.initialize({
+    projectId: 'registry',
+    projectName: 'Registry',
+  });
+  const registry = { projectId: 'registry', components: [] };
+  expect(await workspace.readRegistry('registry')).toEqual(registry);
+  await workspace.writeRegistry(registry);
+  await workspace.writeRegistry(registry);
+  const directory = join(project.directory, 'design-system'),
+    path = join(directory, 'components.json');
+  expect(await workspace.readRegistry('registry')).toEqual(registry);
+  expect((await stat(path)).mode & 0o777).toBe(0o600);
+  expect(await readdir(directory)).toEqual(['components.json']);
+  const outside = join(root, 'outside-registry.json');
+  await writeFile(outside, 'original');
+  await rm(path);
+  await symlink(outside, path);
+  await expect(workspace.writeRegistry(registry)).rejects.toThrow();
+  expect(await readFile(outside, 'utf8')).toBe('original');
+  await rm(directory, { recursive: true });
+  const outsideDir = join(root, 'outside-directory');
+  await mkdir(outsideDir);
+  await symlink(outsideDir, directory);
+  await expect(workspace.writeRegistry(registry)).rejects.toThrow();
+  expect(await readdir(outsideDir)).toEqual([]);
+});

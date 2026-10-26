@@ -59,10 +59,7 @@ it('runs production startup, MCP negotiation and frame/render round-trips over s
     plugin = new FakePluginClient(
       `ws://127.0.0.1:${credentials.port}`,
       credentials.token,
-      async (command) => ({
-        command: 'renderDesign',
-        result: await harness.render(command.input),
-      }),
+      async (command) => harness.execute(command),
     );
     await plugin.connect();
     const created = await client.callTool({

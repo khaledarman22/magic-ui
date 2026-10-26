@@ -1,14 +1,28 @@
 import { z } from 'zod';
-import { validateDesignSystem, componentWarnings } from './designSystemValidation.js';
-import { tokensSchema, tokenReferenceSchema, resolveToken, resolveTokenReferences } from './tokens.js';
+import {
+  validateDesignSystem,
+  componentWarnings,
+} from './designSystemValidation.js';
+import {
+  tokensSchema,
+  tokenReferenceSchema,
+  resolveToken,
+  resolveTokenReferences,
+} from './tokens.js';
 import { MagicUiError, failure } from '../errors/errors.js';
 
 export const stableIdSchema = z
   .string()
   .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/);
-const dimension = z.union([z.number().finite().positive().max(100000), tokenReferenceSchema]);
+const dimension = z.union([
+  z.number().finite().positive().max(100000),
+  tokenReferenceSchema,
+]);
 const size = z.union([dimension, z.enum(['hug', 'fill'])]);
-const coordinate = z.union([z.number().finite().min(-1000000).max(1000000), tokenReferenceSchema]);
+const coordinate = z.union([
+  z.number().finite().min(-1000000).max(1000000),
+  tokenReferenceSchema,
+]);
 export const layoutSchema = z
   .object({
     type: z.enum(['auto-layout', 'absolute']).default('absolute'),
@@ -27,7 +41,9 @@ export const layoutSchema = z
       })
       .strict()
       .default({ top: 0, right: 0, bottom: 0, left: 0 }),
-    itemSpacing: z.union([z.number().finite().min(0).max(100000), tokenReferenceSchema]).default(0),
+    itemSpacing: z
+      .union([z.number().finite().min(0).max(100000), tokenReferenceSchema])
+      .default(0),
     alignment: z.enum(['start', 'center', 'end']).default('start'),
     primaryAlignment: z
       .enum(['start', 'center', 'end', 'space-between'])
@@ -36,17 +52,28 @@ export const layoutSchema = z
   .strict();
 const solidPaintSchema = z
   .object({
-    color: z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), tokenReferenceSchema]),
-    opacity: z.union([z.number().min(0).max(1), tokenReferenceSchema]).default(1),
+    color: z.union([
+      z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      tokenReferenceSchema,
+    ]),
+    opacity: z
+      .union([z.number().min(0).max(1), tokenReferenceSchema])
+      .default(1),
   })
   .strict();
 export const stylingSchema = z
   .object({
     fills: z.array(solidPaintSchema).max(16).default([]),
     strokes: z.array(solidPaintSchema).max(16).default([]),
-    strokeWeight: z.union([z.number().min(0).max(1000), tokenReferenceSchema]).default(1),
-    cornerRadius: z.union([z.number().min(0).max(100000), tokenReferenceSchema]).default(0),
-    opacity: z.union([z.number().min(0).max(1), tokenReferenceSchema]).default(1),
+    strokeWeight: z
+      .union([z.number().min(0).max(1000), tokenReferenceSchema])
+      .default(1),
+    cornerRadius: z
+      .union([z.number().min(0).max(100000), tokenReferenceSchema])
+      .default(0),
+    opacity: z
+      .union([z.number().min(0).max(1), tokenReferenceSchema])
+      .default(1),
   })
   .strict();
 const common = {
@@ -63,11 +90,18 @@ export const textSpecificationSchema = z
     typography: z.string().optional(),
     fontFamily: z.union([z.string().min(1).max(128), tokenReferenceSchema]),
     fontStyle: z.union([z.string().min(1).max(128), tokenReferenceSchema]),
-    fontSize: z.union([z.number().positive().max(1000), tokenReferenceSchema]).default(16),
+    fontSize: z
+      .union([z.number().positive().max(1000), tokenReferenceSchema])
+      .default(16),
     lineHeight: z
-      .union([z.literal('auto'), z.union([z.number().positive().max(10000), tokenReferenceSchema])])
+      .union([
+        z.literal('auto'),
+        z.union([z.number().positive().max(10000), tokenReferenceSchema]),
+      ])
       .default('auto'),
-    letterSpacing: z.union([z.number().min(-1000).max(1000), tokenReferenceSchema]).default(0),
+    letterSpacing: z
+      .union([z.number().min(-1000).max(1000), tokenReferenceSchema])
+      .default(0),
     textAlign: z
       .enum(['start', 'end', 'left', 'right', 'center', 'justified'])
       .default('start'),
@@ -79,11 +113,17 @@ export const rectangleSpecificationSchema = z
 const frameBaseSchema = z
   .object({ ...common, type: z.literal('frame') })
   .strict();
-export const instanceSpecificationSchema = z.object({
-  ...common, type: z.literal('component-instance'), componentId: stableIdSchema,
-  variant: z.string().min(1),
-  overrides: z.record(z.string(), z.union([z.string(), z.boolean()])).default({}),
-}).strict();
+export const instanceSpecificationSchema = z
+  .object({
+    ...common,
+    type: z.literal('component-instance'),
+    componentId: stableIdSchema,
+    variant: z.string().min(1),
+    overrides: z
+      .record(z.string(), z.union([z.string(), z.boolean()]))
+      .default({}),
+  })
+  .strict();
 export type NodeSpecification =
   | z.infer<typeof instanceSpecificationSchema>
   | z.infer<typeof textSpecificationSchema>
@@ -115,24 +155,51 @@ export const screenSpecificationSchema = z
     nodes: z.array(nodeSpecificationSchema).max(500),
   })
   .strict();
-export const componentPropertySchema = z.object({
-  id: stableIdSchema, name: z.string().min(1).max(100),
-  type: z.enum(['TEXT', 'BOOLEAN', 'INSTANCE_SWAP', 'VARIANT']),
-  defaultValue: z.union([z.string(), z.boolean()]),
-  targetId: stableIdSchema.optional(),
-}).strict();
-export const componentSpecificationSchema = z.object({
-  id: stableIdSchema, name: z.string().min(1).max(256), category: stableIdSchema,
-  version: z.number().int().positive().default(1),
-  properties: z.array(componentPropertySchema).max(40).default([]),
-  dependencies: z.array(stableIdSchema).default([]),
-  variants: z.array(z.object({
-    id: stableIdSchema, name: z.string().min(1).max(256),
-    values: z.record(z.string(), z.string()),
-    root: frameSpecificationSchema,
-  }).strict()).min(1).max(100),
-}).strict();
-export type ComponentSpecification = z.infer<typeof componentSpecificationSchema>;
+export const componentPropertySchema = z
+  .object({
+    id: stableIdSchema,
+    name: z
+      .string()
+      .min(1)
+      .max(100)
+      .regex(/^[^,=#]+$/),
+    type: z.enum(['TEXT', 'BOOLEAN', 'INSTANCE_SWAP', 'VARIANT']),
+    defaultValue: z.union([z.string(), z.boolean()]),
+    targetId: stableIdSchema.optional(),
+  })
+  .strict();
+export const componentSpecificationSchema = z
+  .object({
+    id: stableIdSchema,
+    name: z.string().min(1).max(256),
+    category: stableIdSchema,
+    version: z.number().int().positive().default(1),
+    properties: z.array(componentPropertySchema).max(40).default([]),
+    dependencies: z.array(stableIdSchema).default([]),
+    variants: z
+      .array(
+        z
+          .object({
+            id: stableIdSchema,
+            name: z.string().min(1).max(256),
+            values: z.record(
+              z.string(),
+              z
+                .string()
+                .min(1)
+                .regex(/^[^,=]+$/),
+            ),
+            root: frameSpecificationSchema,
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(100),
+  })
+  .strict();
+export type ComponentSpecification = z.infer<
+  typeof componentSpecificationSchema
+>;
 export const designSpecificationSchema = z
   .object({
     schemaVersion: z.literal('1.0.0'),
@@ -153,11 +220,25 @@ export const designSpecificationSchema = z
   })
   .strict()
   .superRefine((spec, ctx) => {
-    for (const issue of validateDesignSystem(spec)) ctx.addIssue({ code: 'custom', ...issue });
+    for (const issue of validateDesignSystem(spec))
+      ctx.addIssue({ code: 'custom', ...issue });
     try {
-      for (const mode of spec.tokens.modes) for (const token of spec.tokens.values) resolveToken(spec.tokens, token.id, mode);
-      for (const mode of spec.tokens.modes) resolveTokenReferences({ pages: spec.pages, components: spec.components }, spec.tokens, mode);
-    } catch (error) { ctx.addIssue({ code: 'custom', path: ['tokens'], message: String(error) }); }
+      for (const mode of spec.tokens.modes)
+        for (const token of spec.tokens.values)
+          resolveToken(spec.tokens, token.id, mode);
+      for (const mode of spec.tokens.modes)
+        resolveTokenReferences(
+          { pages: spec.pages, components: spec.components },
+          spec.tokens,
+          mode,
+        );
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['tokens'],
+        message: String(error),
+      });
+    }
     const ids = new Set<string>();
     const check = (id: string, path: (string | number)[]) => {
       if (ids.has(id))
@@ -187,7 +268,10 @@ export const designSpecificationSchema = z
               path: p,
               message: 'Maximum nesting depth is 32.',
             });
-          const frame = !('type' in node) || node.type === 'frame' || node.type === 'component-instance';
+          const frame =
+            !('type' in node) ||
+            node.type === 'frame' ||
+            node.type === 'component-instance';
           const l = node.layout;
           if (
             'type' in node &&
@@ -273,7 +357,13 @@ export function validateDesignSpecification(
 ): z.infer<typeof validationResultSchema> {
   const result = designSpecificationSchema.safeParse(value);
   return result.success
-    ? { valid: true, errors: [], ...(componentWarnings(result.data.components).length ? { warnings: componentWarnings(result.data.components) } : {}) }
+    ? {
+        valid: true,
+        errors: [],
+        ...(componentWarnings(result.data.components).length
+          ? { warnings: componentWarnings(result.data.components) }
+          : {}),
+      }
     : {
         valid: false,
         errors: result.error.issues.map((issue) => ({

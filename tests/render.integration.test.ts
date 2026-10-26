@@ -44,10 +44,7 @@ beforeEach(async () => {
   plugin = new FakePluginClient(
     `ws://127.0.0.1:${port}`,
     token,
-    async (command) => ({
-      command: 'renderDesign',
-      result: await harness.render(command.input),
-    }),
+    async (command) => harness.execute(command),
   );
   await plugin.connect();
 });
@@ -166,4 +163,89 @@ it('returns structured drift and font errors through the complete transport', as
   const result = await render();
   expect(result.isError).toBe(true);
   expect(JSON.stringify(result.content)).toContain('DRIFT_DETECTED');
+});
+it('renders the design system and instances over MCP/WebSocket, persists searchable registry, and extends the same set', async () => {
+  const { default: raw } =
+    await import('../scripts/samples/phase-3.design-spec.json');
+  const {
+    designSpecificationSchema,
+    designSystemResultSchema,
+    componentRegistrySchema,
+  } = await import('../packages/shared/src/index.js');
+  const { readFile } = await import('node:fs/promises');
+  const { dirname } = await import('node:path');
+  const spec = designSpecificationSchema.parse({
+    ...raw,
+    projectId: 'phase2-smoke',
+  });
+  await writeFile(specificationPath, JSON.stringify(spec));
+  const system = async () => {
+    const response = await client.callTool({
+      name: 'magic_ui_render_design_system',
+      arguments: {
+        sessionId: plugin.sessionId,
+        pageId: '0:1',
+        projectId: spec.projectId,
+      },
+    });
+    if (response.isError) throw new Error(JSON.stringify(response.content));
+    return designSystemResultSchema.parse(response.structuredContent);
+  };
+  const first = await system(),
+    second = await system();
+  expect(second).toEqual(first);
+  const screenFirst = renderDesignResultSchema.parse(
+    (await render()).structuredContent,
+  );
+  const screenSecond = renderDesignResultSchema.parse(
+    (await render()).structuredContent,
+  );
+  expect(screenSecond.mapping).toEqual(screenFirst.mapping);
+  expect(screenSecond.created).toBe(0);
+  const registry = componentRegistrySchema.parse(
+    JSON.parse(
+      await readFile(
+        join(dirname(specificationPath), 'design-system/components.json'),
+        'utf8',
+      ),
+    ),
+  );
+  expect(registry.components).toHaveLength(3);
+  const lookup = await client.callTool({
+    name: 'magic_ui_find_component',
+    arguments: {
+      projectId: spec.projectId,
+      name: 'Button',
+      category: 'actions',
+    },
+  });
+  expect(JSON.stringify(lookup.structuredContent)).toContain('button');
+  const variables = await client.callTool({
+    name: 'magic_ui_read_variables',
+    arguments: { sessionId: plugin.sessionId, projectId: spec.projectId },
+  });
+  expect(variables.isError).not.toBe(true);
+  expect(JSON.stringify(variables.structuredContent)).toContain(
+    'VARIABLE_ALIAS',
+  );
+  const components = await client.callTool({
+    name: 'magic_ui_read_components',
+    arguments: { sessionId: plugin.sessionId, projectId: spec.projectId },
+  });
+  expect(componentRegistrySchema.parse(components.structuredContent)).toEqual(
+    registry,
+  );
+  const variant = structuredClone(spec.components[0]!.variants[0]!);
+  variant.id = 'new-variant';
+  variant.values = { type: 'Secondary', size: 'Small', state: 'Default' };
+  spec.components[0]!.variants.push(variant);
+  await writeFile(specificationPath, JSON.stringify(spec));
+  const extended = await system();
+  expect(extended.componentCount).toBe(first.componentCount + 1);
+  expect(extended.components.find((c) => c.id === 'button')!.nodeId).toBe(
+    first.components.find((c) => c.id === 'button')!.nodeId,
+  );
+  expect(
+    harness.document.findAll((n) => n.type === 'COMPONENT_SET'),
+  ).toHaveLength(3);
 });

@@ -1,4 +1,11 @@
-import { designSystemInputSchema, designSystemResultSchema, readDesignSystemSchema, componentRegistrySchema, variablesResultSchema } from './designSystemCommands.js';
+import { readerInputSchema, readerChunkSchema } from './readerCommands.js';
+import {
+  designSystemInputSchema,
+  designSystemResultSchema,
+  readDesignSystemSchema,
+  componentRegistrySchema,
+  variablesResultSchema,
+} from './designSystemCommands.js';
 import { z } from 'zod';
 import {
   renderDesignSchema,
@@ -25,9 +32,25 @@ export const createFrameSchema = z
 export const readNodeSchema = z.object({ nodeId: identifierSchema }).strict();
 export const pingSchema = z.object({}).strict();
 export const commandSchema = z.discriminatedUnion('command', [
- z.object({command:z.literal('renderDesignSystem'),input:designSystemInputSchema}).strict(),
- z.object({command:z.literal('readComponents'),input:readDesignSystemSchema}).strict(),
- z.object({command:z.literal('readVariables'),input:readDesignSystemSchema}).strict(),
+ z.object({command: z.literal('readFigma'), input: readerInputSchema}).strict(),
+  z
+    .object({
+      command: z.literal('renderDesignSystem'),
+      input: designSystemInputSchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('readComponents'),
+      input: readDesignSystemSchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('readVariables'),
+      input: readDesignSystemSchema,
+    })
+    .strict(),
   z
     .object({ command: z.literal('renderDesign'), input: renderDesignSchema })
     .strict(),
@@ -50,9 +73,25 @@ export const nodeSnapshotSchema = z
   })
   .strict();
 export const commandResultSchema = z.discriminatedUnion('command', [
- z.object({command:z.literal('renderDesignSystem'),result:designSystemResultSchema}).strict(),
- z.object({command:z.literal('readComponents'),result:componentRegistrySchema}).strict(),
- z.object({command:z.literal('readVariables'),result:variablesResultSchema}).strict(),
+ z.object({command: z.literal('readFigma'), result: readerChunkSchema}).strict(),
+  z
+    .object({
+      command: z.literal('renderDesignSystem'),
+      result: designSystemResultSchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('readComponents'),
+      result: componentRegistrySchema,
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('readVariables'),
+      result: variablesResultSchema,
+    })
+    .strict(),
   z
     .object({
       command: z.literal('renderDesign'),
@@ -94,3 +133,5 @@ export const connectionStatusSchema = z
     document: documentSchema.nullable(),
   })
   .strict();
+
+export const commandPermissions = { ping: 'read', readNode: 'read', readComponents: 'read', readVariables: 'read', readFigma: 'read', createFrame: 'write', renderDesign: 'write', renderDesignSystem: 'write' } as const satisfies Record<Command['command'], 'read' | 'write'>;

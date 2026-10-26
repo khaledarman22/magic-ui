@@ -10,11 +10,12 @@ import {
 } from './sessionCredentials.js';
 
 export async function startServer(
-  options: { port?: number; sessionDirectory?: string } = {},
+  options: { port?: number; sessionDirectory?: string; readOnly?: boolean } = {},
 ) {
   const token = generateSessionToken();
   const bridge = new BridgeServer({
     token,
+    readOnly: options.readOnly ?? false,
     port: options.port ?? DEFAULT_BRIDGE_PORT,
   });
   const server = createMcpServer(bridge);

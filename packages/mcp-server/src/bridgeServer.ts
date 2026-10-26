@@ -1,6 +1,7 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
 import {
+  commandPermissions,
   HEARTBEAT_INTERVAL_MS,
   MAX_MESSAGE_BYTES,
   REQUEST_TIMEOUT_MS,
@@ -35,12 +36,14 @@ export class BridgeServer {
   private heartbeat: ReturnType<typeof setInterval> | undefined;
   constructor(
     private readonly options: {
+      readOnly?: boolean;
       token: string;
       port: number;
       timeoutMs?: number;
       heartbeatMs?: number;
     },
   ) {}
+  get readOnly() { return this.options.readOnly ?? false; }
   async start(): Promise<number> {
     const server = new WebSocketServer({
       host: '127.0.0.1',
@@ -161,6 +164,7 @@ export class BridgeServer {
         this.send(
           socket,
           envelope('ready', message.sessionId, message.correlationId, {
+            readOnly: this.readOnly,
             heartbeatIntervalMs:
               this.options.heartbeatMs ?? HEARTBEAT_INTERVAL_MS,
           }),
@@ -200,6 +204,7 @@ export class BridgeServer {
     command: Command,
     signal?: AbortSignal,
   ): Promise<CommandResult> {
+    if (this.readOnly && commandPermissions[command.command] !== 'read') return Promise.reject(new MagicUiError(failure('PERMISSION_DENIED', 'This session is read-only.')));
     const connection = this.plugin;
     if (!connection)
       return Promise.reject(

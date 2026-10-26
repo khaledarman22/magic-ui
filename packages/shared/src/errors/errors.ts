@@ -1,6 +1,8 @@
 import { z } from 'zod';
 export const errorCodeSchema = z.enum([
   'AUTH_FAILED',
+  'PERMISSION_DENIED',
+  'INVALID_CURSOR',
   'INVALID_MESSAGE',
   'INVALID_INPUT',
   'NOT_CONNECTED',
@@ -13,6 +15,7 @@ export const errorCodeSchema = z.enum([
   'INTERNAL_ERROR',
   'UNSUPPORTED_SCHEMA_VERSION',
   'FONT_UNAVAILABLE',
+  'FIGMA_MODE_LIMIT',
   'DRIFT_DETECTED',
   'MESSAGE_TOO_LARGE',
   'WORKSPACE_ERROR',

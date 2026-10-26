@@ -8,6 +8,7 @@ async function main() {
   if (process.argv.includes('--selftest')) {
     const bridge = new BridgeServer({
       token: generateSessionToken(),
+      readOnly: process.argv.includes('--read-only'),
       port: DEFAULT_BRIDGE_PORT,
     });
     for (const name of await listRegisteredTools(bridge))
@@ -15,6 +16,7 @@ async function main() {
     return;
   }
   await startServer({
+    readOnly: process.argv.includes('--read-only'),
     port: portSchema.parse(
       process.env.MAGIC_UI_BRIDGE_PORT ?? DEFAULT_BRIDGE_PORT,
     ),

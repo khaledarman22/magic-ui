@@ -2,7 +2,11 @@
 
 ## Current Phase
 
-**Phase 2 — Design Spec v1 + Render شاشة واحدة: مكتملة ومغلقة، بما فيها التجربة الحقيقية داخل Figma Desktop يوم 2026-10-26.**
+**Phase 4 — قيد التنفيذ.** 2026-10-26: وافق صاحب المشروع على D9 وتم تثبيته Locked، وعلى بدء Phase 4 مع تأجيل تجربة light/dark من Phase 3 وإبقائها معلّقة (Requires User Action).
+
+**Phase 3 — التنفيذ والتحقق الآلي وتجربة Figma الحقيقية بوضع light: Passed. تبديل light/dark: Requires User Action لأن الملف الحالي محدود بـmode واحدة؛ المرحلة لم تُغلق بالكامل.**
+
+Phase 2 مكتملة ومغلقة، بما فيها التجربة الحقيقية داخل Figma Desktop يوم 2026-10-26.
 
 Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figma Desktop.
 
@@ -11,6 +15,33 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 2026-10-26: صاحب المشروع أكد D7 وD8 وD12 وبقوا **Locked**. D7 اتعدّل لـ `setSharedPluginData` بدل `setPluginData` (السبب مكتوب في §2). تم تنفيذ Phase 2 في هذه الجلسة بدون الاعتماد على قرارات Proposed.
 
 ## Done
+
+### Phase 4 — فحص البداية 2026-10-26
+
+- **Passed:** قراءة `AGENTS.md` و`PROGRESS.md` و`prompts/phase-4.md` وجدول القرارات في `docs/ARCHITECTURE.md §2`.
+- **Requires User Action:** D9 ما زال Proposed؛ تعليمات Phase 4 تشترط تحويله إلى Locked بعد موافقة صاحب المشروع، وتنص صراحة على التوقف والسؤال قبل التنفيذ.
+- **Requires User Action:** Phase 3 لم تُغلق بسبب تجربة light/dark في ملف يسمح بـmodeين. يلزم إتمام التجربة أو موافقة صريحة على تأجيلها والسماح ببدء Phase 4 مع إبقاء نتيجتها معلّقة.
+- لم يبدأ تنفيذ Phase 4؛ التعديل الوحيد لهذه المحاولة هو توثيق فحص البداية هنا. لا dependencies جديدة.
+- **Not Tested (توقف عند شروط البداية؛ لا تعديل كود):** `pnpm typecheck` و`pnpm lint` و`pnpm test` وأوامر DoD الخاصة بـPhase 4 لم تُشغّل في هذه المحاولة.
+
+### Phase 3 — 2026-10-26
+
+- **Passed — التجربة الحقيقية بوضع light:** `pnpm smoke:design-system --mode=light` خرج Exit 0 في `Untitled / Page 1`. 8 variables و6 variants داخل 3 sets بنفس الهويات، و3 screen instances. إعادة الشاشة: 0 created / 0 updated / 4 unchanged وعدد فعلي 9 nodes.
+- إصلاحات اكتُشفت في Figma الحقيقي: أسماء Variables تعرض `/` بدل `.` مع الاحتفاظ بالـstable ID؛ snapshot لا يقرأ componentPropertyDefinitions من variant؛ والـset ذو variant واحدة يستخدم اسمًا صحيحًا `Variant=Default`. أُضيف خطأ `FIGMA_MODE_LIMIT` بدل إخفاء حد modes تحت INTERNAL_ERROR، والـharness صار يفرض قيود الـAPI الثلاثة.
+- **Requires User Action:** تجربة light/dark الأصلية اصطدمت برسالة Figma `in addMode: Limited to 1 modes only`. لم تُحاكَ dark ولم يُدّعَ نجاح تبديل modes. يوجد خيار تشخيص صريح `--mode=light`؛ العينة الأصلية ما زالت تحتوي light/dark.
+- [الشاشة الحقيقية](https://www.figma.com/design/omtkdMFHILIuKZQ6Gm94iu/Untitled?node-id=1-42) محفوظة عند x=1000/y=40 بجوار التجارب السابقة. [صورة الشاشة](docs/installation/phase-3-verification/light-screen.png) و[صورة المكونات](docs/installation/phase-3-verification/workspace.png).
+
+- توسيع Design Specification 1.0.0 بصورة متوافقة مع Phase 2: tokens/modes/typography/components/variants وcomponent-instance. العقود وschemas والـregistry في `packages/shared`؛ JSON Schema أُعيد توليده من Zod. لا اعتماد على D6/D9/D11 المقترحة، ولا dependencies جديدة.
+- Tokens للألوان primitive/semantic وspacing/radius وخصائص typography. aliases متحققة في جميع modes، مع رفض المراجع الناقصة والدورات وعدم توافق النوع والقيم بعد resolution. مراجع token متاحة لقيم التصميم؛ معرفات البنية والمكونات تبقى صريحة.
+- Renderer ينشئ Variables وCollection حقيقية وaliases وText styles، ويربط الخصائص المدعومة بـsetBoundVariable وsetBoundVariableForPaint. x/y وpaint opacity تُحل عند الرسم لأن Figma لا يدعم binding مباشرًا لها؛ تغيّرها يدخل في render intent.
+- Components بخصائص TEXT/BOOLEAN/INSTANCE_SWAP/VARIANT وvariants صريحة فقط، وترتيب dependencies مستنتجة من nested instances وswap defaults. الدورات والـvariant combinations غير المعلنة تُرفض قبل الكتابة، والتحقق يشمل تخطيط شجرات المكونات.
+- إنشاء صفحة Components مملوكة بالمشروع، وWorkspace/تصنيفات Auto Layout، وComponent Sets/Components فعلية. إعادة الرسم تستخدم نفس الهويات؛ إضافة variant تلحقها بالـset الموجودة. أسماء العرض لا تستخدم كهوية للخصائص: property keys محفوظة تحت stable property IDs، وتغيير الاسم يحافظ على suffix الخاص بها.
+- شاشات component-instance تستخدم createInstance وswapComponent وsetProperties للـoverrides، وترث مظهر المكونات دون تصفير fills. البحث والتحديث لا يدخلان في أبناء instances الموروثة.
+- Registry في `design-system/components.json` تُحفظ ذريًا بصلاحيات 0600، مع منع symlinks، وتضم IDs/name/category/properties/propertyKeys/variants/dependencies/usage/version. lookup بالاسم والتصنيف وsimilarity الاسم والخصائص، وتحذيرات validation للتشابه ورفض هويات registry المكررة.
+- الأدوات الجديدة: `magic_ui_render_design_system`، `magic_ui_find_component`، `magic_ui_read_components`، `magic_ui_read_variables`؛ الإجمالي 10. read_components يقرأ registry المحفوظة في مستند Figma، وread_variables يقرأ Variables الفعلية. الأخطاء/المدخلات/النتائج/المهلة والصلاحيات محددة.
+- كشف drift للـvariables/styles/components والهوية المفقودة، مع baselines لا تعتبر لونًا محسوبًا من mode تغييرًا يدويًا. قفل render مشترك، وإعادة فحص الصفحة والإلغاء بين الخطوات غير المتزامنة. علامة pending تمنع تكرار موارد design system بعد فشل جزئي؛ التسوية خارج نطاق المرحلة.
+- العينة `scripts/samples/phase-3.design-spec.json`: 8 variables، light/dark، Body style، وButton بأربع combinations من Type × Size × State، وInput وCard، و3 instances في الشاشة. `pnpm smoke:design-system` ودليل `docs/installation/design-system-render.md` جاهزان للتجربة الحقيقية؛ السكريبت لا يحذف أي محتوى.
+- الاختبارات توسّع الـVM harness لتشغيل handlers الإنتاجية وتضيف تكامل MCP/WebSocket للرسم المكرر والـregistry والقراءة وإضافة variant إلى نفس set. لا mocks في مسارات الإنتاج.
 
 ### Phase 2 — 2026-10-26
 
@@ -47,10 +78,55 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 
 ## In Progress
 
-- لا توجد مهام معلقة ضمن Phase 2. اكتمل التحقق الحقيقي بطلب المستخدم، وأُغلقت المرحلة.
-- لا توجد عملية smoke منتظرة. لم يبدأ تنفيذ Phase 3.
+- Phase 3: الفحص الحقيقي للـVariables والـcomponents والـinstances بوضع light مكتمل. المتبقي فقط تبديل light/dark في ملف يسمح بأكثر من mode.
+- لا توجد عملية smoke منتظرة؛ الخادم خرج Exit 0 وcredentials الخاصة بالتجربة نُظفت. لم يُحذف أي node أو variable للمستخدم.
 
 ## Verification Log
+
+### Phase 3 — التجربة الحقيقية والإصلاحات 2026-10-26
+
+- **Failed / Requires User Action:** تجربة العينة الأصلية ذات modeين في `Untitled` توقفت عند إضافة dark. إعادة التحقق مباشرة عبر Figma API أعادت `Error: in addMode: Limited to 1 modes only`. هذا قيد الملف/خطة Figma، لا خطأ تم تجاوزه في الكود. خطأ النقل صار `FIGMA_MODE_LIMIT`، واختباره الآلي Passed.
+- **Failed ثم Passed:** `createVariable('primitive.white', ...)` أعاد `invalid variable name`. عُدّل اسم العرض إلى `primitive/white` وبقي shared stable ID هو `primitive.white`. المتغيرات الحقيقية `VariableID:1:11` حتى `VariableID:1:18` محفوظة.
+- **Failed ثم Passed:** Figma رفض قراءة componentPropertyDefinitions من variant برسالة `Can only get component property definitions of a component set or non-variant component`. يُقرأ التعريف على الـset فقط؛ snapshot للـvariants لا يستدعي getter غير صالح.
+- **Failed ثم Passed:** إعادة تسمية variant الوحيدة إلى `Default` جعلت set غير صالحة عند الرسم الثاني (`Component set has existing errors`). أصبح الاسم `Variant=Default` قبل قراءة التعريفات.
+- **Passed:** قبل كل إعادة تمت قراءة الحالة الجزئية. أُصلحت metadata الخاصة بعينة `phase3-smoke` فقط بعد تحديد موضع الفشل: collection الفارغة ثم snapshots التي تعذر تسجيلها بسبب getter ثم اسما variant المنفردتين. لا حذف، ولا نسخ جديدة، ولا تجاوز آلي عام لـpending/drift في المنتج. بقيت collection `VariableCollectionId:1:10` ونفس sets طوال الإصلاح.
+- **Passed:** `pnpm smoke:design-system --mode=light` عبر stdio → WebSocket → Magic UI الحقيقي، Exit 0. 8 variables و6 component variants بنفس IDs في الإعادة. الشاشة `1:42`، instances: Button `1:43` وInput `1:45` وCard `1:47`، وعدد nodes الحقيقي 9 بما فيها الأطفال الموروثة.
+- **Passed:** فحص خصائص Figma الفعلية: Button set `1:25` بأربع variants وTEXT/BOOLEAN/VARIANT، Input set `1:35` وTEXT، Card set `1:41` وINSTANCE_SWAP. Body Text style فعلي Inter Regular 16. semantic aliases تشير إلى primitive variables الحقيقية، وspacing=12 وradius=8 من نوع FLOAT.
+- **Passed:** لوحة Variables أظهرت Magic UI و8 variables وعمود light، وقيم primitive الفعلية. فُحصت الشاشة والمكونات بصور Figma export؛ لا قص للنصوص أو تداخل بينها. root الشاشة 520×304، ومكانها 1000/40. أُبقيت محددة للمراجعة.
+- **Passed:** الخادم أغلق ونظّف `~/.magic-ui/session.json`؛ لا smoke منتظرة. آخر workspace محفوظ في `/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-render-smoke-EZdNsq/Phase3Smoke-Design`.
+- **Passed:** `pnpm typecheck` و`pnpm lint` و`pnpm test` بعد الإصلاحات؛ 96 اختبارًا في 11 ملفًا. `pnpm build` ناجح مع تحذيري Zod المعروفين فقط. لا dependencies جديدة.
+- **Not Tested (قيد Figma):** التغير البصري للـinstances عند تبديل light/dark؛ يتطلب ملفًا يسمح بـmodeين. المرحلة تبقى مفتوحة لهذا البند وحده.
+
+المخرجات الفعلية لآخر تشغيل — Exit 0:
+
+```text
+Target: Untitled / Page 1
+Passed: 8 variables and 6 component variants retained their identities.
+First render: {"nodeCount":9,"created":0,"updated":1,"unchanged":3,"orphaned":0,"mapping":[{"id":"home","nodeId":"1:42"},{"id":"home-button","nodeId":"1:43"},{"id":"home-input","nodeId":"1:45"},{"id":"home-card","nodeId":"1:47"}],"orphanedNodes":[]}
+Second render: {"nodeCount":9,"created":0,"updated":0,"unchanged":4,"orphaned":0,"mapping":[{"id":"home","nodeId":"1:42"},{"id":"home-button","nodeId":"1:43"},{"id":"home-input","nodeId":"1:45"},{"id":"home-card","nodeId":"1:47"}],"orphanedNodes":[]}
+Passed: node count unchanged (9 → 9), 0 created, 0 updated, 4 unchanged; identical mapping.
+```
+
+التحديث الوحيد في أول render لهذا التشغيل هو نقل root العينة بجوار Phase 2؛ تشغيل النجاح السابق أنشأ root والـ3 instances ثم أعادها بلا تغيير.
+
+### Phase 3 — 2026-10-26
+
+- **Passed:** `pnpm typecheck` — Exit 0، TypeScript strict للجذر وPlugin Main.
+- **Passed:** `pnpm lint` — Exit 0؛ ESLint وPrettier.
+- **Passed:** `pnpm schema:generate` — `Generated packages/shared/design-spec.schema.json from Zod v1.`؛ اختبار مطابقة الملف بالمصدر ناجح.
+- **Passed:** `pnpm test` — 95 اختبارًا في 11 ملفًا. يتضمن aliases/modes/reference errors/dependency ordering/cycles/similarity/duplicate registry، النقل الكامل عبر fake client، ثبات الأعداد والهويات، إضافة variant لنفس set، حماية symlinks، font/drift/cancellation/page/concurrency/partial failure، وmode-resolved paint changes.
+- **Passed:** `pnpm build` — shared/server/plugin؛ ملفات manifest/main/ui جاهزة. تحذيرا Zod السابقان بخصوص `@__PURE__` ما زالا ظاهرين دون تعطيل البناء.
+- **Passed:** `pnpm --filter mcp-server start --selftest` — Exit 0 وأظهر الأدوات العشرة، منها الأدوات الأربع الجديدة.
+- **Requires User Action:** `pnpm smoke:design-system` داخل Figma الحقيقي، وفحص Variables panel وText styles وخصائص المكونات وتبديل light/dark بصريًا. لم يُشغّل في هذه الجلسة ولم تُدّعَ نتيجة Figma حقيقية.
+- **Failed ثم Passed:** التشغيل الأول للاختبارات داخل sandbox منع WebSocket بـ`listen EPERM: operation not permitted 127.0.0.1`؛ أعيد التشغيل بالصلاحية المحلية المناسبة ونجح.
+- **Failed ثم Passed:** اختبار إعادة تسمية property كشف أن الـharness لم ينقل property key الجديدة إلى instances كما تفعل Figma؛ أُصلحت المحاكاة واختُبرت المحافظة على suffix دون إنشاء property إضافية. أخطاء typing الأولية عولجت، والنتيجة النهائية لـtypecheck ناجحة.
+
+مقتطف من مخرجات الاختبارات الفعلية:
+
+```text
+Test Files  11 passed (11)
+     Tests  95 passed (95)
+```
 
 ### Phase 2 — التحقق الحقيقي وإغلاق المرحلة 2026-10-26
 
@@ -373,6 +449,8 @@ $ vitest run
 
 ## Blockers / Requires User Action
 
+- **Phase 3:** المتبقي للإغلاق تجربة تبديل light/dark في ملف Figma يسمح بـmodeين. الملف الحالي أعاد `Limited to 1 modes only`. تجربة light مكتملة وPassed، ولا توجد موافقات معمارية معلقة.
+
 - لا توجد عوائق متبقية لإغلاق Phase 1.
 - إعادة تشغيل الخادم تولّد token جديدًا؛ يحتاج نسخه إلى الـPlugin مرة أخرى. الـframe التجريبي لم يُحذف.
 - D6 وD9 وD11 فقط ما زالت Proposed ومؤجلة. D7 وD8 وD12 Locked واستُخدمت في Phase 2. لا multi-client hub ولا read-only mode ولا تسجيل clients أو setup آلي.
@@ -383,6 +461,8 @@ $ vitest run
 - Node 24 LTS غير مثبت؛ لم تُشغّل الاختبارات عليه. هذا لا يغيّر نتيجة التجربة الحقيقية على البيئة الحالية.
 
 ## Dependencies Added (مع المبرر)
+
+**Phase 3: لا dependencies جديدة ولا تعديل على lockfile.**
 
 **Phase 2: لا dependencies جديدة ولا تعديل على lockfile.** استُخدم Zod 4 المثبت لتوليد JSON Schema، وPrettier المثبت لتنسيق الملف المولّد.
 
@@ -408,5 +488,5 @@ Playwright استُخدم من بيئة `webapp-testing` المثبتة مسبق
 
 ## Backlog
 
-- لا توسع خارج Phase 2. components/variants/variables/styles/images/sync/Trash/multi-session/read-only تظل للمراحل اللاحقة.
+- لا توسع خارج Phase 3. images/assets/mockups/sync/Trash/multi-session/read-only تظل للمراحل اللاحقة. components/variants/variables/styles نُفذت ضمن Phase 3.
 - تسوية drift وتغيير نوع node واستكمال الفشل الجزئي بقرارات المستخدم تبقى لمسار sync/recovery في المرحلة المحددة لها؛ لا auto-merge في Phase 2.

@@ -1,5 +1,10 @@
 import { applyInstance, findVariant } from './designSystemRenderer';
-import { applyTokenBindings, projectVariables, readIdentity } from './designSystemIdentity';
+import {
+  applyTokenBindings,
+  projectVariables,
+  readIdentity,
+  renderState,
+} from './designSystemIdentity';
 import { resolveTokenReferences, type Resolved } from '@magic-ui/shared';
 import {
   MagicUiError,
@@ -14,10 +19,11 @@ import {
   type NodeSpecification,
 } from '@magic-ui/shared';
 
-type RenderNode = FrameNode | TextNode | RectangleNode | ComponentNode | InstanceNode;
+type RenderNode =
+  FrameNode | TextNode | RectangleNode | ComponentNode | InstanceNode;
 const namespace = 'magic_ui';
 const loadedFonts = new Set<string>();
-let rendering = false;
+
 const readData = (node: BaseNode, key: string) =>
   node.getSharedPluginData(namespace, key);
 function writeData(node: BaseNode, key: string, value: string) {
@@ -112,7 +118,14 @@ export function snapshot(node: SceneNode): string {
     'componentProperties',
   ];
   for (const key of keys)
-    if (key in node)
+    if (
+      !(
+        key === 'componentPropertyDefinitions' &&
+        node.type === 'COMPONENT' &&
+        node.parent?.type === 'COMPONENT_SET'
+      ) &&
+      key in node
+    )
       properties[key] = (node as unknown as Record<string, unknown>)[key];
   // Figma can recalculate auto-layout geometry after this turn. Only owned coordinates/sizes are stable.
   let intent: {
@@ -139,6 +152,84 @@ export function snapshot(node: SceneNode): string {
   properties.parentId = node.parent?.id ?? null;
   if ('children' in node)
     properties.children = node.children.map((child) => child.id);
+  if (
+    node.type === 'TEXT' &&
+    node.textStyleId &&
+    node.textStyleId !== figma.mixed
+  )
+    for (const field of ['fontName', 'fontSize', 'lineHeight', 'letterSpacing'])
+      delete properties[field];
+  if (node.type === 'INSTANCE') {
+    const inherited = [
+      'fills',
+      'strokes',
+      'strokeWeight',
+      'cornerRadius',
+      'topLeftRadius',
+      'topRightRadius',
+      'bottomLeftRadius',
+      'bottomRightRadius',
+      'effects',
+      'opacity',
+      'layoutMode',
+      'layoutWrap',
+      'paddingTop',
+      'paddingRight',
+      'paddingBottom',
+      'paddingLeft',
+      'itemSpacing',
+      'primaryAxisAlignItems',
+      'counterAxisAlignItems',
+      'clipsContent',
+      'fillStyleId',
+      'strokeStyleId',
+      'effectStyleId',
+      'children',
+    ];
+    for (const field of inherited) delete properties[field];
+    properties.instanceOverrides = (node.overrides ?? []).map((override) => {
+      const target =
+        override.id === node.id
+          ? node
+          : node.findOne((n) => n.id === override.id);
+      return {
+        id: override.id,
+        fields: Object.fromEntries(
+          override.overriddenFields.map((field) => [
+            field,
+            target
+              ? (target as unknown as Record<string, unknown>)[field]
+              : null,
+          ]),
+        ),
+      };
+    });
+  }
+  if ('boundVariables' in node) {
+    if (
+      node.boundVariables?.topLeftRadius ||
+      node.boundVariables?.topRightRadius ||
+      node.boundVariables?.bottomLeftRadius ||
+      node.boundVariables?.bottomRightRadius
+    )
+      delete properties.cornerRadius;
+    if (
+      node.type === 'TEXT' &&
+      (node.boundVariables?.fontFamily || node.boundVariables?.fontStyle)
+    )
+      delete properties.fontName;
+    for (const [field, binding] of Object.entries(node.boundVariables ?? {}))
+      if (binding && field !== 'fills' && field !== 'strokes')
+        delete properties[field];
+    for (const field of ['fills', 'strokes']) {
+      const paints = properties[field];
+      if (Array.isArray(paints))
+        properties[field] = paints.map((p: Record<string, unknown>) => {
+          const bound = p.boundVariables as Record<string, unknown> | undefined;
+          return bound?.color ? { ...p, color: bound.color } : p;
+        });
+    }
+  }
   return canonicalJson(properties);
 }
 function assertActive(pageId: string, isCancelled: () => boolean) {
@@ -293,7 +384,8 @@ export function applyProperties(
     );
   if (
     autoParent ||
-    (['FRAME','COMPONENT','INSTANCE'].includes(node.type) && l.type === 'auto-layout') ||
+    (['FRAME', 'COMPONENT', 'INSTANCE'].includes(node.type) &&
+      l.type === 'auto-layout') ||
     node.type === 'TEXT'
   ) {
     setProperty(
@@ -319,6 +411,7 @@ export function applyProperties(
     setProperty(node, 'x', l.x);
     setProperty(node, 'y', l.y);
   }
+  if (node.type === 'INSTANCE') return;
   setPaints(node, 'fills', spec.styling.fills.map(paint));
   setPaints(node, 'strokes', spec.styling.strokes.map(paint));
   setProperty(node, 'strokeWeight', spec.styling.strokeWeight);
@@ -330,7 +423,7 @@ export async function renderDesign(
   raw: RenderDesignInput,
   isCancelled: () => boolean,
 ): Promise<RenderDesignResult> {
-  if (rendering)
+  if (renderState.busy)
     throw new MagicUiError(
       failure(
         'SESSION_BUSY',
@@ -338,7 +431,7 @@ export async function renderDesign(
         true,
       ),
     );
-  rendering = true;
+  renderState.busy = true;
   try {
     const input = renderDesignSchema.parse(raw);
     if (input.specification.projectId !== input.projectId)
@@ -370,14 +463,54 @@ export async function renderDesign(
           ),
         );
     }
-    const entries = flattenScreen(screen);
+    const entries = flattenScreen(screen, input.specification.tokens);
     for (const { specification: node } of entries) {
-      await loadSpecificationFonts(resolveTokenReferences(node,input.specification.tokens));
-      if(node.type==='component-instance') await findVariant(input.projectId,node.componentId,node.variant);
-      assertActive(input.pageId,isCancelled);
+      for (const mode of input.specification.tokens.modes)
+        await loadSpecificationFonts(
+          resolveTokenReferences(node, input.specification.tokens, mode),
+        );
+      if (node.type === 'component-instance')
+        await findVariant(input.projectId, node.componentId, node.variant);
+      assertActive(input.pageId, isCancelled);
     }
-    const variables=input.specification.tokens.values.length?await projectVariables(input.projectId):[];
-    const styles=input.specification.tokens.typography.length?(await figma.getLocalTextStylesAsync()).filter(s=>readIdentity(s,'projectId')===input.projectId):[];
+    const variables = await projectVariables(input.projectId);
+    const styles = (await figma.getLocalTextStylesAsync()).filter(
+      (s) => readIdentity(s, 'projectId') === input.projectId,
+    );
+    const referencedIds = new Set<string>();
+    const collectReferences = (value: unknown) => {
+      if (value && typeof value === 'object') {
+        if ('token' in value) referencedIds.add(String(value.token));
+        else Object.values(value).forEach(collectReferences);
+      }
+    };
+    collectReferences(screen);
+    for (const id of referencedIds)
+      if (!variables.some((v) => readIdentity(v, 'id') === id))
+        throw new MagicUiError(
+          failure('INVALID_INPUT', `Render design system first: ${id}`),
+        );
+    for (const { specification: node } of entries)
+      if (
+        node.type === 'text' &&
+        node.typography &&
+        !styles.some((s) => readIdentity(s, 'id') === node.typography)
+      )
+        throw new MagicUiError(
+          failure('INVALID_INPUT', 'Render typography styles first.'),
+        );
+    for (const style of styles)
+      try {
+        await figma.loadFontAsync(style.fontName);
+      } catch {
+        throw new MagicUiError(
+          failure(
+            'FONT_UNAVAILABLE',
+            `Font unavailable for style ${style.name}`,
+          ),
+        );
+      }
+    assertActive(input.pageId, isCancelled);
     // Only top-level screen roots are looked up; descendants are searched within that screen alone.
     const owns = (node: BaseNode) =>
       readData(node, 'projectId') === input.projectId &&
@@ -402,13 +535,16 @@ export async function renderDesign(
       );
     const existing: SceneNode[] =
       root && root.type === 'FRAME'
-        ? [root, ...ownedDescendants(root,owns)]
+        ? [root, ...ownedDescendants(root, owns)]
         : [];
     const byId = new Map<string, RenderNode>();
     const drift: { id: string; nodeId: string; reason: string }[] = [];
     for (const node of existing) {
       const id = readData(node, 'id');
-      if (byId.has(id) || !['FRAME', 'TEXT', 'RECTANGLE','INSTANCE'].includes(node.type))
+      if (
+        byId.has(id) ||
+        !['FRAME', 'TEXT', 'RECTANGLE', 'INSTANCE'].includes(node.type)
+      )
         drift.push({
           id,
           nodeId: node.id,
@@ -425,7 +561,13 @@ export async function renderDesign(
     }
     for (const entry of entries) {
       const node = byId.get(entry.id);
-      if (node && node.type !== (entry.specification.type==='component-instance'?'INSTANCE':entry.specification.type.toUpperCase()))
+      if (
+        node &&
+        node.type !==
+          (entry.specification.type === 'component-instance'
+            ? 'INSTANCE'
+            : entry.specification.type.toUpperCase())
+      )
         drift.push({
           id: entry.id,
           nodeId: node.id,
@@ -447,6 +589,7 @@ export async function renderDesign(
         nodeId: node.id,
         intent: readData(node, 'intent'),
       })),
+      input.specification.tokens,
     );
     const result: RenderDesignResult = {
       nodeCount: 0,
@@ -460,14 +603,26 @@ export async function renderDesign(
     assertActive(input.pageId, isCancelled);
     // Bounded to 500 nodes with no async gap after this last preflight check.
     for (const operation of plan.operations) {
+      assertActive(input.pageId, isCancelled);
       let node = byId.get(operation.id);
       if (!node) {
+        const source =
+          operation.specification.type === 'component-instance'
+            ? await findVariant(
+                input.projectId,
+                operation.specification.componentId,
+                operation.specification.variant,
+              )
+            : undefined;
+        assertActive(input.pageId, isCancelled);
         node =
           operation.specification.type === 'frame'
             ? figma.createFrame()
             : operation.specification.type === 'text'
               ? figma.createText()
-              : operation.specification.type==='rectangle'?figma.createRectangle():(await findVariant(input.projectId,operation.specification.componentId,operation.specification.variant)).createInstance();
+              : operation.specification.type === 'rectangle'
+                ? figma.createRectangle()
+                : source!.createInstance();
         // Persist identity immediately, even if a later Figma write fails.
         writeData(node, 'id', operation.id);
         writeData(node, 'projectId', input.projectId);
@@ -488,9 +643,33 @@ export async function renderDesign(
             parent.children.indexOf(node) !== operation.index)
         )
           parent.insertChild(operation.index, node);
-        applyProperties(node, resolveTokenReferences(operation.specification,input.specification.tokens), screen.direction);
-        if(node.type==='INSTANCE'&&operation.specification.type==='component-instance')await applyInstance(node,operation.specification,input.projectId);
-        if(variables.length||styles.length)await applyTokenBindings(node,operation.specification,input.specification.tokens,variables,styles);
+        applyProperties(
+          node,
+          resolveTokenReferences(
+            operation.specification,
+            input.specification.tokens,
+          ),
+          screen.direction,
+        );
+        if (
+          node.type === 'INSTANCE' &&
+          operation.specification.type === 'component-instance'
+        )
+          await applyInstance(
+            node,
+            operation.specification,
+            input.projectId,
+            () => assertActive(input.pageId, isCancelled),
+          );
+        assertActive(input.pageId, isCancelled);
+        if (variables.length || styles.length)
+          await applyTokenBindings(
+            node,
+            operation.specification,
+            input.specification.tokens,
+            variables,
+            styles,
+          );
         writeData(node, 'intent', operation.intent);
         writeData(node, 'hash', syncHash(operation.intent));
         writeData(node, 'specVersion', input.specification.schemaVersion);
@@ -511,23 +690,45 @@ export async function renderDesign(
         : 0;
     return result;
   } finally {
-    rendering = false;
+    renderState.busy = false;
   }
 }
 
-export async function loadSpecificationFonts(node: Resolved<NodeSpecification>) {
- if(node.type==='text') {
-  const key=canonicalJson([node.fontFamily,node.fontStyle]);
-  if(!loadedFonts.has(key)) {
-   try { await figma.loadFontAsync({family:node.fontFamily,style:node.fontStyle}); }
-   catch {throw new MagicUiError(failure('FONT_UNAVAILABLE',`Font unavailable: ${node.fontFamily} / ${node.fontStyle}. Install or select an available font explicitly.`));}
-   loadedFonts.add(key);
+export async function loadSpecificationFonts(
+  node: Resolved<NodeSpecification>,
+) {
+  if (node.type === 'text') {
+    const key = canonicalJson([node.fontFamily, node.fontStyle]);
+    if (!loadedFonts.has(key)) {
+      try {
+        await figma.loadFontAsync({
+          family: node.fontFamily,
+          style: node.fontStyle,
+        });
+      } catch {
+        throw new MagicUiError(
+          failure(
+            'FONT_UNAVAILABLE',
+            `Font unavailable: ${node.fontFamily} / ${node.fontStyle}. Install or select an available font explicitly.`,
+          ),
+        );
+      }
+      loadedFonts.add(key);
+    }
   }
- }
- if('nodes'in node)for(const child of node.nodes)await loadSpecificationFonts(child);
+  if ('nodes' in node)
+    for (const child of node.nodes) await loadSpecificationFonts(child);
 }
-function ownedDescendants(root:FrameNode,owns:(node:BaseNode)=>boolean):SceneNode[] {
- const result:SceneNode[]=[];
- const visit=(node:SceneNode)=>{if(owns(node))result.push(node);if(node.type!=='INSTANCE'&&'children'in node)node.children.forEach(visit);};
- root.children.forEach(visit);return result;
+export function ownedDescendants(
+  root: FrameNode | ComponentSetNode,
+  owns: (node: BaseNode) => boolean,
+): SceneNode[] {
+  const result: SceneNode[] = [];
+  const visit = (node: SceneNode) => {
+    if (owns(node)) result.push(node);
+    if (node.type !== 'INSTANCE' && 'children' in node)
+      node.children.forEach(visit);
+  };
+  root.children.forEach(visit);
+  return result;
 }

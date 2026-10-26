@@ -8,3 +8,5 @@ export * from './commands/designCommands.js';
 export * from './designSpecification/tokens.js';
 export * from './designSpecification/designSystemValidation.js';
 export * from './commands/designSystemCommands.js';
+
+export * from './commands/readerCommands.js';

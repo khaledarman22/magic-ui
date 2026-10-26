@@ -27,7 +27,10 @@
   ],
   "exclude": [
     "packages/plugin/src/main.ts",
+    "packages/plugin/src/figmaReader.ts",
     "packages/plugin/src/designRenderer.ts",
+    "packages/plugin/src/designSystemRenderer.ts",
+    "packages/plugin/src/designSystemIdentity.ts",
     "packages/plugin/src/pluginCommandHandlers.ts",
     "**/dist",
     "node_modules"

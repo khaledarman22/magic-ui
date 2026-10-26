@@ -1,3 +1,4 @@
+import { resolveTokenReferences, type Tokens } from './tokens.js';
 import type {
   Layout,
   NodeSpecification,
@@ -28,7 +29,10 @@ export type RenderEntry = {
   intent: string;
 };
 export type ExistingRenderNode = { id: string; nodeId: string; intent: string };
-export function flattenScreen(screen: ScreenSpecification): RenderEntry[] {
+export function flattenScreen(
+  screen: ScreenSpecification,
+  tokens?: Tokens,
+): RenderEntry[] {
   const entries: RenderEntry[] = [];
   const visit = (
     node: NodeSpecification,
@@ -38,6 +42,14 @@ export function flattenScreen(screen: ScreenSpecification): RenderEntry[] {
   ) => {
     const properties: Record<string, unknown> = { ...node };
     delete properties.nodes;
+    const unbound = {
+      x: node.layout.x,
+      y: node.layout.y,
+      fillOpacity: node.styling.fills.map((p) => p.opacity),
+      strokeOpacity: node.styling.strokes.map((p) => p.opacity),
+    };
+    if (tokens && JSON.stringify(unbound).includes('"token"'))
+      properties.resolvedUnbound = resolveTokenReferences(unbound, tokens);
     entries.push({
       id: node.id,
       parentId,
@@ -81,8 +93,9 @@ export function flattenScreen(screen: ScreenSpecification): RenderEntry[] {
 export function planRender(
   screen: ScreenSpecification,
   existing: ExistingRenderNode[],
+  tokens?: Tokens,
 ) {
-  const entries = flattenScreen(screen);
+  const entries = flattenScreen(screen, tokens);
   const byId = new Map(existing.map((node) => [node.id, node]));
   const desiredIds = new Set(entries.map((entry) => entry.id));
   return {

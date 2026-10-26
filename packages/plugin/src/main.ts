@@ -9,9 +9,11 @@ import {
   envelope,
   type MainToUi,
 } from '@magic-ui/shared';
+import { resetReaderSnapshots } from './figmaReader';
 import { executePluginCommand } from './pluginCommandHandlers';
 
 figma.showUI(__html__, { width: 360, height: 400, themeColors: true });
+let readOnly = true;
 let sessionId: string | undefined;
 const active = new Map<string, { cancelled: boolean }>();
 const post = (message: MainToUi) => {
@@ -80,6 +82,8 @@ figma.ui.onmessage = async (raw: unknown) => {
   if (incoming.type === 'ready') {
     for (const entry of active.values()) entry.cancelled = true;
     sessionId = incoming.sessionId;
+    readOnly = incoming.payload.readOnly;
+    resetReaderSnapshots();
     return;
   }
   if (incoming.sessionId !== sessionId) return;
@@ -95,6 +99,7 @@ figma.ui.onmessage = async (raw: unknown) => {
     const result = await executePluginCommand(
       incoming.payload,
       () => entry.cancelled,
+      readOnly,
     );
     post({
       kind: 'bridge',
