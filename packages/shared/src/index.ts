@@ -1,5 +1,6 @@
 export * from './protocol/constants.js';
 export * from './protocol/messages.js';
+export * from './protocol/hub.js';
 export * from './errors/errors.js';
 export * from './commands/commands.js';
 export * from './designSpecification/schema.js';

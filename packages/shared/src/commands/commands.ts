@@ -193,7 +193,9 @@ export const commandResultSchema = z.discriminatedUnion('command', [
   z
     .object({
       command: z.literal('ping'),
-      result: z.object({ alive: z.literal(true) }).strict(),
+      result: z
+        .object({ alive: z.literal(true), document: documentSchema.optional() })
+        .strict(),
     })
     .strict(),
   z

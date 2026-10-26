@@ -1,5 +1,7 @@
+import type { IncomingMessage } from 'node:http';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
+import { acceptHubPeer } from './hubPeer.js';
 import {
   commandPermissions,
   HEARTBEAT_INTERVAL_MS,
@@ -31,7 +33,7 @@ type PluginConnection = {
 };
 export class BridgeServer {
   private server: WebSocketServer | undefined;
-  private plugin: PluginConnection | undefined;
+  private readonly plugins = new Map<string, PluginConnection>();
   private readonly pending = new Map<string, PendingRequest>();
   private heartbeat: ReturnType<typeof setInterval> | undefined;
   constructor(
@@ -43,6 +45,29 @@ export class BridgeServer {
       heartbeatMs?: number;
     },
   ) {}
+  private writeOwner: string | undefined;
+  acquireWrite(owner: string) {
+    if (this.writeOwner)
+      throw new MagicUiError(
+        failure(
+          'SESSION_BUSY',
+          'Another client is writing. Retry after it completes.',
+        ),
+      );
+    this.writeOwner = owner;
+  }
+  releaseWrite(owner: string) {
+    if (this.writeOwner === owner) this.writeOwner = undefined;
+  }
+  async withWriteLock<T>(action: () => Promise<T>): Promise<T> {
+    const owner = randomUUID();
+    this.acquireWrite(owner);
+    try {
+      return await action();
+    } finally {
+      this.releaseWrite(owner);
+    }
+  }
   get readOnly() {
     return this.options.readOnly ?? false;
   }
@@ -51,28 +76,40 @@ export class BridgeServer {
       host: '127.0.0.1',
       port: this.options.port,
       maxPayload: MAX_MESSAGE_BYTES,
-      verifyClient: ({ origin }: { origin: string }) =>
-        origin === 'null' ||
-        origin === 'https://www.figma.com' ||
-        origin === 'https://figma.com',
+      verifyClient: ({
+        origin,
+        req,
+      }: {
+        origin: string;
+        req: IncomingMessage;
+      }) =>
+        (req.url === '/peer' && !origin) ||
+        (req.url !== '/peer' &&
+          (origin === 'null' ||
+            origin === 'https://www.figma.com' ||
+            origin === 'https://figma.com')),
     });
     this.server = server;
-    server.on('connection', (socket) => this.accept(socket));
+    server.on('connection', (socket, request) => {
+      if (request.url === '/peer')
+        acceptHubPeer(socket, this.options.token, this);
+      else this.accept(socket);
+    });
     await new Promise<void>((resolve, reject) => {
       server.once('listening', resolve);
       server.once('error', reject);
     });
     // Keep runtime socket errors handled without logging payloads or credentials.
     server.on('error', () => {
-      this.plugin?.socket.terminate();
+      for (const plugin of this.plugins.values()) plugin.socket.terminate();
     });
     this.heartbeat = setInterval(() => {
-      const current = this.plugin;
-      if (!current) return;
-      void this.request(current.sessionId, {
-        command: 'ping',
-        input: {},
-      }).catch(() => current.socket.terminate());
+      for (const current of this.plugins.values()) {
+        void this.request(current.sessionId, {
+          command: 'ping',
+          input: {},
+        }).catch(() => current.socket.terminate());
+      }
     }, this.options.heartbeatMs ?? HEARTBEAT_INTERVAL_MS);
     this.heartbeat.unref();
     const address = server.address();
@@ -80,11 +117,21 @@ export class BridgeServer {
       throw new Error('Bridge has no TCP address.');
     return address.port;
   }
-  status() {
+  listSessions() {
     return {
-      connected: Boolean(this.plugin),
-      sessionId: this.plugin?.sessionId ?? null,
-      document: this.plugin?.document ?? null,
+      sessions: [...this.plugins.values()].map(({ sessionId, document }) => ({
+        sessionId,
+        document,
+      })),
+    };
+  }
+  status() {
+    const sessions = this.listSessions().sessions;
+    const only = sessions.length === 1 ? sessions[0] : undefined;
+    return {
+      connected: sessions.length > 0,
+      sessionId: only?.sessionId ?? null,
+      document: only?.document ?? null,
     };
   }
   private send(socket: WebSocket, message: Envelope) {
@@ -109,7 +156,22 @@ export class BridgeServer {
     socket.on('error', () => socket.terminate());
     socket.on('close', () => {
       clearTimeout(authTimer);
-      if (this.plugin?.socket === socket) this.plugin = undefined;
+      for (const [id, plugin] of this.plugins)
+        if (plugin.socket === socket) this.plugins.delete(id);
+      for (const [id, pending] of this.pending)
+        if (pending.socket === socket) {
+          this.pending.delete(id);
+          clearTimeout(pending.timer);
+          pending.dispose();
+          pending.reject(
+            new MagicUiError(
+              failure(
+                'NOT_CONNECTED',
+                'Plugin disconnected. A write may have completed; inspect Figma before retrying.',
+              ),
+            ),
+          );
+        }
     });
     socket.on('message', (raw, binary) => {
       let message: Envelope;
@@ -145,24 +207,24 @@ export class BridgeServer {
           );
           return;
         }
-        if (this.plugin) {
+        if (this.plugins.has(message.sessionId) || this.plugins.size >= 64) {
           this.rejectConnection(
             socket,
             message,
             failure(
               'SESSION_BUSY',
-              'One Figma session is already connected. Close it before connecting another.',
+              'Duplicate session identity or session limit reached.',
             ),
           );
           return;
         }
         authenticated = true;
         clearTimeout(authTimer);
-        this.plugin = {
+        this.plugins.set(message.sessionId, {
           socket,
           sessionId: message.sessionId,
           document: message.payload.document,
-        };
+        });
         this.send(
           socket,
           envelope('ready', message.sessionId, message.correlationId, {
@@ -173,10 +235,7 @@ export class BridgeServer {
         );
         return;
       }
-      if (
-        message.sessionId !== this.plugin?.sessionId ||
-        this.plugin.socket !== socket
-      ) {
+      if (this.plugins.get(message.sessionId)?.socket !== socket) {
         socket.close(1008, 'SESSION_MISMATCH');
         return;
       }
@@ -193,6 +252,14 @@ export class BridgeServer {
         socket.close(1008, 'INVALID_MESSAGE');
         return;
       }
+      if (
+        message.type === 'result' &&
+        message.payload.command === 'ping' &&
+        message.payload.result.document
+      ) {
+        const plugin = this.plugins.get(message.sessionId);
+        if (plugin) plugin.document = message.payload.result.document;
+      }
       this.pending.delete(message.correlationId);
       clearTimeout(pending.timer);
       pending.dispose();
@@ -205,21 +272,25 @@ export class BridgeServer {
     sessionId: string,
     command: Command,
     signal?: AbortSignal,
+    requesterReadOnly = this.readOnly,
   ): Promise<CommandResult> {
-    if (this.readOnly && commandPermissions[command.command] !== 'read')
+    if (
+      (this.readOnly || requesterReadOnly) &&
+      commandPermissions[command.command] !== 'read'
+    )
       return Promise.reject(
         new MagicUiError(
           failure('PERMISSION_DENIED', 'This session is read-only.'),
         ),
       );
-    const connection = this.plugin;
-    if (!connection)
+    const connection = this.plugins.get(sessionId);
+    if (this.plugins.size === 0)
       return Promise.reject(
         new MagicUiError(
           failure('NOT_CONNECTED', 'Open Magic UI in Figma and connect.', true),
         ),
       );
-    if (connection.sessionId !== sessionId)
+    if (!connection)
       return Promise.reject(
         new MagicUiError(
           failure(
@@ -233,7 +304,10 @@ export class BridgeServer {
         new MagicUiError(failure('CANCELLED', 'Request cancelled.')),
       );
     const correlationId = randomUUID();
-    const message = envelope('command', sessionId, correlationId, command);
+    const message = {
+      ...envelope('command', sessionId, correlationId, command),
+      readOnly: this.readOnly || requesterReadOnly,
+    };
     if (Buffer.byteLength(JSON.stringify(message), 'utf8') > MAX_MESSAGE_BYTES)
       return Promise.reject(
         new MagicUiError(
@@ -296,8 +370,9 @@ export class BridgeServer {
       );
     }
     this.pending.clear();
-    this.plugin = undefined;
+    this.plugins.clear();
     const server = this.server;
+    this.server = undefined;
     if (server) {
       for (const socket of server.clients) socket.terminate();
       await new Promise<void>((resolve) => server.close(() => resolve()));

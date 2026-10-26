@@ -49,6 +49,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import {
+  commandPermissions,
+  sessionsSchema,
   connectionStatusInputSchema,
   connectionStatusSchema,
   createFrameToolSchema,
@@ -59,10 +61,10 @@ import {
   REQUEST_TIMEOUT_MS,
   type Command,
 } from '@magic-ui/shared';
-import type { BridgeServer } from './bridgeServer.js';
+import type { BridgeConnection } from '@magic-ui/shared';
 
 export function createMcpServer(
-  bridge: BridgeServer,
+  bridge: BridgeConnection,
   workspace = new DesignWorkspace(
     process.env.MAGIC_UI_WORKSPACE_ROOT ?? process.cwd(),
   ),
@@ -89,8 +91,8 @@ export function createMcpServer(
         errorCodes: [],
       },
     },
-    () => {
-      const status = connectionStatusSchema.parse(bridge.status());
+    async () => {
+      const status = connectionStatusSchema.parse(await bridge.status());
       return {
         content: [{ type: 'text', text: JSON.stringify(status) }],
         structuredContent: status,
@@ -103,7 +105,9 @@ export function createMcpServer(
     signal: AbortSignal,
   ) {
     try {
-      const response = await bridge.request(sessionId, command, signal);
+      const response = await (commandPermissions[command.command] === 'write'
+        ? bridge.withWriteLock(() => bridge.request(sessionId, command, signal))
+        : bridge.request(sessionId, command, signal));
       return {
         content: [
           { type: 'text' as const, text: JSON.stringify(response.result) },
@@ -224,7 +228,7 @@ export function createMcpServer(
         localResult(() => {
           if (extra.signal.aborted)
             throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
-          return workspace.initialize(input);
+          return bridge.withWriteLock(() => workspace.initialize(input));
         }),
     );
   server.registerTool(
@@ -313,7 +317,8 @@ export function createMcpServer(
         outputSchema: assetRecordSchema,
         annotations: writeAnnotations,
       },
-      (input) => localResult(() => assets.register(input)),
+      (input) =>
+        localResult(() => bridge.withWriteLock(() => assets.register(input))),
     );
     server.registerTool(
       'magic_ui_prepare_project',
@@ -325,26 +330,28 @@ export function createMcpServer(
         annotations: writeAnnotations,
       },
       (input, extra) =>
-        localResult(async () => {
-          const specification = await workspace.readSpecification(
-            input.projectId,
-          );
-          const response = await bridge.request(
-            input.sessionId,
-            {
-              command: 'projectLayout',
-              input: {
-                projectId: input.projectId,
-                pageId: input.pageId,
-                specification,
+        localResult(() =>
+          bridge.withWriteLock(async () => {
+            const specification = await workspace.readSpecification(
+              input.projectId,
+            );
+            const response = await bridge.request(
+              input.sessionId,
+              {
+                command: 'projectLayout',
+                input: {
+                  projectId: input.projectId,
+                  pageId: input.pageId,
+                  specification,
+                },
               },
-            },
-            extra.signal,
-          );
-          if (response.command !== 'projectLayout')
-            throw new Error('Unexpected project response.');
-          return response.result;
-        }),
+              extra.signal,
+            );
+            if (response.command !== 'projectLayout')
+              throw new Error('Unexpected project response.');
+            return response.result;
+          }),
+        ),
     );
     server.registerTool(
       'magic_ui_present_screen',
@@ -356,17 +363,19 @@ export function createMcpServer(
         annotations: writeAnnotations,
       },
       ({ sessionId, ...input }, extra) =>
-        localResult(async () => {
-          await assets.writeMockupSources(input.projectId);
-          const response = await bridge.request(
-            sessionId,
-            { command: 'presentScreen', input },
-            extra.signal,
-          );
-          if (response.command !== 'presentScreen')
-            throw new Error('Unexpected presentation response.');
-          return response.result;
-        }),
+        localResult(() =>
+          bridge.withWriteLock(async () => {
+            await assets.writeMockupSources(input.projectId);
+            const response = await bridge.request(
+              sessionId,
+              { command: 'presentScreen', input },
+              extra.signal,
+            );
+            if (response.command !== 'presentScreen')
+              throw new Error('Unexpected presentation response.');
+            return response.result;
+          }),
+        ),
     );
   }
 
@@ -656,10 +665,31 @@ export function createMcpServer(
           localResult(() => sync.trash(input, restore, extra.signal)),
       );
   }
+  server.registerTool(
+    'magic_ui_list_sessions',
+    {
+      description:
+        'List all connected Figma files and their current pages. Always pass an explicit sessionId to Figma tools; no default is chosen when multiple files are connected.',
+      inputSchema: connectionStatusInputSchema,
+      outputSchema: sessionsSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: ['NOT_CONNECTED'],
+      },
+    },
+    () => localResult(() => bridge.listSessions()),
+  );
   return server;
 }
 
-export async function listRegisteredTools(bridge: BridgeServer) {
+export async function listRegisteredTools(bridge: BridgeConnection) {
   const server = createMcpServer(bridge);
   const client = new Client({ name: 'magic-ui-selftest', version: '0.1.0' });
   const [clientTransport, serverTransport] =

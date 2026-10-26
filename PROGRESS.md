@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Phase 7 — فحص البداية فقط (2026-10-26): Requires User Action.** Phase 6 مكتملة، لكن D6 وD11 ما زالتا Proposed. أُضيف D13 كاقتراح في `docs/ARCHITECTURE.md §2`؛ تنفيذ Phase 7 ينتظر تأكيد القرارات الثلاثة وفق شروط ملف المرحلة.
+**Phase 7 — التنفيذ والتحقق الآلي وsetup المعزول مكتملان (2026-10-26).** D6 وD11 وD13 أصبحت Locked بموافقة صاحب المشروع. **Passed:** 152 اختبارًا في 19 ملفًا، وtypecheck وlint وbuild، وتشغيل setup مرتين باستخدام العملاء الحقيقيين في HOME مؤقت ومسار بمسافات. **Requires User Action — DoD #8:** الموافقة على تشغيل setup على إعدادات المستخدم الفعلية ثم تسجيل summary؛ المرحلة لم تُغلق بعد.
 
 **Phase 6 — مكتملة ومغلقة، بما فيها تجربة Figma الحقيقية DoD #8 (2026-10-26).** التنفيذ والتحقق الآلي وتجربة الصور والـmockups والـLayers: **Passed**. وافق صاحب المشروع صراحة على تأجيل تحقق Phase 5 والسماح ببدء Phase 6. تحقق Phase 5 الحقيقي يبقى **Requires User Action — مؤجل بموافقة**، ولا يُعتبر Passed.
 
@@ -21,6 +21,36 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 2026-10-26: صاحب المشروع أكد D7 وD8 وD12 وبقوا **Locked**. D7 اتعدّل لـ `setSharedPluginData` بدل `setPluginData` (السبب مكتوب في §2). تم تنفيذ Phase 2 في هذه الجلسة بدون الاعتماد على قرارات Proposed.
 
 ## Done
+
+### Phase 7 — Multi-client + setup — 2026-10-26
+
+- **Passed — القرارات:** موافقة المستخدم «موافق اعتمد وكمل» اعتمدت D6 وD11 وD13، وأصبحت Locked في §2. لا dependencies جديدة ولا تغييرات lockfile. Phase 8 (agents/skills) خارج النطاق.
+- `MultiClientBridge`: أول instance تملك loopback port تصبح hub؛ البقية تستخدم WebSocket peer channel مصادقًا بنفس token. العقود وZod schemas وواجهة transport في `packages/shared`. Plugin origins منفصلة عن `/peer` الذي يرفض browser origins؛ كل hop يربط الرد بالطلب وcorrelationId، مع validation وcancellation وحد الحجم.
+- انتقال الملكية تلقائي عند إغلاق/قتل hub؛ العمليات المتقطعة ترجع NOT_CONNECTED مع تنبيه لاحتمال اكتمال كتابة ولا تُعاد تلقائيًا. عمليات الكتابة متعددة الخطوات تحتفظ بجيل الاتصال فلا تواصل صامتًا على hub جديد. قفل كتابة مشترك على hub يحمي عمليات sync/render والكتابة المحلية وprepare/present/create من clients المتزامنة، مع SESSION_BUSY عند التعارض.
+- دعم عدة Plugin sessions حتى 64، وأداة `magic_ui_list_sessions` (الإجمالي 27 أداة عادية و16 read-only). ترجع sessionId واسم الملف والصفحة؛ metadata تُحدّث مع heartbeat خلال نحو 5 ثوانٍ. عقود أدوات Figma الحالية تحتفظ بـsessionId إلزامي حتى في جلسة واحدة؛ مع عدة جلسات يعيد status هوية مفردة null بدل اختيار ملف افتراضي. أدوات workspace المحلية لا تستهدف Figma أصلًا.
+- read-only محفوظ على مستوى كل client: الأدوات الكتابية لا تُسجّل، النقل يرفض writes، والـhub يمرر readOnly لكل command وتتحقق Main منه مستقلةً عن حالة hub. إعادة الاتصال تستعمل آخر document metadata الواردة في heartbeat.
+- D13: token عشوائي 256-bit مشترك ودائم في `~/.magic-ui/session.json`؛ نشر أول ملف كامل ذريًا عبر hard link يمنع اختلاف tokens بين التشغيلات المتزامنة. يتحقق من regular file/ownership/0600 وdirectory/0700 ويرفض symlinks والملف التالف دون استبداله. تحديث PID/port لا يغيّر token، وshutdown يحذف lease الخاصة بالعملية فقط.
+- `--rotate-token`: يتطلب توقف جميع instances؛ يفحص PID leases ويحتجز المنفذ وrotation gate قبل الاستبدال الذري، ثم يحتاج Plugin pairing من جديد. لا يطبع secrets. الانقطاع القسري أثناء rotate قد يترك `rotate.lock`؛ إجراء الفحص اليدوي موثق، ولا يُحذف ملف credentials تلقائيًا.
+- `setup.command` Bash مع منطق TypeScript داخل `installers/setup.ts`، يبدأ مباشرة بـNode دون الاعتماد على tsx قبل التثبيت. install/update/repair يعيدون التحقق والتثبيت المقفل والبناء؛ verify لا يثبت أو يبني أو يسجل. preflight لـmacOS/arch/Node>=24/git؛ pnpm أو `corepack pnpm` بدون sudo أو تغيير global shims. health check يستخدم MCP stdio حقيقيًا بوضع read-only ويفحص الأدوات وbridge ووجود sessions.
+- تسجيل رسمي للعملاء الثلاثة بعد فحص help وتحديد versions، وreadback بعد التسجيل. backup خاص 0600 باسم timestamp قبل تغيير config؛ التطابق يمنع التكرار، والتعارض يُحفظ ويُبلغ عنه. custom/legacy/JSONC configs غير المدعومة لا تُعدّل بتخمين. لا manual-config fallback مطلوب للإصدارات الحالية لأن الثلاثة توفر CLI noninteractive. setup يمرر المنفذ للـclients ويتحقق من تطابق manifest، ويطبع تعليمات import اليدوي. update لا يعمل git pull أو يمس التغييرات المحلية.
+- **Passed — DoD #2/#3:** اختبار عميلين MCP في عمليتي Node منفصلتين على نفس port، يكتبان للـfake Plugin؛ SIGKILL للـhub يعيد خطأ للطلب المعلّق، ويرقّي الناجي بنفس token، دون تكرار كتابة. اختبار مستقل بثلاث instances يستخدم PluginConnectionManager الحقيقي ويتحقق من reconnect ومن وجود hub واحدة وclient بعد الانتخاب.
+- **Passed — DoD #4:** جلستا Figma، عرض الملف/الصفحة لكل منهما، ورفض write بلا sessionId، والتوجيه الصريح لكل جلسة. اختبارات إضافية لقفل الكتابة، cancellation، token خاطئ دون تعطيل الجلسة، ورفض Main لطلب read-only رغم أن hub writable.
+- **Passed — DoD #5/#6/#7:** `tests/setup.test.ts` يبني artifacts حقيقية ثم يستخدم CLI/package-manager fixtures داخل tests فقط وHOME مؤقت. تشغيل setup مرتين من `project with spaces`، تطابق configs byte-for-byte، بقاء servers الأخرى ومحتويات backups، استكمال تسجيل جزئي بـrepair، verify دون تسجيل جديد، وNode مفقود/قديم دون تعديل جزئي.
+- **Passed — تحقق إضافي بالبرامج الحقيقية:** `node --import tsx scripts/verify-setup-sandbox.ts` — Exit 0. ينسخ المشروع وdependencies إلى `Magic UI project` وHOME مؤقت، ويشغل pnpm install/build والـsetup كاملًا مرتين مع Claude Code **2.1.310** وCodex CLI **0.163.0** وOpenCode **v2.1.4**. النتيجة: `Passed: real pnpm install/build and all three real client CLIs ran twice from a path with spaces; configs are byte-identical and unrelated servers/backups are preserved.` حُذف مجلد التجربة فقط بعد النجاح. لم تُمس configs المستخدم الفعلية.
+- **Passed — النسخة النهائية:** `pnpm typecheck` — Exit 0؛ `pnpm lint` — Exit 0: `All matched files use Prettier code style!`؛ `pnpm test` — Exit 0: `Test Files 19 passed (19)` و`Tests 152 passed (152)`، Duration `25.11s`. `pnpm build` — Exit 0 مع تحذيري Zod/Rollup المعروفين فقط. selftest العادي و`--read-only` — Exit 0: 27 و16 أداة. `git diff --check` — Exit 0 قبل إضافة هذا السجل.
+- **Passed — مراجعة أخيرة:** اختبارات setup تستخدم الآن منفذًا مؤقتًا منفصلًا حتى لو hub المستخدم شغالة على 3845. تعذّر تأكيد acquire/release لقفل peer يغلق ذلك الاتصال لتحرير ملكيته بدل ترك قفل عالق؛ SESSION_BUSY لا يقطع الاتصال. أُعيد `pnpm typecheck` و`pnpm lint` بنجاح، واختبارات الجزأين المتأثرين: `Test Files 2 passed (2)` و`Tests 5 passed (5)`، Duration `12.38s`؛ تبني اختبارات setup artifacts الحالية قبل تشغيلها.
+- **Failed ثم Passed بعد الإصلاح:** sockets أولًا أعادت `listen EPERM 127.0.0.1` ثم نجحت بصلاحية loopback. typecheck كشف typing لـverifyClient وStream وبيئة test، واختبارات credentials القديمة احتاجت عقد D13 الجديد. full suite الأولى: 147 passed و2 failed بسبب عدد الأدوات القديم وسباق فحص حدث إغلاق الجلسة؛ أُصلح المتوقع وانتظار الحدث. lint كشف تنسيق وCommonJS fixture؛ تحولت إلى ESM دون تعطيل قواعد lint. لا اختبارات أُسقطت.
+- **Requires User Action — DoD #8:** التشغيل على configs المستخدم الحقيقية لم يُنفّذ؛ موافقة القرارات الثلاثة لا تُسجّل كموافقة على هذه الخطوة المنفصلة المحددة في prompt. دليل التشغيل والمراجعة: `docs/installation/multi-client-setup.md`.
+- **Not Tested (تجربة Figma حقيقية جديدة غير منفذة ضمن هذه المرحلة):** عدة ملفات Figma Desktop في نفس الوقت وإعادة pairing بعد rotate الحقيقي. التحقق من reconnect هنا يستخدم مدير اتصال Plugin الفعلي داخل harness. Node 24 غير مثبت؛ جميع التشغيلات على Node **26.11.1** الذي يحقق شرط >=24.
+
+Summary تجربة setup المعزولة باستخدام البرامج الحقيقية (لا يُعد Summary تشغيل إعدادات المستخدم):
+
+```text
+Environment=Passed; Dependencies=Passed; Build=Passed; Selftest=Passed;
+Plugin manifest=Passed; Plugin import=Requires User Action;
+claude=Passed; codex=Passed; opencode=Passed;
+Server / tools / bridge port=Passed; Plugin connection=Requires User Action
+```
 
 ### Phase 7 — فحص البداية — 2026-10-26
 
@@ -632,7 +662,7 @@ $ vitest run
 
 ## Blockers / Requires User Action
 
-- **Phase 7:** تأكيد D6 وD11 وD13 مطلوب قبل بدء التنفيذ وفق `prompts/phase-7.md › Pre-check`؛ جميعها Proposed حاليًا.
+- **Phase 7 — DoD #8:** الموافقة على تشغيل `./setup.command install` على إعدادات المستخدم الفعلية مع backups ثم توثيق summary. تنفيذ المرحلة وDoD #1–#7 Passed؛ المرحلة غير مغلقة حتى هذه الخطوة أو استثناء صريح.
 
 - **Phase 6:** لا عوائق متبقية؛ DoD #8 **Passed** بالتجربة الحقيقية والفحص البصري والـLayers الموضحين أعلاه.
 
@@ -646,7 +676,7 @@ $ vitest run
 
 - لا توجد عوائق متبقية لإغلاق Phase 1.
 - إعادة تشغيل الخادم تولّد token جديدًا؛ يحتاج نسخه إلى الـPlugin مرة أخرى. الـframe التجريبي لم يُحذف.
-- D6 وD11 وD13 ما زالت Proposed، وتنتظر التأكيد لبدء Phase 7. D9 Locked ونُفّذ في Phase 4. لا multi-client hub ولا تسجيل clients أو setup آلي.
+- D6 وD11 وD13 أصبحت Locked ونُفّذت في Phase 7. D9 ما زال Locked ويُطبق لكل client وداخل Main. لا قرارات معمارية معلقة.
 - لا توجد عوائق متبقية لـPhase 2؛ التحقق الحقيقي والمراجعة البصرية **Passed**، والمرحلة مغلقة.
 
 ## Not Verifiable in Agent Environment
@@ -654,6 +684,8 @@ $ vitest run
 - Node 24 LTS غير مثبت؛ لم تُشغّل الاختبارات عليه. هذا لا يغيّر نتيجة التجربة الحقيقية على البيئة الحالية.
 
 ## Dependencies Added (مع المبرر)
+
+**Phase 7: لا dependencies جديدة ولا تعديل على lockfile.** استُخدمت Node APIs وws/Zod/MCP SDK المثبتة؛ installer يعمل بـNode native TypeScript قبل تثبيت dependencies.
 
 **Phase 6: لا dependencies جديدة ولا تعديل على lockfile.** SHA-256 مشتركة وSVG subset sanitizer والتحقق البنيوي للصور باستخدام JavaScript وNode APIs المتاحة؛ لا ضغط أو تحويل.
 
@@ -687,5 +719,5 @@ Playwright استُخدم من بيئة `webapp-testing` المثبتة مسبق
 
 ## Backlog
 
-- لا توسع خارج Phase 7 المطلوبة حاليًا؛ تنفيذها ينتظر القرارات. assets/mockups/project pages نُفذت في Phase 6؛ multi-session ضمن Phase 7؛ skills/agents مؤجلة لـPhase 8. sync/Trash للشاشات نُفذا في Phase 5. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
+- لا توسع خارج Phase 7؛ التنفيذ والتحقق المعزول مكتملان، وتشغيل إعدادات المستخدم ينتظر الموافقة. assets/mockups/project pages نُفذت في Phase 6؛ multi-session ضمن Phase 7؛ skills/agents مؤجلة لـPhase 8. sync/Trash للشاشات نُفذا في Phase 5. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
 - تغيير نوع node وهجرة هويته ما زالا مرفوضين دون مسار صريح؛ no auto-merge. تسوية drift والاستكمال للشاشات نُفذا في Phase 5. استكمال design-system الجزئي على مستوى token/component نُفذ في الإدخال الأحدث؛ قيد بيانات Phase 3 القديمة بدون checkpoints موثق في دليل التشغيل.

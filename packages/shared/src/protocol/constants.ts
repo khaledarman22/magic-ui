@@ -31,6 +31,7 @@ export const TOOL_NAMES = [
   'magic_ui_resume_operation',
   'magic_ui_move_to_trash',
   'magic_ui_restore_from_trash',
+  'magic_ui_list_sessions',
 ] as const;
 export const identifierSchema = z.string().min(1).max(256);
 export const tokenSchema = z.string().regex(/^[a-f0-9]{64}$/);

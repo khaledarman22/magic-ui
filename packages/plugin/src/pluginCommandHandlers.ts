@@ -108,7 +108,17 @@ export async function executePluginCommand(
         result: await renderDesign(command.input, isCancelled),
       };
     case 'ping':
-      return { command: 'ping', result: { alive: true } };
+      return {
+        command: 'ping',
+        result: {
+          alive: true,
+          document: {
+            name: figma.root.name,
+            pageId: figma.currentPage.id,
+            pageName: figma.currentPage.name,
+          },
+        },
+      };
     case 'createFrame': {
       const { pageId, name, width, height, x, y } = command.input;
       if (figma.currentPage.id !== pageId)

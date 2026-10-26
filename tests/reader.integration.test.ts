@@ -60,7 +60,7 @@ afterEach(async () => {
 });
 it('omits every write tool, marks handshake read-only and independently refuses bridge writes', async () => {
   const tools = (await client.listTools()).tools;
-  expect(tools).toHaveLength(15);
+  expect(tools).toHaveLength(16);
   expect(tools.every((t) => t._meta?.permission === 'read')).toBe(true);
   expect(tools.map((t) => t.name)).not.toContain('magic_ui_create_frame');
   expect(plugin.received.find((m) => m.type === 'ready')).toMatchObject({

@@ -114,14 +114,118 @@ it('runs production startup, MCP negotiation and frame/render round-trips over s
     });
     await plugin.disconnect();
     await client.close();
-    await vi.waitFor(async () => {
-      await expect(stat(join(directory, 'session.json'))).rejects.toMatchObject(
-        { code: 'ENOENT' },
-      );
-    });
+    expect((await stat(join(directory, 'session.json'))).mode & 0o777).toBe(
+      0o600,
+    );
+    expect(
+      sessionFileSchema.parse(
+        JSON.parse(
+          await readFile(join(directory, 'session.json'), 'utf8'),
+        ) as unknown,
+      ).token,
+    ).toBe(credentials.token);
   } finally {
     await plugin?.disconnect();
     await client.close();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+it('starts two production stdio processes on one port with one token and promotes the survivor after hub termination', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'magic-ui-processes-'));
+  const clients: Client[] = [];
+  const transports: StdioClientTransport[] = [];
+  let plugin: FakePluginClient | undefined;
+  async function start(port = 0) {
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [
+        '--import',
+        'tsx',
+        resolve('scripts/stdio-test-server.ts'),
+        directory,
+        String(port),
+      ],
+      stderr: 'pipe',
+    });
+    transport.stderr?.on('data', () => {});
+    transports.push(transport);
+    const client = new Client({ name: 'process-test', version: '1.0' });
+    clients.push(client);
+    await client.connect(transport);
+    return client;
+  }
+  try {
+    const first = await start();
+    const credentials = sessionFileSchema.parse(
+      JSON.parse(
+        await readFile(join(directory, 'session.json'), 'utf8'),
+      ) as unknown,
+    );
+    const second = await start(credentials.port);
+    plugin = new FakePluginClient(
+      `ws://127.0.0.1:${credentials.port}`,
+      credentials.token,
+    );
+    await plugin.connect();
+    for (const client of [first, second]) {
+      const result = await client.callTool({
+        name: 'magic_ui_create_frame',
+        arguments: {
+          sessionId: plugin.sessionId,
+          pageId: '0:1',
+          name: 'Process frame',
+          width: 100,
+          height: 100,
+        },
+      });
+      expect(result.isError).not.toBe(true);
+    }
+    expect(plugin.nodes.size).toBe(2);
+    plugin.dropCommands = true;
+    const pending = second.callTool({
+      name: 'magic_ui_create_frame',
+      arguments: {
+        sessionId: plugin.sessionId,
+        pageId: '0:1',
+        name: 'Interrupted process frame',
+        width: 100,
+        height: 100,
+      },
+    });
+    await vi.waitFor(() =>
+      expect(
+        plugin!.received.filter(
+          (m) => m.type === 'command' && m.payload.command === 'createFrame',
+        ),
+      ).toHaveLength(3),
+    );
+    process.kill(transports[0]!.pid!, 'SIGKILL');
+    expect(JSON.stringify((await pending).content)).toContain('NOT_CONNECTED');
+    await vi.waitFor(
+      async () => {
+        const current = sessionFileSchema.parse(
+          JSON.parse(
+            await readFile(join(directory, 'session.json'), 'utf8'),
+          ) as unknown,
+        );
+        expect(current.pid).toBe(transports[1]!.pid);
+        expect(current.token).toBe(credentials.token);
+      },
+      { timeout: 5000 },
+    );
+    await plugin.disconnect();
+    plugin.dropCommands = false;
+    await plugin.connect();
+    const result = await second.callTool({
+      name: 'magic_ui_read_node',
+      arguments: { sessionId: plugin.sessionId, nodeId: '1:1' },
+    });
+    expect(result.isError).not.toBe(true);
+    expect(plugin.nodes.size).toBe(2);
+  } finally {
+    await plugin?.disconnect();
+    await Promise.all(clients.map((client) => client.close()));
     await rm(directory, { recursive: true, force: true });
   }
 });

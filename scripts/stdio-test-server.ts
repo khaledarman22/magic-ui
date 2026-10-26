@@ -2,4 +2,7 @@
 import { startServer } from '../packages/mcp-server/src/serverRuntime.js';
 const directory = process.argv[2];
 if (!directory) throw new Error('Test session directory is required.');
-await startServer({ port: 0, sessionDirectory: directory });
+await startServer({
+  port: Number(process.argv[3] ?? 0),
+  sessionDirectory: directory,
+});

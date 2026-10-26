@@ -108,18 +108,22 @@ describe('MCP → real WebSocket bridge → fake plugin', () => {
     } finally {
       await bad.disconnect();
     }
-    expect(bridge.status().sessionId).toBe(plugin.sessionId);
+    await vi.waitFor(() =>
+      expect(bridge.status().sessionId).toBe(plugin.sessionId),
+    );
   });
-  it('rejects a second authenticated session without replacing the first', async () => {
+  it('accepts a second authenticated session without choosing a default', async () => {
     const second = new FakePluginClient(`ws://127.0.0.1:${port}`, token);
     try {
-      await expect(second.connect()).rejects.toMatchObject({
-        code: 'SESSION_BUSY',
-      });
+      await second.connect();
+      expect(bridge.listSessions().sessions).toHaveLength(2);
+      expect(bridge.status().sessionId).toBeNull();
     } finally {
       await second.disconnect();
     }
-    expect(bridge.status().sessionId).toBe(plugin.sessionId);
+    await vi.waitFor(() =>
+      expect(bridge.status().sessionId).toBe(plugin.sessionId),
+    );
   });
   it('rejects untrusted browser origins before authentication', async () => {
     const socket = new WebSocket(`ws://127.0.0.1:${port}`, {
@@ -158,7 +162,7 @@ describe('MCP → real WebSocket bridge → fake plugin', () => {
     await plugin.connect();
     const interrupted = await pending;
     expect(interrupted.isError).toBe(true);
-    expect(JSON.stringify(interrupted.content)).toContain('TIMEOUT');
+    expect(JSON.stringify(interrupted.content)).toContain('NOT_CONNECTED');
     const result = await client.callTool({
       name: TOOL_NAMES[1],
       arguments: { ...frame, sessionId: plugin.sessionId },
@@ -215,7 +219,7 @@ describe('MCP → real WebSocket bridge → fake plugin', () => {
       input: { nodeId: '1:1' },
     });
     const result = expect(pending).rejects.toMatchObject({
-      error: { code: 'TIMEOUT' },
+      error: { code: 'NOT_CONNECTED' },
     });
     await vi.waitFor(() =>
       expect(

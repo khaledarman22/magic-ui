@@ -11,7 +11,7 @@ import {
   type ExportPackageInput,
   type ExportAssetInput,
 } from '@magic-ui/shared';
-import type { BridgeServer } from './bridgeServer.js';
+import type { BridgeConnection } from '@magic-ui/shared';
 import { normalizeFigma } from './figmaNormalization.js';
 
 function check(signal: AbortSignal) {
@@ -19,7 +19,7 @@ function check(signal: AbortSignal) {
     throw new MagicUiError(failure('CANCELLED', 'Export cancelled.'));
 }
 export async function collectFigma(
-  bridge: BridgeServer,
+  bridge: BridgeConnection,
   sessionId: string,
   input: ReaderInput,
   signal: AbortSignal,
@@ -137,7 +137,7 @@ export function decodeAsset(
 const assetName = (id: string) =>
   createHash('sha256').update(id).digest('hex').slice(0, 24);
 export async function exportAsset(
-  bridge: BridgeServer,
+  bridge: BridgeConnection,
   root: string,
   input: ExportAssetInput,
   signal: AbortSignal,
@@ -165,7 +165,7 @@ export async function exportAsset(
   return { directory, files: [file], missingCount: 0 };
 }
 export async function exportDesignPackage(
-  bridge: BridgeServer,
+  bridge: BridgeConnection,
   root: string,
   input: ExportPackageInput,
   signal: AbortSignal,

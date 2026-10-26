@@ -374,3 +374,28 @@ it('blocks asset uploads, bindings, page preparation and presentations in read-o
   }
   expect(figmaHarness.createFrame).not.toHaveBeenCalled();
 });
+
+it('enforces per-request read-only even when the shared hub allows writes', async () => {
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: {
+      ...envelope('command', 'session', 'readonly-peer', {
+        command: 'createFrame',
+        input: {
+          pageId: '0:1',
+          name: 'Forbidden',
+          width: 100,
+          height: 100,
+          x: 0,
+          y: 0,
+        },
+      }),
+      readOnly: true,
+    },
+  });
+  expect(figmaHarness.createFrame).not.toHaveBeenCalled();
+  expect(replies.at(-1)).toMatchObject({
+    kind: 'bridge',
+    message: { type: 'error', payload: { code: 'PERMISSION_DENIED' } },
+  });
+});

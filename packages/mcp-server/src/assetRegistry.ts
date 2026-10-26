@@ -15,7 +15,7 @@ import {
   type AssetRecord,
 } from '@magic-ui/shared';
 import type { DesignWorkspace } from './designWorkspace.js';
-import type { BridgeServer } from './bridgeServer.js';
+import type { BridgeConnection } from '@magic-ui/shared';
 function absent(error: unknown) {
   return (
     !!error &&
@@ -342,7 +342,7 @@ export class AssetRegistry {
     );
   }
   async upload(
-    bridge: BridgeServer,
+    bridge: BridgeConnection,
     sessionId: string,
     projectId: string,
     pageId: string,

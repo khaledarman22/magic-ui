@@ -42,6 +42,7 @@ export const envelopeSchema = z.discriminatedUnion('type', [
     .object({
       ...envelopeFields,
       type: z.literal('command'),
+      readOnly: z.boolean().optional(),
       payload: commandSchema,
     })
     .strict(),

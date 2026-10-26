@@ -15,13 +15,13 @@ import {
   type SyncReport,
   type DesignSpecification,
 } from '@magic-ui/shared';
-import type { BridgeServer } from './bridgeServer.js';
+import type { BridgeConnection } from '@magic-ui/shared';
 import type { DesignWorkspace } from './designWorkspace.js';
 
 export class SyncEngine {
   private busy = false;
   constructor(
-    private bridge: BridgeServer,
+    private bridge: BridgeConnection,
     private workspace: DesignWorkspace,
     private assets = new AssetRegistry(workspace),
   ) {}
@@ -32,7 +32,7 @@ export class SyncEngine {
       );
     this.busy = true;
     try {
-      return await action();
+      return await this.bridge.withWriteLock(action);
     } finally {
       this.busy = false;
     }

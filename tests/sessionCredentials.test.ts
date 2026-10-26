@@ -11,9 +11,11 @@ import { tmpdir } from 'node:os';
 import { afterEach, beforeEach, expect, it } from 'vitest';
 import {
   generateSessionToken,
-  saveSessionCredentials,
+  loadOrCreateSessionCredentials,
+  recordHub,
+  acquireInstanceLease,
+  rotateSessionToken,
 } from '../packages/mcp-server/src/sessionCredentials.js';
-import { sessionFileSchema } from '../packages/shared/src/index.js';
 let directory: string;
 beforeEach(async () => {
   directory = await mkdtemp(join(tmpdir(), 'magic-ui-credentials-'));
@@ -21,43 +23,54 @@ beforeEach(async () => {
 afterEach(async () => {
   await rm(directory, { recursive: true, force: true });
 });
-it('generates unique secrets, writes 0600 credentials and cleans up only its own session', async () => {
-  const token = generateSessionToken();
-  expect(token).toMatch(/^[a-f0-9]{64}$/);
-  expect(generateSessionToken()).not.toBe(token);
-  const removeFirst = await saveSessionCredentials(directory, token, 3845);
-  const path = join(directory, 'session.json');
-  expect((await stat(path)).mode & 0o777).toBe(0o600);
-  expect(
-    sessionFileSchema.parse(JSON.parse(await readFile(path, 'utf8')) as unknown)
-      .token,
-  ).toBe(token);
-  const removeSecond = await saveSessionCredentials(
-    directory,
-    generateSessionToken(),
-    3846,
+it('publishes one private persistent token for concurrent starts and preserves it through hub changes', async () => {
+  expect(generateSessionToken()).toMatch(/^[a-f0-9]{64}$/);
+  const credentials = await Promise.all(
+    Array.from({ length: 12 }, () =>
+      loadOrCreateSessionCredentials(directory, 3845),
+    ),
   );
-  await removeFirst();
-  expect(await stat(path)).toBeDefined();
-  await removeSecond();
-  await expect(stat(path)).rejects.toMatchObject({ code: 'ENOENT' });
+  expect(new Set(credentials.map((c) => c.token)).size).toBe(1);
+  const token = credentials[0]!.token;
+  const release = await acquireInstanceLease(directory);
+  await recordHub(directory, token, 3846);
+  await release();
+  expect((await loadOrCreateSessionCredentials(directory, 3845)).token).toBe(
+    token,
+  );
+  expect((await stat(join(directory, 'session.json'))).mode & 0o777).toBe(
+    0o600,
+  );
 });
-it('replaces a session-file symlink without modifying its target', async () => {
+it('refuses a symbolic link or invalid credentials without replacing user data', async () => {
   const target = join(directory, 'keep.txt');
   await writeFile(target, 'user data');
-  await symlink(target, join(directory, 'session.json'));
-  const cleanup = await saveSessionCredentials(
-    directory,
-    generateSessionToken(),
-    3845,
-  );
+  const path = join(directory, 'session.json');
+  await symlink(target, path);
+  await expect(
+    loadOrCreateSessionCredentials(directory, 3845),
+  ).rejects.toThrow();
   expect(await readFile(target, 'utf8')).toBe('user data');
-  await cleanup();
+  await rm(path);
+  await writeFile(path, '{broken', { mode: 0o600 });
+  await expect(
+    loadOrCreateSessionCredentials(directory, 3845),
+  ).rejects.toThrow();
+  expect(await readFile(path, 'utf8')).toBe('{broken');
 });
 it('refuses a symbolic-link session directory', async () => {
-  const link = join(directory, 'linked');
-  await symlink(directory, link);
-  await expect(
-    saveSessionCredentials(link, generateSessionToken(), 3845),
-  ).rejects.toThrow('real directory');
+  const path = join(directory, 'linked');
+  await symlink(directory, path);
+  await expect(loadOrCreateSessionCredentials(path, 3845)).rejects.toThrow(
+    'real directory',
+  );
+});
+it('refuses rotation while any instance is live, then rotates without exposing the token', async () => {
+  const first = await loadOrCreateSessionCredentials(directory, 43879);
+  const release = await acquireInstanceLease(directory);
+  await expect(rotateSessionToken(directory)).rejects.toThrow('Stop all');
+  await release();
+  await rotateSessionToken(directory);
+  const next = await loadOrCreateSessionCredentials(directory, 43879);
+  expect(next.token).not.toBe(first.token);
 });

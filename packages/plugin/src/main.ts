@@ -99,7 +99,7 @@ figma.ui.onmessage = async (raw: unknown) => {
     const result = await executePluginCommand(
       incoming.payload,
       () => entry.cancelled,
-      readOnly,
+      readOnly || incoming.readOnly === true,
     );
     post({
       kind: 'bridge',

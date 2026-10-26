@@ -109,7 +109,7 @@ export class PluginConnectionManager {
       if (this.stopped) return;
       if (event.code === 1008) {
         this.block(
-          'Connection rejected. Check the token and close any other Magic UI plugin, then reconnect.',
+          'Connection rejected. Check the token and session identity, then reconnect.',
         );
         return;
       }
@@ -122,6 +122,12 @@ export class PluginConnectionManager {
     };
   }
   forward(message: Envelope) {
+    if (
+      message.type === 'result' &&
+      message.payload.command === 'ping' &&
+      message.payload.result.document
+    )
+      this.document = message.payload.result.document;
     if (
       message.sessionId !== this.sessionId ||
       !this.requests.delete(message.correlationId)
