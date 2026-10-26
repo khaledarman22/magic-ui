@@ -4,7 +4,7 @@
 
 **Phase 9 — التنفيذ والتحقق الآلي مكتملان؛ ليست v1 complete (2026-10-26).** المتبقي: benchmark Figma الحقيقي 100/1000/5000 node (DoD #7)، تحقق Phase 8 التفاعلي في العملاء وتجربة login، وتجارب Phases 3/4/5 المؤجلة أدناه. Passed: 169 اختبارًا/24 ملفًا، typecheck وlint وbuild وbenchmarks وclean clone setup/test. audit النهائي صفر advisories. لا موافقة معمارية معلقة.
 
-**Phase 8 — التنفيذ والتحقق الآلي مكتملان؛ التحقق التفاعلي DoD #6/#7 ما زال Requires User Action (2026-10-26).** أُضيفت 20 skill و3 adapters للـagents و5 workflows ومحرك `magic_ui_validate_design`؛ 28 أداة عادية و17 read-only. اختبارات المشروع: **Passed — 162 اختبارًا في 21 ملفًا**. اكتشاف Codex للـ20 skill وOpenCode للـ3 agents وفحص إعدادات جلستي Codex reader/validation بالعملاء الحقيقيين داخل sandbox: **Passed**. لم تُشغّل جلسة نموذج للتجربة النهائية ولم تُثبّت إضافات Phase 8 على configs المستخدم الفعلية.
+**Phase 8 — التنفيذ والتحقق الآلي مكتملان؛ التحقق التفاعلي DoD #6/#7 ما زال Requires User Action (2026-10-26).** أُضيفت 20 skill و3 adapters للـagents و5 workflows ومحرك `magic_ui_validate_design`؛ اختبارها الأصلي: **Passed — 162 اختبارًا في 21 ملفًا**. اكتشاف Codex للـ20 skill وOpenCode للـ3 agents وفحص جلستي Codex reader/validation داخل sandbox: **Passed**. لاحقًا نُفّذ setup repair الحقيقي وأثبت Claude CLI استدعاء `design-agent`؛ التجربة الكاملة داخل Figma واختبار reader في كل client ما زالا معلقين.
 
 **Phase 7 — مكتملة ومغلقة، بما فيها تشغيل setup على جهاز المستخدم بموافقته (2026-10-26).** D6 وD11 وD13 Locked. تسجيل Magic UI الحقيقي في Claude Code وCodex وOpenCode والتحقق من backups وبقاء إعدادات السيرفرات الأخرى وhealth check: **Passed**. **Requires User Action (خطوة تشغيل يدوية):** فتح/إعادة فتح Plugin في Figma وربطها؛ لا جلسة Plugin كانت متصلة وقت الفحص، ولا يُعد اتصالها Passed.
 
@@ -332,7 +332,7 @@ magic_ui_export_design_package
 
 - **Phase 9:** لا تنفيذ آلي متبقٍ. benchmark Figma الحقيقي Requires User Action؛ باقي قبول المراحل السابقة كما يلي، دون تحويلها إلى Passed.
 
-- Phase 8: التنفيذ والتحقق الآلي مكتملان. المتبقي DoD #6/#7 التفاعلي؛ لا جلسة نموذج أو smoke تنتظر إدخالًا. Phase 6 وPhase 7 مغلقتان.
+- Phase 8: التنفيذ والتحقق الآلي مكتملان. setup الحقيقي وsmoke لاستدعاء Claude `design-agent` Passed؛ المتبقي DoD #6/#7 التفاعلي داخل Figma وباقي العملاء. Phase 6 وPhase 7 مغلقتان.
 
 - Phase 5: تجربة Figma الحقيقية بـ`pnpm smoke:sync` ما زالت Requires User Action. لا توجد عملية smoke شغالة أو جلسة تنتظر إدخالًا.
 
@@ -340,6 +340,14 @@ magic_ui_export_design_package
 - لا توجد عملية smoke منتظرة؛ الخادم خرج Exit 0 وcredentials الخاصة بالتجربة نُظفت. لم يُحذف أي node أو variable للمستخدم.
 
 ## Verification Log
+
+### Phase 8 — إصلاح تثبيت Claude الحقيقي 2026-10-26
+
+- **Failed ثم Passed — اكتشاف design-agent:** المستخدم شغّل `claude --agent design-agent` من مشروع `snaabble` فأعاد Claude `--agent 'design-agent' not found`. الفحص وجد `~/.claude/agents/design-agent.md` وskill `design-planning` غير مثبتين.
+- **Passed — setup الحقيقي:** `./setup.command repair` — Exit 0. Claude 2.1.310: تسجيل `magic-ui` الأصلي مطابق وبقي دون كتابة، `magic-ui-reader` سُجّل بالـCLI الرسمي مع backup/readback؛ الـ20 skills وثلاثة agent files ظهرت Passed في مواضع Claude الافتراضية. setup أعاد build/selftest (29 tools) وhealth check؛ لم يُطبع token. لا استبدال لملفات مستخدم موجودة.
+- **Passed — تشغيل agent في Claude CLI:** `claude --agent design-agent --print 'Reply READY only. Do not use tools or modify files.'` — Exit 0، خرج `READY`. يثبت اكتشاف role وتشغيل جلسة نموذج قصيرة، دون ادعاء استخدام MCP/Plugin أو نجاح شاشة login. يلزم بدء جلسة Claude جديدة في `snaabble` لتلقط ملفات user-scope المثبتة.
+- **Passed — تحققات الجلسة:** بعد repair، `pnpm typecheck` — Exit 0؛ `pnpm lint` — Exit 0 (`All matched files use Prettier code style!`)؛ `pnpm test` — Exit 0: `Test Files 24 passed (24)`، `Tests 169 passed (169)`، Duration `31.91s`. لم تُشغّل تجربة Figma ضمن هذه المجموعة.
+- **Requires User Action:** فتح/ربط Plugin في Figma والتأكد من الصلاحيات التفاعلية لـreader/validation في كل client، ثم تجربة login مع Figma result. DoD #6/#7 الكاملان لم يتحولا إلى Passed.
 
 ### Phase 9 — التحقق النهائي 2026-10-26
 
@@ -744,7 +752,7 @@ $ vitest run
 
 - **Phase 9 DoD #7:** تشغيل `pnpm bench:figma` بعد بناء/فتح Plugin في scratch file؛ يختار المستخدم session ويكتب BENCH، وينشئ 6100 node محتفظًا بها. لم يُشغّل هذا المسار الحقيقي؛ help فقط Passed. التقرير لا يعلن v1 complete بسبب هذا البند والبنود السابقة أدناه.
 
-- **Phase 8:** DoD #6/#7 Requires User Action كما هو موضح أعلاه. إضافات Phase 8 لم تُطبّق على configs المستخدم الحقيقية؛ المطلوب تشغيل repair وإعادة فتح العملاء/Plugin، ثم فحص الـreader وتجربة login. لا موافقة معمارية معلقة.
+- **Phase 8:** DoD #6/#7 Requires User Action كما هو موضح أعلاه. setup repair الحقيقي طُبّق، واستدعاء Claude design-agent Passed. المطلوب إعادة فتح العملاء/Plugin، وفحص صلاحيات reader داخل جلسة فعلية في كل client، وتجربة login حقيقية في Figma. لا موافقة معمارية معلقة.
 
 - **Phase 7:** لا عائق إغلاق متبقٍ؛ DoD #8 Passed بالتشغيل الحقيقي الموافق عليه. فتح Plugin وربطها في Figma خطوة تشغيل يدوية ما زالت Requires User Action وليست تحقق اتصال ناجحًا.
 
