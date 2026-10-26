@@ -1,0 +1,38 @@
+{
+  "environment": {
+    "node": "v26.11.1",
+    "cpu": "Apple M2",
+    "cpuCount": 8,
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "workspaceTests": [
+    " Test Files  24 passed (24)",
+    "      Tests  169 passed (169)",
+    "   Duration  27.72s (transform 410ms, setup 0ms, import 2.83s, tests 48.64s, environment 1ms)"
+  ],
+  "cleanInstall": [
+    " Test Files  24 passed (24)",
+    "      Tests  169 passed (169)",
+    "   Duration  32.26s (transform 444ms, setup 0ms, import 2.91s, tests 50.03s, environment 1ms)",
+    "Passed: clean Git clone without node_modules; real setup install + verify + pnpm test. Retained sandbox/evidence: /private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-clean-3mKHaw"
+  ],
+  "audit": {
+    "advisories": {},
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 96,
+      "devDependencies": 208,
+      "optionalDependencies": 81,
+      "totalDependencies": 306
+    }
+  },
+  "performanceResult": "tests/performance/results/2026-10-26T12-25-48.211Z-current.json",
+  "manualFigma": "Requires User Action"
+}

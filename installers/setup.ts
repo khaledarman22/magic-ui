@@ -1,12 +1,18 @@
+import { inspectClientDiscovery } from './clientDiscovery.ts';
+import { installAgentArtifacts } from './agentArtifacts.ts';
 import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import {
   existsSync,
   readFileSync,
+  readdirSync,
   mkdirSync,
   openSync,
   closeSync,
   writeFileSync,
   lstatSync,
+  renameSync,
+  unlinkSync,
 } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -59,6 +65,53 @@ function backup(path: string) {
     closeSync(descriptor);
   }
 }
+function replacePrivateConfig(path: string, contents: string) {
+  const temporary = `${path}.magic-ui-${randomUUID()}.tmp`;
+  const descriptor = openSync(temporary, 'wx', 0o600);
+  try {
+    try {
+      writeFileSync(descriptor, contents);
+    } finally {
+      closeSync(descriptor);
+    }
+    renameSync(temporary, path);
+  } finally {
+    if (existsSync(temporary)) unlinkSync(temporary);
+  }
+}
+function preserveCodexConfiguration(
+  path: string,
+  original: string,
+  serverName: string,
+) {
+  // The official CLI can normalize unrelated servers (e.g. drop args=[]).
+  // Keep only its canonical new table and restore all pre-existing text.
+  // This is scoped to the new entry; existing entries never reach this branch.
+  const generated = readFileSync(path, 'utf8');
+  const sections = generated
+    .split(/(?=^\[)/m)
+    .filter((section) =>
+      new RegExp(`^\\[mcp_servers\\.${serverName}(?:\\.env)?\\]\\s*\\n`).test(
+        section,
+      ),
+    );
+  if (
+    sections.length !== 2 ||
+    !sections.some((section) =>
+      section.startsWith(`[mcp_servers.${serverName}]`),
+    ) ||
+    !sections.some((section) =>
+      section.startsWith(`[mcp_servers.${serverName}.env]`),
+    )
+  )
+    throw new Error(
+      'Unsupported Codex CLI output; original configuration restored.',
+    );
+  replacePrivateConfig(
+    path,
+    `${original}\n\n${sections.map((section) => section.trimEnd()).join('\n\n')}\n`,
+  );
+}
 function configPaths(client: string) {
   if (client === 'codex')
     return [
@@ -83,24 +136,27 @@ function configPaths(client: string) {
 }
 const bridgePort = process.env.MAGIC_UI_BRIDGE_PORT ?? '3845';
 const entrypoint = join(root, 'packages/mcp-server/dist/index.js');
-function matches(command: unknown, args: unknown) {
+function matches(command: unknown, args: unknown, readOnly: boolean) {
   return (
     command === process.execPath &&
-    JSON.stringify(args) === JSON.stringify([entrypoint])
+    JSON.stringify(args) ===
+      JSON.stringify([entrypoint, ...(readOnly ? ['--read-only'] : [])])
   );
 }
 async function register(
   client: 'claude' | 'codex' | 'opencode',
+  serverName = 'magic-ui',
+  readOnly = false,
   readback = false,
-) {
+): Promise<boolean> {
   const version = run(client, ['--version']);
   if (version.status !== 0) {
     report(
-      client,
+      serverName === 'magic-ui' ? client : `${client} reader`,
       'Requires User Action',
       'CLI unavailable; install it and rerun repair.',
     );
-    return;
+    return false;
   }
   if (!readback)
     report(
@@ -115,7 +171,7 @@ async function register(
     const getHelp = checked(client, ['mcp', 'get', '--help']);
     if (!getHelp.includes('--json'))
       throw new Error('Installed Codex lacks verified JSON inspection.');
-    const get = run(client, ['mcp', 'get', 'magic-ui', '--json']);
+    const get = run(client, ['mcp', 'get', serverName, '--json']);
     if (get.status === 0) existing = object(JSON.parse(get.stdout) as unknown);
     else {
       const listHelp = checked(client, ['mcp', 'list', '--help']);
@@ -129,7 +185,7 @@ async function register(
         listed.some((entry: unknown) => typeof object(entry).name !== 'string')
       )
         throw new Error('Codex returned an invalid MCP server list.');
-      if (listed.some((entry: unknown) => object(entry).name === 'magic-ui'))
+      if (listed.some((entry: unknown) => object(entry).name === serverName))
         throw new Error('Existing Magic UI entry could not be inspected.');
     }
   } else {
@@ -143,9 +199,9 @@ async function register(
         client === 'claude'
           ? object(config.mcpServers)
           : object(object(config.mcp).servers);
-      if ('magic-ui' in servers) existing = object(servers['magic-ui']);
+      if (serverName in servers) existing = object(servers[serverName]);
       // Older OpenCode uses mcp.<name>; preserve it and ask for explicit migration.
-      if (client === 'opencode' && 'magic-ui' in object(config.mcp))
+      if (client === 'opencode' && serverName in object(config.mcp))
         throw new Error(
           'Legacy OpenCode Magic UI entry requires manual migration.',
         );
@@ -157,29 +213,38 @@ async function register(
     const same =
       client === 'opencode'
         ? JSON.stringify(existing.command) ===
-          JSON.stringify([process.execPath, entrypoint])
-        : matches(transport.command, transport.args);
+          JSON.stringify([
+            process.execPath,
+            entrypoint,
+            ...(readOnly ? ['--read-only'] : []),
+          ])
+        : matches(transport.command, transport.args, readOnly);
     const configuredEnvironment = object(
       client === 'opencode' ? existing.environment : transport.env,
     );
     const environmentMatches =
       (configuredEnvironment.MAGIC_UI_BRIDGE_PORT ?? '3845') === bridgePort;
-    if (!same || !environmentMatches || existing.enabled === false) {
+    if (
+      !same ||
+      !environmentMatches ||
+      existing.enabled === false ||
+      existing.disabled === true
+    ) {
       report(
-        client,
+        serverName === 'magic-ui' ? client : `${client} reader`,
         'Requires User Action',
         'Magic UI already exists with different launch settings. Preserved; review it before replacing.',
       );
-      return;
+      return false;
     }
     report(
-      client,
+      serverName === 'magic-ui' ? client : `${client} reader`,
       'Passed',
       readback
         ? 'Magic UI registered through the official CLI and verified.'
         : 'Matching Magic UI registration already exists; no write.',
     );
-    return;
+    return true;
   }
   if (readback)
     throw new Error(
@@ -187,11 +252,11 @@ async function register(
     );
   if (verify) {
     report(
-      client,
+      serverName === 'magic-ui' ? client : `${client} reader`,
       'Requires User Action',
       'Magic UI is not registered; run install or repair.',
     );
-    return;
+    return false;
   }
   const args =
     client === 'claude'
@@ -200,7 +265,7 @@ async function register(
           'add',
           '--scope',
           'user',
-          'magic-ui',
+          serverName,
           '--',
           process.execPath,
           entrypoint,
@@ -210,12 +275,13 @@ async function register(
             'mcp',
             'add',
             '--global',
-            'magic-ui',
+            serverName,
             '--',
             process.execPath,
             entrypoint,
           ]
-        : ['mcp', 'add', 'magic-ui', '--', process.execPath, entrypoint];
+        : ['mcp', 'add', serverName, '--', process.execPath, entrypoint];
+  if (readOnly) args.push('--read-only');
   args.splice(
     args.indexOf('--'),
     0,
@@ -235,9 +301,21 @@ async function register(
   paths.forEach(backup);
   if (client === 'codex')
     mkdirSync(dirname(paths[0]!), { recursive: true, mode: 0o700 });
-  checked(client, args);
+  const originalCodex =
+    client === 'codex' && existsSync(paths[0]!)
+      ? readFileSync(paths[0]!, 'utf8')
+      : undefined;
+  try {
+    checked(client, args);
+    if (originalCodex !== undefined)
+      preserveCodexConfiguration(paths[0]!, originalCodex, serverName);
+  } catch (error) {
+    if (originalCodex !== undefined)
+      replacePrivateConfig(paths[0]!, originalCodex);
+    throw error;
+  }
   // Read back via the same inspection path. Failure is reported, never silently counted as registered.
-  await register(client, true);
+  return register(client, serverName, readOnly, true);
 }
 async function health() {
   const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
@@ -366,7 +444,23 @@ async function main() {
   );
   for (const client of ['claude', 'codex', 'opencode'] as const) {
     try {
-      await register(client);
+      const writableRegistered = await register(client);
+      const readerRegistered = await register(client, 'magic-ui-reader', true);
+      if (writableRegistered && readerRegistered) {
+        const artifacts = installAgentArtifacts({ root, client, verify });
+        for (const item of artifacts)
+          report(`${client} ${item.item}`, item.state, item.detail);
+        const discovery = await inspectClientDiscovery(
+          client,
+          root,
+          readdirSync(join(root, 'agent/skills')),
+        );
+        report(
+          `${client} ${discovery.item}`,
+          discovery.state,
+          discovery.detail,
+        );
+      }
     } catch (error) {
       report(
         client,

@@ -1,0 +1,3 @@
+name = "validation-agent"
+description = "Validate Magic UI structure and hand repair findings to design-agent."
+developer_instructions = "Read {{RULES_PATH}}. Follow {{WORKFLOWS_PATH}}/validate-design.md. Use the magic-ui-reader MCP entry. Return findings to the coordinator for any repair."

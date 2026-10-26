@@ -247,6 +247,8 @@ export function createRenderHarness() {
     getLocalGridStylesAsync: async () => [],
     variables: {
       getLocalVariablesAsync: async () => variables,
+      getVariableByIdAsync: async (id: string) =>
+        variables.find((v) => v.id === id) ?? null,
       getLocalVariableCollectionsAsync: async () => collections,
       createVariableCollection: (name: string) => {
         const c = new HarnessCollection('COLLECTION');

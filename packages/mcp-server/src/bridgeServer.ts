@@ -272,6 +272,7 @@ export class BridgeServer {
     sessionId: string,
     command: Command,
     signal?: AbortSignal,
+    correlationId: string = randomUUID(),
     requesterReadOnly = this.readOnly,
   ): Promise<CommandResult> {
     if (
@@ -303,7 +304,12 @@ export class BridgeServer {
       return Promise.reject(
         new MagicUiError(failure('CANCELLED', 'Request cancelled.')),
       );
-    const correlationId = randomUUID();
+    if (this.pending.has(correlationId))
+      return Promise.reject(
+        new MagicUiError(
+          failure('SESSION_BUSY', 'Correlation ID is already in flight.'),
+        ),
+      );
     const message = {
       ...envelope('command', sessionId, correlationId, command),
       readOnly: this.readOnly || requesterReadOnly,

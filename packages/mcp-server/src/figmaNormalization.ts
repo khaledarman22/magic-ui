@@ -553,7 +553,14 @@ export function normalizeFigma(data: FigmaExtraction, projectId: string) {
       );
       return;
     }
-    const parsed = nodeSpecificationSchema.safeParse(candidate);
+    // Children have already passed this same validator. Validate the frame's
+    // own fields once instead of recursively cloning every descendant again.
+    const frame = candidate as { type?: string; nodes?: NodeSpecification[] };
+    const children = frame.type === 'frame' ? frame.nodes : undefined;
+    const shallow = children && children.length <= 500;
+    const parsed = nodeSpecificationSchema.safeParse(
+      shallow ? { ...obj(candidate), nodes: [] } : candidate,
+    );
     if (!parsed.success) {
       report(
         'node',
@@ -563,6 +570,7 @@ export function normalizeFigma(data: FigmaExtraction, projectId: string) {
       );
       return;
     }
+    if (shallow && parsed.data.type === 'frame') parsed.data.nodes = children;
     return parsed.data;
   };
   const components: ComponentSpecification[] = [];

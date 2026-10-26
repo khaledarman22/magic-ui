@@ -1,4 +1,4 @@
-# Phase 7 — Multi-client and macOS setup
+# Multi-client setup — Phases 7 and 8
 
 D6, D11 and D13 were confirmed on 2026-10-26. No additional dependencies.
 
@@ -27,7 +27,7 @@ Verified on 2026-10-26 against the actual installed clients:
 
 The Codex syntax also matches [official MCP documentation](https://learn.chatgpt.com/docs/extend/mcp). Local `--help` and disposable-HOME CLI runs are the primary verification for all three clients. No hand-edited config fallback is needed for these supported versions: each supplies a noninteractive registration CLI. Unsupported CLI variants, JSONC/legacy OpenCode configuration, custom Claude configuration paths and custom OpenCode config overrides are preserved and reported for manual review; setup does not guess their format or silently migrate them. Missing clients are reported as Requires User Action.
 
-Before registration, each existing config is backed up to a timestamped `.magic-ui-backup-*` file created with mode 0600. Matching registrations are left unchanged. A Magic UI entry with different command, arguments, port or disabled state is preserved and reported for review. Other servers are never removed. The setup does not install agents or skills (Phase 8).
+Before registration, each existing config is backed up to a timestamped `.magic-ui-backup-*` file created with mode 0600. Matching registrations are left unchanged. A Magic UI entry with different command, arguments, port or disabled state is preserved and reported for review. Other servers are never removed. Codex absence is confirmed with `codex mcp list --json`, so a trusted project path containing `magic-ui` is not mistaken for registration. Since the Codex CLI can normalize unrelated entries (including dropping `args = []`), setup keeps its newly generated Magic UI tables and atomically restores all original configuration text around them. Unsupported output or a failed registration restores the original snapshot; the timestamped backup remains available. Phase 8 additionally registers `magic-ui-reader` with `--read-only`, then installs absent skills and client-specific agents. Existing user artifacts are preserved and conflicts are reported. See [client compatibility](../skills/client-compatibility.md) for formats and the standalone Codex reader adapter.
 
 ## Plugin and multiple files
 
@@ -60,9 +60,29 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
+pnpm skills:lint
 pnpm --filter mcp-server start --selftest
 pnpm --filter mcp-server start --read-only --selftest
 node --import tsx scripts/verify-setup-sandbox.ts
+node --import tsx scripts/verify-agent-clients.ts
 ```
 
 `tests/setup.test.ts` uses test-only client/package-manager fixtures and real MCP startup in a temporary HOME and copied project path containing spaces. It checks duplicate registration, backup contents, interrupted registration repair, verify mode, and missing/old Node. The separate `verify-setup-sandbox.ts` copies the project and dependencies and runs the **real** pnpm install/build and all three installed CLIs twice against disposable configurations. It checks byte-identical configs after rerun, other server entries and backups; it deletes only its temporary directory on success and retains it for inspection on failure. This is separate from applying setup to the user's real configuration, which requires explicit approval for Phase 7 DoD #8.
+
+## Phase 8 agent installation and checks
+
+Each new MCP entry receives its own backup before CLI registration. Skills are copied to the documented discovery roots; support files remain with each skill, and shared rules link to this checkout. No user skill or agent is overwritten, including during update/repair. `verify` reports missing or divergent content without creating it.
+
+Setup performs model-free discovery where the installed client exposes it: Codex app-server `skills/list` and OpenCode `debug agents`. Claude catalog inspection remains manual. Native discovery does not prove that a model selected a skill or that a live reader tool pool is isolated; complete the interactive checklist in the compatibility guide.
+
+Codex reader and validation use separate standalone sessions because custom subagents inherit the parent's MCP servers. From the repository, with an existing output directory:
+
+```bash
+node installers/launch-codex-reader.ts --check figma-reader-agent /absolute/output-directory
+node installers/launch-codex-reader.ts figma-reader-agent /absolute/output-directory
+node installers/launch-codex-reader.ts validation-agent /absolute/output-directory
+```
+
+`--check` verifies effective MCP configuration and the read-only tool allowlist without a model call. It does not write the user's config. The launcher fails closed for MCP names that cannot be safely represented in this CLI's dotted override syntax.
+
+`magic_ui_validate_design` reports `passed`, `failed`, `warnings` and `unverified` for the live document or requested subtree. It resolves image and variable references through Figma APIs, reads missing-font status, checks component registries/identities and instances, and checks layout and text clipping bounds. Fixed-size text's internal glyph overflow and visual comparison remain unverified. An absent dependency outside a subtree is unverified rather than incorrectly reported deleted. Findings never authorize automatic repair; use the validation workflow to return them to design-agent.

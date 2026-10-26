@@ -4,15 +4,35 @@ import type {
   NodeSpecification,
   ScreenSpecification,
 } from './schema.js';
+// Bounded cache of escaped property names, never values or complete intents.
+const encodedKeys = new Map<string, string>();
+function encodeKey(key: string): string {
+  const cached = encodedKeys.get(key);
+  if (cached !== undefined) return cached;
+  const encoded = JSON.stringify(key);
+  if (key.length <= 128 && encodedKeys.size < 256)
+    encodedKeys.set(key, encoded);
+  return encoded;
+}
 export function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== 'object')
     return JSON.stringify(value) ?? 'null';
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  // Append directly: per-property callback arrays dominated measured planning.
+  let result = '';
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index++) {
+      if (index) result += ',';
+      // Preserve Array.map/join semantics for sparse arrays.
+      if (index in value) result += canonicalJson(value[index]);
+    }
+    return `[${result}]`;
+  }
   const object = value as Record<string, unknown>;
-  return `{${Object.keys(object)
-    .sort()
-    .map((key) => `${JSON.stringify(key)}:${canonicalJson(object[key])}`)
-    .join(',')}}`;
+  for (const key of Object.keys(object).sort()) {
+    if (result) result += ',';
+    result += `${encodeKey(key)}:${canonicalJson(object[key])}`;
+  }
+  return `{${result}}`;
 }
 // Non-cryptographic sync fingerprint; exact snapshots are also retained for drift checks.
 export function syncHash(value: string): string {

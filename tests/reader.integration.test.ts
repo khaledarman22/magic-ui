@@ -20,6 +20,7 @@ import { FakePluginClient } from '../scripts/fake-plugin-client.js';
 import { createRenderHarness } from './figmaRenderHarness.js';
 import {
   readerChunkSchema,
+  designValidationReportSchema,
   extractionSchema,
   exportResultSchema,
   designSpecificationSchema,
@@ -60,7 +61,7 @@ afterEach(async () => {
 });
 it('omits every write tool, marks handshake read-only and independently refuses bridge writes', async () => {
   const tools = (await client.listTools()).tools;
-  expect(tools).toHaveLength(16);
+  expect(tools).toHaveLength(18);
   expect(tools.every((t) => t._meta?.permission === 'read')).toBe(true);
   expect(tools.map((t) => t.name)).not.toContain('magic_ui_create_frame');
   expect(plugin.received.find((m) => m.type === 'ready')).toMatchObject({
@@ -234,4 +235,70 @@ it('reassembles an asset larger than the bridge limit without corrupting bytes',
         m.payload.input.cursor,
     ).length,
   ).toBeGreaterThan(1);
+});
+it('validates live evidence over MCP through the read-only Plugin path without mutations', async () => {
+  const frame = h.api.createFrame();
+  frame.clipsContent = true;
+  frame.absoluteBoundingBox = { x: 0, y: 0, width: 100, height: 100 };
+  const text = h.api.createText();
+  text.hasMissingFont = true;
+  text.textAutoResize = 'NONE';
+  text.absoluteBoundingBox = { x: 90, y: 10, width: 30, height: 20 };
+  text.boundVariables = {
+    fontSize: { type: 'VARIABLE_ALIAS', id: 'missing-variable' },
+  };
+  text.fills = [{ type: 'IMAGE', imageHash: 'missing-image' }];
+  frame.appendChild(text);
+  const writes = h.writes;
+  const result = await client.callTool({
+    name: 'magic_ui_validate_design',
+    arguments: { sessionId: plugin.sessionId, nodeId: frame.id },
+  });
+  expect(result.isError).not.toBe(true);
+  const report = designValidationReportSchema.parse(result.structuredContent);
+  expect(report.failed.map((i) => i.code)).toEqual(
+    expect.arrayContaining([
+      'MISSING_FONT',
+      'TEXT_OUTSIDE_CLIP',
+      'VARIABLE_MISSING',
+      'IMAGE_MISSING',
+    ]),
+  );
+  expect(report.unverified.map((i) => i.code)).toContain(
+    'VISUAL_COMPARISON_UNAVAILABLE',
+  );
+  expect(h.writes).toBe(writes);
+  expect(h.api.loadFontAsync).not.toHaveBeenCalled();
+});
+it('finds deleted component registry targets even when no owned nodes remain', async () => {
+  h.document.setSharedPluginData(
+    'magic_ui',
+    'design-system:deleted-project',
+    JSON.stringify({
+      projectId: 'deleted-project',
+      components: [
+        {
+          id: 'button',
+          name: 'Button',
+          category: 'control',
+          nodeId: '9:99',
+          properties: [],
+          variants: [],
+          dependencies: [],
+          usage: [],
+          version: 1,
+        },
+      ],
+    }),
+  );
+  const writes = h.writes;
+  const result = await client.callTool({
+    name: 'magic_ui_validate_design',
+    arguments: { sessionId: plugin.sessionId },
+  });
+  const report = designValidationReportSchema.parse(result.structuredContent);
+  expect(report.failed.map((i) => i.code)).toContain(
+    'COMPONENT_TARGET_MISSING',
+  );
+  expect(h.writes).toBe(writes);
 });

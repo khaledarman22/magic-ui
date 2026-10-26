@@ -33,7 +33,10 @@ it('runs production startup, MCP negotiation and frame/render round-trips over s
       directory,
     ],
     stderr: 'pipe',
-    env: { MAGIC_UI_WORKSPACE_ROOT: await realpath(directory) },
+    env: {
+      MAGIC_UI_WORKSPACE_ROOT: await realpath(directory),
+      MAGIC_UI_LOG_LEVEL: 'debug',
+    },
   });
   let stderr = '';
   transport.stderr?.on('data', (chunk: Buffer) => {
@@ -67,7 +70,7 @@ it('runs production startup, MCP negotiation and frame/render round-trips over s
       arguments: {
         sessionId: plugin.sessionId,
         pageId: '0:1',
-        name: 'Stdio frame',
+        name: credentials.token,
         width: 320,
         height: 200,
       },
@@ -112,8 +115,15 @@ it('runs production startup, MCP negotiation and frame/render round-trips over s
       unchanged: 7,
       mapping: firstRender.mapping,
     });
+    await client.callTool({
+      name: 'magic_ui_read_node',
+      arguments: { sessionId: plugin.sessionId, nodeId: 'missing' },
+    });
     await plugin.disconnect();
     await client.close();
+    expect(stderr).not.toContain(credentials.token);
+    expect(stderr).toContain('"event":"tool"');
+    expect(stderr).toContain('"failed":true');
     expect((await stat(join(directory, 'session.json'))).mode & 0o777).toBe(
       0o600,
     );

@@ -118,6 +118,7 @@ export function validateDesignSystem(
     )
       fail(['tokens', token.id], 'Semantic tokens require aliases.');
   }
+  let hasTokenReferences = false;
   const checkReferences = (
     value: unknown,
     path: (string | number)[],
@@ -125,6 +126,7 @@ export function validateDesignSystem(
   ) => {
     if (!value || typeof value !== 'object') return;
     if ('token' in value) {
+      hasTokenReferences = true;
       const token = spec.tokens.values.find((t) => t.id === value.token);
       const expected =
         key === 'color'
@@ -301,7 +303,9 @@ export function validateDesignSystem(
       ),
     ),
   );
-  for (const mode of spec.tokens.modes) {
+  // Literal values were already checked by the enclosing Zod parse.
+  // Only token references require a second parse after resolution.
+  for (const mode of hasTokenReferences ? spec.tokens.modes : []) {
     try {
       for (const p of spec.pages)
         for (const s of p.screens)

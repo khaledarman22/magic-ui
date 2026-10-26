@@ -3,12 +3,7 @@ import {
   validateDesignSystem,
   componentWarnings,
 } from './designSystemValidation.js';
-import {
-  tokensSchema,
-  tokenReferenceSchema,
-  resolveToken,
-  resolveTokenReferences,
-} from './tokens.js';
+import { tokensSchema, tokenReferenceSchema, resolveToken } from './tokens.js';
 import { MagicUiError, failure } from '../errors/errors.js';
 
 export const stableIdSchema = z
@@ -232,12 +227,8 @@ export const designSpecificationSchema = z
       for (const mode of spec.tokens.modes)
         for (const token of spec.tokens.values)
           resolveToken(spec.tokens, token.id, mode);
-      for (const mode of spec.tokens.modes)
-        resolveTokenReferences(
-          { pages: spec.pages, components: spec.components },
-          spec.tokens,
-          mode,
-        );
+      // validateDesignSystem resolves and validates all referenced node values.
+      // Here validate even unused token aliases, without cloning the node tree again.
     } catch (error) {
       ctx.addIssue({
         code: 'custom',

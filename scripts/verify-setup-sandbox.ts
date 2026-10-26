@@ -1,3 +1,4 @@
+import { isolateOpenCodeService } from './clientSandbox.js';
 // Integration harness: real installed CLIs and pnpm, confined to a disposable HOME and project copy.
 import {
   mkdtemp,
@@ -21,6 +22,7 @@ await mkdir(home);
 for (const item of [
   'setup.command',
   'installers',
+  'agent',
   'packages',
   'node_modules',
   'package.json',
@@ -48,7 +50,7 @@ const contents = [
   JSON.stringify({
     mcpServers: { keep: { type: 'stdio', command: '/usr/bin/true', args: [] } },
   }),
-  '[mcp_servers.keep]\ncommand = "/usr/bin/true"\n',
+  '[mcp_servers.keep]\ncommand = "/usr/bin/true"\nargs = []\n\n[projects."/trusted/magic-ui"]\ntrust_level = "trusted"\n',
   JSON.stringify({
     mcp: { servers: { keep: { type: 'local', command: ['/usr/bin/true'] } } },
   }),
@@ -96,6 +98,7 @@ async function run() {
     assert.match(output, new RegExp(`Passed: ${client}:`));
   return output;
 }
+const stopService = await isolateOpenCodeService(env, project);
 try {
   process.stdout.write(`Sandbox: ${temporary}\n`);
   await run();
@@ -105,6 +108,10 @@ try {
   await run();
   const second = await Promise.all(
     configs.map((path) => readFile(path, 'utf8')),
+  );
+  assert(
+    second[1]!.startsWith(contents[1]!),
+    'Codex must preserve all original text, including empty args and project trust.',
   );
   assert.deepEqual(
     second,
@@ -117,11 +124,7 @@ try {
     const backups = (await readdir(dirname(path))).filter((name) =>
       name.startsWith(path.split('/').at(-1)! + '.magic-ui-backup-'),
     );
-    assert.equal(
-      backups.length,
-      1,
-      'One backup before the first registration; none on rerun',
-    );
+    assert.equal(backups.length, 2, 'One backup per new server; none on rerun');
   }
   const claude = JSON.parse(second[0]!) as { mcpServers: { keep: unknown } };
   assert.deepEqual(claude.mcpServers.keep, {
@@ -143,8 +146,10 @@ try {
   process.stdout.write(
     'Passed: real pnpm install/build and all three real client CLIs ran twice from a path with spaces; configs are byte-identical and unrelated servers/backups are preserved.\n',
   );
+  stopService();
   await rm(temporary, { recursive: true, force: true });
 } catch (error) {
+  stopService();
   process.stderr.write(`Sandbox retained for diagnosis: ${temporary}\n`);
   throw error;
 }

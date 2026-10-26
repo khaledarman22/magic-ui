@@ -102,7 +102,13 @@ export function acceptHubPeer(
     const controller = new AbortController();
     active.set(message.correlationId, controller);
     void bridge
-      .request(message.sessionId, message.command, controller.signal, readOnly)
+      .request(
+        message.sessionId,
+        message.command,
+        controller.signal,
+        message.correlationId,
+        readOnly,
+      )
       .then(
         (result) => send({ ...base, type: 'response', result }),
         (error: unknown) =>

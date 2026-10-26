@@ -1,4 +1,14 @@
+import { Observability } from './observability.js';
+import { performanceReportSchema } from '@magic-ui/shared';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { AssetRegistry } from './assetRegistry.js';
+import { validateFigmaDesign } from './designValidation.js';
+import { collectFigma } from './figmaExport.js';
+import {
+  extractionSchema,
+  validateLiveDesignToolSchema,
+  designValidationReportSchema,
+} from '@magic-ui/shared';
 import {
   registerAssetSchema,
   assetRecordSchema,
@@ -64,15 +74,27 @@ import {
 import type { BridgeConnection } from '@magic-ui/shared';
 
 export function createMcpServer(
-  bridge: BridgeConnection,
+  sourceBridge: BridgeConnection,
   workspace = new DesignWorkspace(
     process.env.MAGIC_UI_WORKSPACE_ROOT ?? process.cwd(),
   ),
+  observability = new Observability(),
 ) {
+  const bridge = observability.bridge(sourceBridge);
   const assets = new AssetRegistry(workspace);
   const sync = new SyncEngine(bridge, workspace, assets);
   const server = new McpServer({ name: 'magic-ui', version: '0.1.0' });
-  server.registerTool(
+  const registerTool: typeof server.registerTool = (name, config, callback) => {
+    // The SDK's conditional callback tuple depends on each generic input schema.
+    // Forward that exact tuple unchanged; instrumentation never inspects inputs.
+    const invoke = callback as (
+      ...args: unknown[]
+    ) => CallToolResult | Promise<CallToolResult>;
+    const wrapped = ((...args: unknown[]) =>
+      observability.tool(name, () => invoke(...args))) as typeof callback;
+    return server.registerTool(name, config, wrapped);
+  };
+  registerTool(
     'magic_ui_get_connection_status',
     {
       description:
@@ -137,7 +159,7 @@ export function createMcpServer(
     'INTERNAL_ERROR',
   ];
   if (!bridge.readOnly)
-    server.registerTool(
+    registerTool(
       'magic_ui_create_frame',
       {
         description:
@@ -159,7 +181,7 @@ export function createMcpServer(
       ({ sessionId, ...input }, extra) =>
         execute(sessionId, { command: 'createFrame', input }, extra.signal),
     );
-  server.registerTool(
+  registerTool(
     'magic_ui_read_node',
     {
       description:
@@ -205,7 +227,7 @@ export function createMcpServer(
     }
   }
   if (!bridge.readOnly)
-    server.registerTool(
+    registerTool(
       'magic_ui_initialize_project',
       {
         description:
@@ -231,7 +253,7 @@ export function createMcpServer(
           return bridge.withWriteLock(() => workspace.initialize(input));
         }),
     );
-  server.registerTool(
+  registerTool(
     'magic_ui_validate_design_spec',
     {
       description:
@@ -254,7 +276,7 @@ export function createMcpServer(
       localResult(() => validateDesignSpecification(specification)),
   );
   if (!bridge.readOnly)
-    server.registerTool(
+    registerTool(
       'magic_ui_render_design',
       {
         description:
@@ -308,7 +330,7 @@ export function createMcpServer(
       idempotentHint: true,
       openWorldHint: false,
     };
-    server.registerTool(
+    registerTool(
       'magic_ui_register_asset',
       {
         description:
@@ -320,7 +342,7 @@ export function createMcpServer(
       (input) =>
         localResult(() => bridge.withWriteLock(() => assets.register(input))),
     );
-    server.registerTool(
+    registerTool(
       'magic_ui_prepare_project',
       {
         description:
@@ -353,7 +375,7 @@ export function createMcpServer(
           }),
         ),
     );
-    server.registerTool(
+    registerTool(
       'magic_ui_present_screen',
       {
         description:
@@ -386,7 +408,7 @@ export function createMcpServer(
     openWorldHint: false,
   };
   if (!bridge.readOnly)
-    server.registerTool(
+    registerTool(
       'magic_ui_render_design_system',
       {
         description:
@@ -420,7 +442,7 @@ export function createMcpServer(
           }),
         ),
     );
-  server.registerTool(
+  registerTool(
     'magic_ui_find_component',
     {
       description:
@@ -456,7 +478,7 @@ export function createMcpServer(
         };
       }),
   );
-  server.registerTool(
+  registerTool(
     'magic_ui_read_components',
     {
       description:
@@ -473,7 +495,7 @@ export function createMcpServer(
     ({ sessionId, ...input }, extra) =>
       execute(sessionId, { command: 'readComponents', input }, extra.signal),
   );
-  server.registerTool(
+  registerTool(
     'magic_ui_read_variables',
     {
       description:
@@ -498,7 +520,7 @@ export function createMcpServer(
     magic_ui_read_styles: 'styles',
   } as const;
   for (const [name, scope] of Object.entries(readTools))
-    server.registerTool(
+    registerTool(
       name,
       {
         description: `Read Figma ${scope} without document writes. Returns a JSON fragment and nextCursor; repeat the identical scope with that cursor, concatenate data, then parse JSON. read_page accepts a page or subtree nodeId.`,
@@ -527,7 +549,7 @@ export function createMcpServer(
         ),
     );
   const exportRoot = workspace.allowedRoot;
-  server.registerTool(
+  registerTool(
     'magic_ui_export_asset',
     {
       description:
@@ -544,7 +566,7 @@ export function createMcpServer(
     (input, extra) =>
       localResult(() => exportAsset(bridge, exportRoot, input, extra.signal)),
   );
-  server.registerTool(
+  registerTool(
     'magic_ui_export_design_package',
     {
       description:
@@ -571,7 +593,7 @@ export function createMcpServer(
   ] as const) {
     const write = name === 'magic_ui_apply_changes';
     if (write && bridge.readOnly) continue;
-    server.registerTool(
+    registerTool(
       name,
       {
         description: write
@@ -612,7 +634,7 @@ export function createMcpServer(
     );
   }
   if (!bridge.readOnly) {
-    server.registerTool(
+    registerTool(
       'magic_ui_resume_operation',
       {
         description:
@@ -646,7 +668,7 @@ export function createMcpServer(
         ),
     );
     for (const restore of [false, true])
-      server.registerTool(
+      registerTool(
         restore ? 'magic_ui_restore_from_trash' : 'magic_ui_move_to_trash',
         {
           description: restore
@@ -665,7 +687,7 @@ export function createMcpServer(
           localResult(() => sync.trash(input, restore, extra.signal)),
       );
   }
-  server.registerTool(
+  registerTool(
     'magic_ui_list_sessions',
     {
       description:
@@ -685,6 +707,66 @@ export function createMcpServer(
       },
     },
     () => localResult(() => bridge.listSessions()),
+  );
+  registerTool(
+    'magic_ui_validate_design',
+    {
+      description:
+        'Read and structurally validate a Figma document or subtree: components, layout, clipped text bounds, fonts, instances, variable references and image assets. Returns passed, failed, warnings and unverified; visual comparison is always unverified. Does not mutate Figma.',
+      inputSchema: validateLiveDesignToolSchema,
+      outputSchema: designValidationReportSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: sharedErrors,
+      },
+    },
+    (input, extra) =>
+      localResult(async () => {
+        const text = await collectFigma(
+          bridge,
+          input.sessionId,
+          {
+            scope: input.nodeId ? 'page' : 'document',
+            ...(input.nodeId ? { nodeId: input.nodeId } : {}),
+            format: 'PNG',
+            scale: 1,
+            includeValidation: true,
+          },
+          extra.signal,
+        );
+        return validateFigmaDesign(
+          extractionSchema.parse(JSON.parse(text) as unknown),
+          input.nodeId ?? 'document',
+        );
+      }),
+  );
+  registerTool(
+    'magic_ui_get_performance_report',
+    {
+      description:
+        'Read bounded process-local timing and failure counters. Bridge latency includes Plugin execution; no document mutations.',
+      inputSchema: connectionStatusInputSchema,
+      outputSchema: performanceReportSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: [],
+      },
+    },
+    () => localResult(() => observability.report()),
   );
   return server;
 }

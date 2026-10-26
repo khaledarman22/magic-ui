@@ -2,7 +2,11 @@
 
 ## Current Phase
 
-**Phase 7 — التنفيذ والتحقق الآلي وsetup المعزول مكتملان (2026-10-26).** D6 وD11 وD13 أصبحت Locked بموافقة صاحب المشروع. **Passed:** 152 اختبارًا في 19 ملفًا، وtypecheck وlint وbuild، وتشغيل setup مرتين باستخدام العملاء الحقيقيين في HOME مؤقت ومسار بمسافات. **Requires User Action — DoD #8:** الموافقة على تشغيل setup على إعدادات المستخدم الفعلية ثم تسجيل summary؛ المرحلة لم تُغلق بعد.
+**Phase 9 — التنفيذ والتحقق الآلي مكتملان؛ ليست v1 complete (2026-10-26).** المتبقي: benchmark Figma الحقيقي 100/1000/5000 node (DoD #7)، تحقق Phase 8 التفاعلي في العملاء وتجربة login، وتجارب Phases 3/4/5 المؤجلة أدناه. Passed: 169 اختبارًا/24 ملفًا، typecheck وlint وbuild وbenchmarks وclean clone setup/test. audit النهائي صفر advisories. لا موافقة معمارية معلقة.
+
+**Phase 8 — التنفيذ والتحقق الآلي مكتملان؛ التحقق التفاعلي DoD #6/#7 ما زال Requires User Action (2026-10-26).** أُضيفت 20 skill و3 adapters للـagents و5 workflows ومحرك `magic_ui_validate_design`؛ 28 أداة عادية و17 read-only. اختبارات المشروع: **Passed — 162 اختبارًا في 21 ملفًا**. اكتشاف Codex للـ20 skill وOpenCode للـ3 agents وفحص إعدادات جلستي Codex reader/validation بالعملاء الحقيقيين داخل sandbox: **Passed**. لم تُشغّل جلسة نموذج للتجربة النهائية ولم تُثبّت إضافات Phase 8 على configs المستخدم الفعلية.
+
+**Phase 7 — مكتملة ومغلقة، بما فيها تشغيل setup على جهاز المستخدم بموافقته (2026-10-26).** D6 وD11 وD13 Locked. تسجيل Magic UI الحقيقي في Claude Code وCodex وOpenCode والتحقق من backups وبقاء إعدادات السيرفرات الأخرى وhealth check: **Passed**. **Requires User Action (خطوة تشغيل يدوية):** فتح/إعادة فتح Plugin في Figma وربطها؛ لا جلسة Plugin كانت متصلة وقت الفحص، ولا يُعد اتصالها Passed.
 
 **Phase 6 — مكتملة ومغلقة، بما فيها تجربة Figma الحقيقية DoD #8 (2026-10-26).** التنفيذ والتحقق الآلي وتجربة الصور والـmockups والـLayers: **Passed**. وافق صاحب المشروع صراحة على تأجيل تحقق Phase 5 والسماح ببدء Phase 6. تحقق Phase 5 الحقيقي يبقى **Requires User Action — مؤجل بموافقة**، ولا يُعتبر Passed.
 
@@ -21,6 +25,45 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 2026-10-26: صاحب المشروع أكد D7 وD8 وD12 وبقوا **Locked**. D7 اتعدّل لـ `setSharedPluginData` بدل `setPluginData` (السبب مكتوب في §2). تم تنفيذ Phase 2 في هذه الجلسة بدون الاعتماد على قرارات Proposed.
 
 ## Done
+
+### Phase 9 — Performance + Security + Docs — 2026-10-26
+
+- قُرئت قواعد المشروع وPhase 9 وأقسام القرارات والأمان والتشغيل والتقرير الأصلي §40. طلب المستخدم تنفيذ Phase 9 مع إبقاء Phase 8 التفاعلية معلقة؛ لا ادعاء إغلاقها. حُفظت تعديلات Phase 8 السابقة للجلسة.
+- لا قرار Locked تغير. قياس 100/1000/5000/10000 node بدفعات صالحة حتى 500 يحافظ على حدود العقد؛ لا رفع للحدود لإظهار benchmark وهمي.
+- تحسينات بعد القياس: حذف validation/resolution المتكرر للقيم literal، فحص normalization للـframe دون إعادة فحص الأبناء الذين اجتازوا بالفعل، وتحسين canonical serialization مع حفظ snapshots حرفيًا. ملفات baseline والمراحل الوسيطة محفوظة؛ تشغيل متزامن مع typecheck موثق كقياس noisy ولا يُستخدم وحده لاستنتاج التحسن.
+- أداة أداء read-only وlogger بمستويات stderr، IDs مولدة على tool/command وتُحفظ عبر peer/hub/Plugin. لا payloads أو error text في logs. اختبار correlation collision يمنع استبدال طلب معلّق.
+- **Failed ثم Passed — audit:** البداية 3 moderate و2 critical advisory entries في أدوات الاختبار. Vitest رُفع إلى 4.1.12 لإصلاح advisories وإزالة tinypool؛ لا runtime dependency جديدة. audit النهائي Exit 0 وكل مستويات vulnerabilities = 0؛ الدليل docs/security/audit-before.json وaudit-after.json.
+- **Failed ثم Passed:** أول suite بعد التحديث نجح 166/167، والفشل الوحيد توقع 17 أداة قراءة بدل 18 بعد إضافة performance report. بعد التصحيح وإضافة اختبارات الأمان: 169/169 Passed في 24 ملفًا، وكذلك في clone نظيف.
+
+### Phase 8 — Agents + Skills + Workflows — 2026-10-26
+
+- **Passed — Pre-check:** قُرئت `AGENTS.md` و`PROGRESS.md` و`prompts/phase-8.md`؛ Phase 7 مغلقة، وD9/D11 Locked. حُفظت تعديلات Phase 7 الموجودة قبل الجلسة. لا قرارات معمارية جديدة ولا dependencies جديدة.
+- **Passed — توافق العملاء:** `docs/skills/client-compatibility.md` يوثق المصادر الرسمية وCLI help للإصدارات Claude Code 2.1.310، Codex 0.163.0 وOpenCode 2.1.4. OpenCode يستخدم permissions الخاصة بـV2؛ Codex custom subagents تورث MCP ولا تستطيع عزله بملف role. لذلك design-agent native، والـreader/validation لهما standalone launcher منفصل ضمن البديل المسموح في البرومبت، وليس ادعاء عزل داخل parent قابل للكتابة. يحجب كل MCP entries المكتشفة، ويثبت reader بـ`--read-only` وallowlist وoutput root، ويتحقق بـlist/get قبل إطلاق جلسة read-only؛ `--check` لا يشغّل نموذجًا. لا تغيير لملف إعدادات المستخدم بواسطة launcher.
+- **Passed — المحتوى:** القواعد المشتركة وحدها في `agent/AGENTS.md`. عشرون `SKILL.md` بأوصاف اكتشاف وأقسام when/inputs/prerequisites/steps/outputs/validation/errors/related؛ كل الأدوات المذكورة موجودة في selftest. خمسة workflows تشير إلى skills؛ مراجع React وFlutter قصيرة للـhandoff فقط. البحث وتوليد الصور يوضحان غياب الأداة ولا يختلقان نتائج. لا code generator ولا visual diff engine.
+- **Passed — validation:** أداة read-only جديدة `magic_ui_validate_design`، وعقود التقرير/الأدلة في shared. تقرأ مستندًا أو subtree عبر القارئ الحقيقي، وتفحص component registry/IDs والtargets المحذوفة، layout/fill-parent، حدود النص بالنسبة للقص، hasMissingFont، mainComponent، variable aliases وimage hashes عبر Figma APIs، ووسم missing asset الفعلي. التقارير تحتوي passed/failed/warnings/unverified. المقارنة البصرية دائمًا unverified؛ glyph overflow للنص الثابت، الدوران، الأجداد خارج النطاق والبيانات الناقصة لا تتحول إلى نجاح. المصادر الخارجية لا تُعد مفقودة لمجرد عدم وجودها في subtree. التقرير يصرّح بحدود القراءة المتتابعة مع تعديلات المستخدم المتزامنة.
+- **Passed — setup:** يسجّل `magic-ui-reader` منفصلًا بالـCLI الرسمي مع backup/readback، ولا يثبّت adapters إذا تعذر تأكيد التسجيل. ينسخ الناقص من skills/agents دون استبدال ملفات المستخدم، ويبلغ عن التعارضات. يرفض توجيه التثبيت عبر symlinks المستخدم، مع دعم aliases macOS القياسية `/var` و`/tmp`. verify لا ينشئ artifacts. Codex reader roles خارج catalog الموروث، ويستخدمها launcher؛ Claude/OpenCode لديهما allowlist/permissions إضافية.
+- **Passed — discovery دون نموذج:** setup يفحص Codex عبر app-server `skills/list`، وOpenCode عبر JSON من `debug agents`. أظهر فحص native 20 skill وثلاثة agents. OpenCode 2.1.4 قد يعيد `[]` أثناء warming؛ retry واحدة بعد 250ms للحالة الفارغة فقط. sandbox يستخدم منفذ خدمة مستقل ويوقف خدمته في النهاية. Claude CLI لا يوفر catalog صالحًا لهذا الفحص؛ بقي التحقق التفاعلي Requires User Action.
+- **Passed — الاختبارات:** fixtures لكل أنواع المشاكل، وMCP → WebSocket → Plugin handlers الحقيقي داخل harness يثبت كشف المشاكل دون mutations أو تحميل fonts. يتضمن حالة حذف جميع component nodes مع بقاء registry. اختبارات setup تمر مرتين من مسار به مسافات، وتحافظ على skill معدلة وservers الأخرى، وتؤكد `--read-only` للentries الثلاثة وrepair/verify. linter يرفض أسماء أدوات غير موجودة ويراجع الروابط والأقسام وعدد الـskills.
+- **تعارض موثق:** جدول ARCHITECTURE §5 يحتوي أسماء تخطيطية غير منفذة مثل `magic_ui_get_validation_report`. لم تُخترع في skills؛ الأداة الجديدة تعيد التقرير مباشرة، وselftest هو المرجع الفعلي. اقتراح تسوية الجدول موثق في compatibility guide، دون توسيع Phase 8 بأدوات تخزين تقارير غير مطلوبة.
+- **Requires User Action — DoD #6/#7:** تطبيق setup repair للنسخة الجديدة على البيئة الفعلية بعد مراجعتها، وإعادة فتح Plugin والعملاء؛ التحقق من discovery وصلاحيات reader داخل جلسة فعلية في كل client، ثم تجربة “Create a simple login screen using Magic UI” وتسجيل Figma result. فحص config وcatalog آليًا لا يُعتبر تجربة agent فعلية ولا إغلاقًا للمرحلة.
+
+### Phase 7 — التثبيت الحقيقي وإغلاق DoD #8 — 2026-10-26
+
+- **Passed — الموافقة:** رد المستخدم «موافق» أذن صراحةً بتشغيل `./setup.command install` على إعداداته الفعلية مع backups. لا موافقة أخرى معلقة على التثبيت.
+- **Passed — DoD #8:** تشغيل setup الحقيقي انتهى Exit 0 بعد الإصلاح أدناه: environment وpnpm install/build وselftest (27 أداة) وmanifest، وتسجيل/قراءة Magic UI في Claude Code 2.1.310 وCodex CLI 0.163.0 وOpenCode v2.1.4. health check الحقيقي نجح مع 16 أداة read-only واستعلام bridge مصادق.
+- **Passed:** `./setup.command verify` — Exit 0، والتسجيلات الثلاثة مطابقة دون كتابة جديدة. Install/build بحالة **Not Tested (verify لا يعيدهما)**؛ كانا Passed في install الحقيقي.
+- **Failed ثم Passed:** المحاولة الأولى سجلت Claude وOpenCode، وتوقفت خطوة Codex لأن فحصًا نصيًا قديمًا اعتبر مسار trusted project يحتوي `magic-ui` تسجيلًا مسبقًا. استُبدل بفحص `codex mcp list --json` بعد التحقق من `--help`. أُضيف regression للـtrusted project path، ثم نجح استكمال التسجيل دون تكرار الآخرين.
+- **Failed ثم Passed — مقارنة configs:** CLI Codex 0.163.0 حذف `args = []` من server آخر أثناء serialization. استُعيد كل نص الإعدادات الأصلية من backup مع إبقاء جداول Magic UI المولّدة بالـCLI فقط، وحُفظت نسخة 0600 إضافية للحالة بعد CLI قبل الإصلاح. تحقق TOML مستقل أثبت أن جميع قيم config الأصلية عادت، مع إضافة Magic UI فقط. أصبح installer يطبق هذه الحماية تلقائيًا بعد CLI، ويستعيد الأصل عند فشل التسجيل أو شكل خرج غير مدعوم؛ ليس هناك استبدال تسجيل CLI بأوامر متخيلة.
+- **Passed — backups/الحفاظ على الإعدادات:** مقارنة مستقلة لـJSON/TOML مع backups الأصلية أثبتت بقاء كل servers الأخرى: Claude عدد 0، Codex عدد 2، OpenCode عدد 2. كل backup بصلاحية 0600، ولم تُطبع أسرار أو token. الملفات: `~/.claude.json.magic-ui-backup-2026-10-26T11-32-51.126Z-36417`؛ `~/.codex/config.toml.magic-ui-backup-2026-10-26T11-34-19.166Z-37673`؛ `~/.config/opencode/opencode.json.magic-ui-backup-2026-10-26T11-32-52.381Z-36417`.
+- **Passed:** typecheck وlint بعد الإصلاحات. اختبار setup المعزول يحاكي تطبيع CLI الجانبي ويتحقق من حفظ نص Codex الأصلي كاملًا؛ تشغيله المنفرد: 2/2 Passed في 12.28s. **Passed — المجموعة النهائية:** `pnpm test` — Exit 0: `Test Files 19 passed (19)` و`Tests 152 passed (152)`، Duration `26.15s`. `node --import tsx scripts/verify-setup-sandbox.ts` أُعيد على النسخة النهائية — Exit 0؛ تشغيلان بالـCLIs الحقيقية، وحفظ نص Codex الأصلي حرفيًا بما فيه args الفارغة وtrusted project، وتطابق configs بعد الإعادة. `git diff --check` — Exit 0.
+- **Requires User Action:** summary يطبع Plugin import/pairing كخطوة يدوية؛ لا جلسة Plugin متصلة وقت الفحص. Import السابق في Phase 6 موثق، لكن تشغيل النسخة الجديدة واتصالها لم يُتحققا في هذه الجلسة. هذا لا يمنع إغلاق DoD #8 الذي يشترط تشغيل setup الحقيقي ونسخ summary، ويفحص Plugin فقط لو مفتوحة.
+
+Summary التشغيل الحقيقي:
+
+```text
+Summary (install): Environment=Passed; Dependencies=Passed; Build=Passed; Selftest=Passed; Plugin manifest=Passed; Plugin import=Requires User Action; claude version=Passed; claude=Passed; codex version=Passed; codex=Passed; opencode version=Passed; opencode=Passed; Server / tools / bridge port=Passed; Plugin connection=Requires User Action
+Summary (verify): Environment=Passed; Install / build=Not Tested; Selftest=Passed; Plugin manifest=Passed; Plugin import=Requires User Action; claude version=Passed; claude=Passed; codex version=Passed; codex=Passed; opencode version=Passed; opencode=Passed; Server / tools / bridge port=Passed; Plugin connection=Requires User Action
+```
 
 ### Phase 7 — Multi-client + setup — 2026-10-26
 
@@ -287,7 +330,9 @@ magic_ui_export_design_package
 
 ## In Progress
 
-- Phase 6 مغلقة؛ لا أعمال متبقية داخل نطاقها ولا جلسة smoke منتظرة. لم يبدأ تنفيذ Phase 7.
+- **Phase 9:** لا تنفيذ آلي متبقٍ. benchmark Figma الحقيقي Requires User Action؛ باقي قبول المراحل السابقة كما يلي، دون تحويلها إلى Passed.
+
+- Phase 8: التنفيذ والتحقق الآلي مكتملان. المتبقي DoD #6/#7 التفاعلي؛ لا جلسة نموذج أو smoke تنتظر إدخالًا. Phase 6 وPhase 7 مغلقتان.
 
 - Phase 5: تجربة Figma الحقيقية بـ`pnpm smoke:sync` ما زالت Requires User Action. لا توجد عملية smoke شغالة أو جلسة تنتظر إدخالًا.
 
@@ -295,6 +340,41 @@ magic_ui_export_design_package
 - لا توجد عملية smoke منتظرة؛ الخادم خرج Exit 0 وcredentials الخاصة بالتجربة نُظفت. لم يُحذف أي node أو variable للمستخدم.
 
 ## Verification Log
+
+### Phase 9 — التحقق النهائي 2026-10-26
+
+- **Passed — P9-types:** `pnpm typecheck` — Exit 0، `tsc --noEmit && tsc -p packages/plugin/tsconfig.main.json --noEmit`.
+- **Passed — P9-lint:** `pnpm lint` — Exit 0، `All matched files use Prettier code style!`؛ أُعيد بعد كتابة التقرير والسجل. أول lint كشف صياغة fixture sparse-array وملفات JSON مولدة غير منسقة؛ أُصلحت fixture واستُثنيت نتائج القياس المولدة من formatting.
+- **Passed — P9-tests:** `pnpm test` — Exit 0: `Test Files 24 passed (24)`، `Tests 169 passed (169)`، `Duration 27.72s`. مقارنة token في stderr تشمل startup وsuccess/failure بعد نهاية العملية. suite تشمل metrics/read-only/correlation، malformed/oversize، validation/canonical equivalence وregressions المراحل السابقة.
+- **Passed — P9-build:** `pnpm build` — Exit 0؛ `✓ 125 modules transformed.` و`✓ built in 735ms` و`Plugin built for loopback port 3845: manifest.json, main.js, ui.js, ui.html`. تحذيرا Zod @**PURE** السابقان باقِيان.
+- **Passed — P9-skills:** `pnpm skills:lint` — Exit 0: `Passed: 20 skills, required sections, local references and all MCP names checked against --selftest (29 tools).` reader inventory: 18؛ أُضيف performance report فقط ضمن نطاق observability المطلوب.
+- **Passed — P9-performance:** `pnpm test:performance` — Exit 0؛ `tests/performance/results/2026-10-26T12-25-48.211Z-current.json`؛ Node v26.11.1 / Apple M2 / darwin arm64. 10000 node: validation 90.742→38.618ms، normalization 249.592→95.039ms، planning 37.844→27.562ms. القيم medians، والـraw samples محفوظة مع environment. القياس aggregate في specs حتى 500 node؛ لا رفع لحد العقد. نقل 2040011 bytes في 181 chunks مع exact reassembly Passed. ملف current عند 12:17:22 كان noisy مع typecheck متزامن؛ النهائي عند 12:25:48 منفصل.
+- **Passed — P9-performance-paired:** `node --import tsx tests/performance/comparePlanning.ts` — Exit 0؛ مقارنة متبادلة 15 عينة بعد 4 warmups مع deep equality خارج التوقيت. planning 10000 node: 42.737→31.262ms. جدول incremental لكل تحسين وروابط JSON في docs/development/performance.md.
+- **Passed — P9-security:** مراجعة §14 والأدلة في docs/security/review.md. اختبارات real bridge boundaries وread-only بطبقتين وtoken-free logs ضمن P9-tests؛ مصادر runtime لا تستورد shell APIs، وPlugin source/Main bundle بلا direct eval/new Function في الفحص المحدد. حدود TOCTOU والثقة في نفس المستخدم موثقة، وليس ادعاء audit احترافي شامل.
+- **Failed ثم Passed — P9-audit:** `pnpm audit --json` الأول Exit 1: moderate=3، critical=2. بعد Vitest 4.1.12: Exit 0 وكل المستويات=0. `pnpm audit` نفسه كما في README — Exit 0: `No known vulnerabilities found`. أدلة before/after داخل docs/security.
+- **Failed ثم Passed — P9-clean:** المحاولة الأولى لم تبدأ Codex config inspection لأن harness عيّن CODEX_HOME غير موجود؛ أُنشئ directory فارغ قبل CLI دون config مُسبق. إعادة `node --import tsx scripts/verify-clean-install.ts` — Exit 0، clone Git جديد من snapshot العمل الحالي، لا node_modules منسوخة، `./setup.command install` ثم `./setup.command verify` ثم `pnpm test`: `24 passed (24)`، `169 passed (169)`، `Duration 32.26s`. النص: `Passed: clean Git clone without node_modules; real setup install + verify + pnpm test.` الدليل محفوظ في `/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-clean-3mKHaw/verification.txt`؛ خدمة OpenCode المؤقتة أُوقفت. لا تعديل لـconfigs المستخدم الحقيقي. import/pairing وinteractive discovery في summary يظلان Requires User Action.
+- **Failed ثم Passed — P9-hygiene:** الفحص وجد 3 ملفات .pnpm-store/v11/index.db* متتبّعة. أُضيف ignore لـGit/lint/format وأُزيل تتبّع الثلاثة بـ`git rm --cached` فقط، والملفات باقية على القرص. scanner على 205 ملفات نصية tracked/non-ignored أعاد `matchingPathsOnly: []`؛ فحص محدود لcredential filenames/private-key/token patterns وليس ضمانًا ضد أي secret محتمل. `git diff --check` و`git diff --cached --check` — Exit 0.
+- **Passed — P9-docs:** README وأدلة architecture/security/troubleshooting/development وFINAL-REPORT مبنية على هذا السجل. كل أوامر README التنفيذية شُغلت فعلًا: setup install/verify في sandbox النظيفة؛ typecheck/lint/test/build/skills:lint/test:performance/audit في المشروع. محتوى docs تغيّر بعد clone؛ source runtime المختبَر مطابق. الأوامر اليدوية غير المشغلة موضحة خارج quick-start commands على أنها Requires User Action.
+- **Passed — P9-history (نقل دليل سابق، ليس إعادة تجربة):** Phase 1/2 create/read/render داخل Figma وPhase 3 light mode كما في سطور Verification Log أدناه؛ Phase 4 export/preview على test4 كما في Done › Phase 4 — التحقق الحقيقي، وPhase 6 assets/mockups/Layers كما في Done › Phase 6 — إغلاق التحقق الحقيقي؛ Phase 7 registration الحقيقي بbackups كما في Done › Phase 7 — التثبيت الحقيقي؛ Phase 8 catalog/config كما في Verification Log › Phase 8. هذه السطور هي مرجع ادعاءات التاريخ في التقرير النهائي ولا تؤكد تشغيل build Phase 9 في Figma.
+- **Passed — P9-help / Requires User Action — P9-figma:** `pnpm bench:figma --help` — Exit 0. render/read الحقيقي 100/1000/5000 لم يُشغّل؛ لا نتائج Figma مُختلقة. script يحفظ النتائج الجزئية ويتطلب اختيار session وBENCH في scratch file ويحافظ على كل nodes/workspaces.
+- **Failed ثم Passed — البيئة:** أول benchmark المحلي تعذّر عند `listen EPERM 127.0.0.1` داخل القيود؛ أُعيد بالأذونات المناسبة. أول typecheck بعد observability كشف literal type لـUUID، ثم fixture inferred union؛ صُححت annotations وأصبح Passed.
+
+### Phase 8 — التحقق النهائي 2026-10-26
+
+- **Passed:** `pnpm typecheck` — Exit 0: `tsc --noEmit && tsc -p packages/plugin/tsconfig.main.json --noEmit`.
+- **Passed:** `pnpm lint` — Exit 0: ESLint و`All matched files use Prettier code style!`؛ أُعيد بعد تحديث هذا السجل.
+- **Passed:** `pnpm test` — Exit 0 على التنفيذ النهائي: `Test Files 21 passed (21)`، `Tests 162 passed (162)`، `Duration 28.43s`. لا Figma أو model session حقيقية ضمن هذه الاختبارات.
+- **Passed:** `pnpm build` — Exit 0؛ Plugin: `✓ built in 519ms` و`Plugin built for loopback port 3845: manifest.json, main.js, ui.js, ui.html`. تحذيرا Zod `@__PURE__` السابقان ما زالا ظاهرين ولم يمنعا البناء.
+- **Passed — DoD #2:** `pnpm skills:lint` — Exit 0: `Passed: 20 skills, required sections, local references and all MCP names checked against --selftest (28 tools).`
+- **Passed — DoD #3/#4/#5:** tests/reader.integration.test.ts وdesignValidation.test.ts وagentArtifacts.test.ts وsetup.test.ts ضمن المجموعة أعلاه؛ read-only لديه 17 أداة دون write tools، ومشاكل component/layout/text/fonts/instances/tokens/assets تظهر؛ visual unverified. skill المستخدم المعدلة محفوظة والناقص اتضاف، والتشغيل الثاني مطابق.
+- **Passed:** `node --import tsx scripts/verify-setup-sandbox.ts` — Exit 0 على النسخة النهائية، تشغيل setup مرتين بالـCLIs الحقيقية من `Magic UI project` وHOME مؤقت. المخرج: `Passed: real pnpm install/build and all three real client CLIs ran twice from a path with spaces; configs are byte-identical and unrelated servers/backups are preserved.` تسجيلان لكل client؛ backup قبل كل entry جديدة؛ الخدمة المؤقتة لـOpenCode أُوقفت ثم أُزيل sandbox الناجح فقط.
+- **Passed:** `node --import tsx scripts/verify-agent-clients.ts` — Exit 0؛ Codex `skills/list` اكتشف 20 اسمًا؛ OpenCode `debug agents` أعاد IDs الثلاثة. السطران: `Passed: figma-reader-agent; only magic-ui-reader enabled with --read-only, 17 allowlisted tools and the requested output root. No model session launched.` ونفس النتيجة لـvalidation-agent. تأكد بقاء ملف Codex الأصلي دون تغيير، وإيقاف خدمة sandbox وتنظيفه.
+- **Passed:** `git diff --check` — Exit 0.
+- **Failed ثم Passed:** التشغيل الأول للاختبارات داخل القيود رفض loopback بـ`listen EPERM`، وبعض setup fixtures انتهت timeout؛ أُعيدت بالأذونات المناسبة داخل sandbox فقط. فشل أول تشغيل كامل بسبب توقعات registry القديمة، وتصنيف aliases macOS كـsymlinks، واعتبار pattern الخاص بعميل OpenCode اسم MCP حقيقيًا؛ أُصلحت، ثم Passed في المجموعة النهائية.
+- **Failed ثم Passed:** `pnpm build` الأول رفض allowImportingTsExtensions مع emit؛ أُضيف override خاص ببناء shared ثم نجح البناء. فحص Codex launcher الأول أثبت أن quoted override keys لا تعمل وأن list لا يعيد enabled_tools؛ صُحح الأمر وفُحصت allowlist عبر get الحقيقي.
+- **Failed ثم Passed:** native OpenCode discovery في HOME جديد اصطدم بمنفذ managed service الافتراضي؛ الـharness أصبح يخصص منفذًا منفصلًا بالـCLI. بعد ذلك رصد `[]` في أول قراءة قبل warming؛ retry محدودة واحدة أصلحت التحقق. لا تعديل لخدمة أو إعدادات المستخدم لحل المشكلة.
+- **Failed — تحقق اختياري بسبب البيئة:** `skill-creator/scripts/quick_validate.py` لم يعمل على Python المتاح ولا bundled Python: `ModuleNotFoundError: No module named 'yaml'`. لم تُضف dependency للمشروع لهذا الغرض. lint المشروع واكتشاف Codex الحقيقي تحققا من skills بنجاح، لكن هذا السكريبت الاختياري نفسه ليس Passed.
+- **Requires User Action:** DoD #6 التفاعلي وDoD #7 login E2E لم يُنفذا. نجاح native catalog/config checks لا يحوّلهما إلى Passed.
 
 ### Phase 3 — التجربة الحقيقية والإصلاحات 2026-10-26
 
@@ -662,7 +742,11 @@ $ vitest run
 
 ## Blockers / Requires User Action
 
-- **Phase 7 — DoD #8:** الموافقة على تشغيل `./setup.command install` على إعدادات المستخدم الفعلية مع backups ثم توثيق summary. تنفيذ المرحلة وDoD #1–#7 Passed؛ المرحلة غير مغلقة حتى هذه الخطوة أو استثناء صريح.
+- **Phase 9 DoD #7:** تشغيل `pnpm bench:figma` بعد بناء/فتح Plugin في scratch file؛ يختار المستخدم session ويكتب BENCH، وينشئ 6100 node محتفظًا بها. لم يُشغّل هذا المسار الحقيقي؛ help فقط Passed. التقرير لا يعلن v1 complete بسبب هذا البند والبنود السابقة أدناه.
+
+- **Phase 8:** DoD #6/#7 Requires User Action كما هو موضح أعلاه. إضافات Phase 8 لم تُطبّق على configs المستخدم الحقيقية؛ المطلوب تشغيل repair وإعادة فتح العملاء/Plugin، ثم فحص الـreader وتجربة login. لا موافقة معمارية معلقة.
+
+- **Phase 7:** لا عائق إغلاق متبقٍ؛ DoD #8 Passed بالتشغيل الحقيقي الموافق عليه. فتح Plugin وربطها في Figma خطوة تشغيل يدوية ما زالت Requires User Action وليست تحقق اتصال ناجحًا.
 
 - **Phase 6:** لا عوائق متبقية؛ DoD #8 **Passed** بالتجربة الحقيقية والفحص البصري والـLayers الموضحين أعلاه.
 
@@ -675,7 +759,7 @@ $ vitest run
 - **Phase 3:** المتبقي للإغلاق تجربة تبديل light/dark في ملف Figma يسمح بـmodeين. الملف الحالي أعاد `Limited to 1 modes only`. تجربة light مكتملة وPassed، ولا توجد موافقات معمارية معلقة.
 
 - لا توجد عوائق متبقية لإغلاق Phase 1.
-- إعادة تشغيل الخادم تولّد token جديدًا؛ يحتاج نسخه إلى الـPlugin مرة أخرى. الـframe التجريبي لم يُحذف.
+- D13 نُفّذ: إعادة تشغيل الخادم لا تغيّر token. تغييرها يكون عبر rotate صريح ثم إعادة pairing؛ الـframe التجريبي القديم لم يُحذف.
 - D6 وD11 وD13 أصبحت Locked ونُفّذت في Phase 7. D9 ما زال Locked ويُطبق لكل client وداخل Main. لا قرارات معمارية معلقة.
 - لا توجد عوائق متبقية لـPhase 2؛ التحقق الحقيقي والمراجعة البصرية **Passed**، والمرحلة مغلقة.
 
@@ -684,6 +768,10 @@ $ vitest run
 - Node 24 LTS غير مثبت؛ لم تُشغّل الاختبارات عليه. هذا لا يغيّر نتيجة التجربة الحقيقية على البيئة الحالية.
 
 ## Dependencies Added (مع المبرر)
+
+**Phase 9:** تحديث dev dependency الموجودة Vitest من 3.2.7 إلى 4.1.12 لمعالجة audit advisories في Vitest/mocker وإزالة tinypool المتأثرة. lockfile تحدّث؛ لا runtime dependencies جديدة.
+
+**Phase 8: لا dependencies جديدة ولا تعديل lockfile.** استُخدمت Node APIs وZod وMCP SDK المثبتة. إعداد TypeScript يسمح بواردات `.ts` الخاصة بالـinstaller الذي يعمل بـNode native؛ بناء shared يستثني هذا الخيار عند emit.
 
 **Phase 7: لا dependencies جديدة ولا تعديل على lockfile.** استُخدمت Node APIs وws/Zod/MCP SDK المثبتة؛ installer يعمل بـNode native TypeScript قبل تثبيت dependencies.
 
@@ -697,7 +785,7 @@ $ vitest run
 
 **Phase 2: لا dependencies جديدة ولا تعديل على lockfile.** استُخدم Zod 4 المثبت لتوليد JSON Schema، وPrettier المثبت لتنسيق الملف المولّد.
 
-الإصدارات الفعلية مثبتة في `pnpm-lock.yaml`؛ مفيش تغيير لإعدادات clients خارج المشروع.
+الإصدارات الفعلية مثبتة في `pnpm-lock.yaml`؛ إعدادات clients الحقيقية عُدّلت فقط لإضافة Magic UI في Phase 7 بموافقة المستخدم وbackups والتحقق من حفظ الباقي.
 
 | الحزم                                   | الإصدار المثبت            | المبرر                                                                      |
 | --------------------------------------- | ------------------------- | --------------------------------------------------------------------------- |
@@ -719,5 +807,5 @@ Playwright استُخدم من بيئة `webapp-testing` المثبتة مسبق
 
 ## Backlog
 
-- لا توسع خارج Phase 7؛ التنفيذ والتحقق المعزول مكتملان، وتشغيل إعدادات المستخدم ينتظر الموافقة. assets/mockups/project pages نُفذت في Phase 6؛ multi-session ضمن Phase 7؛ skills/agents مؤجلة لـPhase 8. sync/Trash للشاشات نُفذا في Phase 5. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
+- Phase 9 نُفذت بطلب المستخدم؛ لا توسع لاحق دون طلب. Phase 8 المتبقي منها تحققها التفاعلي الموثق فقط. تأجيلات Phases 3/4/5 تبقى كما هي ولا تتحول إلى Passed. Code generators وvisual diff engine خارج نطاق Phase 8.
 - تغيير نوع node وهجرة هويته ما زالا مرفوضين دون مسار صريح؛ no auto-merge. تسوية drift والاستكمال للشاشات نُفذا في Phase 5. استكمال design-system الجزئي على مستوى token/component نُفذ في الإدخال الأحدث؛ قيد بيانات Phase 3 القديمة بدون checkpoints موثق في دليل التشغيل.

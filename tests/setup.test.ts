@@ -41,6 +41,7 @@ async function sandbox() {
   for (const file of [
     'setup.command',
     'installers',
+    'agent',
     'packages/mcp-server/dist',
     'packages/plugin/dist',
   ])
@@ -103,7 +104,12 @@ async function sandbox() {
               '/trusted/project/magic-ui': { trust_level: 'trusted' },
             },
           };
-    await writeFile(file, JSON.stringify(value));
+    await writeFile(
+      file,
+      index === 1
+        ? '[mcp_servers.existing]\ncommand = "keep-user-server"\nargs = ["unchanged"]\n\n[projects."/trusted/project/magic-ui"]\ntrust_level = "trusted"\n'
+        : JSON.stringify(value),
+    );
   }
   async function run(mode = 'install') {
     const child = spawn('/bin/bash', [join(root, 'setup.command'), mode], {
@@ -127,6 +133,12 @@ async function sandbox() {
 it('runs setup twice from a path with spaces, preserves other servers, backs up, and supports repair and verify', async () => {
   const fixture = await sandbox();
   try {
+    const modifiedSkill = join(
+      fixture.home,
+      '.claude/skills/layout-engine/SKILL.md',
+    );
+    await mkdir(resolve(modifiedSkill, '..'), { recursive: true });
+    await writeFile(modifiedSkill, 'User-custom layout skill.');
     const before = await Promise.all(
       fixture.configs.map((p) => readFile(p, 'utf8')),
     );
@@ -136,19 +148,33 @@ it('runs setup twice from a path with spaces, preserves other servers, backs up,
     const after = await Promise.all(
       fixture.configs.map((p) => readFile(p, 'utf8')),
     );
+    expect(after[1]!.startsWith(before[1]!)).toBe(true);
     for (const [index, file] of fixture.configs.entries()) {
       expect(after[index]).toContain('keep-user-server');
       expect(after[index]).toContain('unchanged');
       const backups = (await readdir(resolve(file, '..'))).filter((name) =>
         name.startsWith(file.split('/').at(-1)! + '.magic-ui-backup-'),
       );
-      expect(backups).toHaveLength(1);
+      expect(backups).toHaveLength(2);
       expect(
-        await readFile(join(resolve(file, '..'), backups[0]!), 'utf8'),
+        await readFile(join(resolve(file, '..'), backups.sort()[0]!), 'utf8'),
       ).toBe(before[index]);
     }
     const second = await fixture.run();
     expect(second.code, second.output).toBe(0);
+    expect(await readFile(modifiedSkill, 'utf8')).toBe(
+      'User-custom layout skill.',
+    );
+    expect(await readdir(join(fixture.home, '.claude/skills'))).toHaveLength(
+      20,
+    );
+    expect(after.every((text) => text.includes('--read-only'))).toBe(true);
+    expect(
+      await readFile(
+        join(fixture.home, '.claude/agents/figma-reader-agent.md'),
+        'utf8',
+      ),
+    ).toContain('magic-ui-reader');
     expect(
       await Promise.all(fixture.configs.map((p) => readFile(p, 'utf8'))),
     ).toEqual(after);
@@ -156,7 +182,7 @@ it('runs setup twice from a path with spaces, preserves other servers, backs up,
       (await readFile(join(fixture.home, 'registrations'), 'utf8'))
         .trim()
         .split('\n'),
-    ).toHaveLength(3);
+    ).toHaveLength(6);
     await writeFile(fixture.configs[2]!, before[2]!);
     const repair = await fixture.run('repair');
     expect(repair.code, repair.output).toBe(0);
@@ -164,7 +190,7 @@ it('runs setup twice from a path with spaces, preserves other servers, backs up,
       (await readFile(join(fixture.home, 'registrations'), 'utf8'))
         .trim()
         .split('\n'),
-    ).toHaveLength(4);
+    ).toHaveLength(8);
     const verified = await fixture.run('verify');
     expect(verified.code, verified.output).toBe(0);
     expect(verified.output).toContain('Not Tested: Install / build');
@@ -172,7 +198,7 @@ it('runs setup twice from a path with spaces, preserves other servers, backs up,
       (await readFile(join(fixture.home, 'registrations'), 'utf8'))
         .trim()
         .split('\n'),
-    ).toHaveLength(4);
+    ).toHaveLength(8);
   } finally {
     await rm(fixture.temporary, { recursive: true, force: true });
   }

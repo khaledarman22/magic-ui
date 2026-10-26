@@ -6,3 +6,5 @@ MAGIC UI.md
 prompts
 docs/ARCHITECTURE.md
 .impeccable
+.pnpm-store
+tests/performance/results/

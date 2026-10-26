@@ -284,7 +284,12 @@ export class MultiClientBridge implements BridgeConnection {
       document: only?.document ?? null,
     };
   }
-  async request(sessionId: string, command: Command, signal?: AbortSignal) {
+  async request(
+    sessionId: string,
+    command: Command,
+    signal?: AbortSignal,
+    correlationId: string = randomUUID(),
+  ) {
     const operation = this.operation.getStore();
     if (operation && operation.connection !== (this.hub ?? this.peer))
       throw this.disconnected();
@@ -293,11 +298,17 @@ export class MultiClientBridge implements BridgeConnection {
         failure('PERMISSION_DENIED', 'This client is read-only.'),
       );
     if (this.hub)
-      return this.hub.request(sessionId, command, signal, this.readOnly);
+      return this.hub.request(
+        sessionId,
+        command,
+        signal,
+        correlationId,
+        this.readOnly,
+      );
     const response = await this.exchange(
       {
         protocolVersion: PROTOCOL_VERSION,
-        correlationId: randomUUID(),
+        correlationId,
         type: 'request',
         sessionId,
         command,

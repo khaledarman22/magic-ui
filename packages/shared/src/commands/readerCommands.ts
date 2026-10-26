@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { identifierSchema } from '../protocol/constants.js';
 import { stableIdSchema } from '../designSpecification/schema.js';
+import { validationEvidenceSchema } from './validationCommands.js';
 
 export const readerInputSchema = z
   .object({
@@ -16,6 +17,7 @@ export const readerInputSchema = z
     cursor: z.string().max(200).optional(),
     format: z.enum(['PNG', 'SVG']).default('PNG'),
     scale: z.number().positive().max(4).default(1),
+    includeValidation: z.boolean().optional(),
   })
   .strict();
 export type ReaderInput = z.infer<typeof readerInputSchema>;
@@ -37,6 +39,7 @@ export const rawNodeSchema = z
     childIds: z.array(z.string()),
     properties: z.record(z.string(), z.unknown()),
     identity: z.record(z.string(), z.string()),
+    validation: validationEvidenceSchema.optional(),
   })
   .strict();
 export type RawFigmaNode = z.infer<typeof rawNodeSchema>;
@@ -49,6 +52,7 @@ export const extractionSchema = z
     collections: z.array(z.record(z.string(), z.unknown())),
     styles: z.array(z.record(z.string(), z.unknown())),
     registries: z.array(z.unknown()).default([]),
+    validation: validationEvidenceSchema.optional(),
   })
   .strict();
 export type FigmaExtraction = z.infer<typeof extractionSchema>;

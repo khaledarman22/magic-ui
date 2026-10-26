@@ -5,6 +5,7 @@ import {
   type ReaderChunk,
   type RawFigmaNode,
   type FigmaExtraction,
+  type ValidationEvidence,
 } from '@magic-ui/shared';
 
 const snapshots = new Map<
@@ -93,6 +94,9 @@ const fields = [
   'variantProperties',
   'vectorPaths',
   'exportSettings',
+  'hasMissingFont',
+  'absoluteBoundingBox',
+  'textTruncation',
 ] as const;
 async function readNode(node: BaseNode): Promise<RawFigmaNode> {
   const properties: Record<string, unknown> = {};
@@ -137,6 +141,7 @@ async function readNode(node: BaseNode): Promise<RawFigmaNode> {
     'specVersion',
     'registry',
     'propertyKeys',
+    'assetChild',
   ]) {
     const value = node.getSharedPluginData('magic_ui', key);
     if (value) identity[key] = value;
@@ -150,6 +155,63 @@ async function readNode(node: BaseNode): Promise<RawFigmaNode> {
     properties,
     identity,
   };
+}
+async function validationEvidence(
+  value: unknown,
+  cache: Map<string, ValidationEvidence['references'][number]>,
+  cancelled: () => boolean,
+): Promise<ValidationEvidence> {
+  const references: ValidationEvidence['references'] = [];
+  const pending: unknown[] = [value];
+  const seen = new Set<string>();
+  while (pending.length) {
+    check(cancelled);
+    const item = pending.pop();
+    if (!item || typeof item !== 'object') continue;
+    if (Array.isArray(item)) {
+      pending.push(...item);
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    const kind =
+      record.type === 'VARIABLE_ALIAS'
+        ? 'variable'
+        : record.type === 'IMAGE'
+          ? 'image'
+          : undefined;
+    const id = kind === 'variable' ? record.id : record.imageHash;
+    if (kind && (typeof id === 'string' || id === null)) {
+      const key = `${kind}:${String(id)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        let evidence = cache.get(key);
+        if (!evidence) {
+          let status: ValidationEvidence['references'][number]['status'] =
+            'unverified';
+          try {
+            const found =
+              typeof id === 'string' &&
+              id.length > 0 &&
+              (kind === 'variable'
+                ? await figma.variables.getVariableByIdAsync(id)
+                : figma.getImageByHash(id));
+            status = found ? 'resolved' : 'missing';
+          } catch {
+            /* An API failure is not proof of a missing resource. */
+          }
+          evidence = {
+            kind,
+            id: typeof id === 'string' ? id : '(empty)',
+            status,
+          };
+          cache.set(key, evidence);
+        }
+        references.push(evidence);
+      }
+    }
+    pending.push(...Object.values(record));
+  }
+  return { references };
 }
 async function resources() {
   const variables = await figma.variables.getLocalVariablesAsync();
@@ -221,6 +283,10 @@ async function extract(
   }
   const nodes: RawFigmaNode[] = [],
     seen = new Set<string>();
+  const validationCache = new Map<
+    string,
+    ValidationEvidence['references'][number]
+  >();
   const stack = [...roots].reverse();
   let size = 0;
   while (stack.length) {
@@ -241,6 +307,12 @@ async function extract(
             identity: {},
           }
         : await readNode(node);
+    if (input.includeValidation)
+      record.validation = await validationEvidence(
+        record.properties,
+        validationCache,
+        cancelled,
+      );
     nodes.push(record);
     size += JSON.stringify(record).length;
     if (size > MAX_SNAPSHOT || nodes.length > 100000)
@@ -260,9 +332,14 @@ async function extract(
       : await resources();
   check(cancelled);
   const registries: unknown[] = [];
-  for (const projectId of new Set(
+  const projectIds = new Set(
     nodes.map((n) => n.identity.projectId).filter(Boolean),
-  )) {
+  );
+  if (input.includeValidation && input.scope === 'document')
+    for (const key of figma.root.getSharedPluginDataKeys('magic_ui'))
+      if (key.startsWith('design-system:'))
+        projectIds.add(key.slice('design-system:'.length));
+  for (const projectId of projectIds) {
     const saved = figma.root.getSharedPluginData(
       'magic_ui',
       `design-system:${projectId}`,
@@ -271,7 +348,8 @@ async function extract(
       try {
         registries.push(JSON.parse(saved) as unknown);
       } catch {
-        /* Invalid metadata is not a source of truth. */
+        // Invalid metadata is evidence for validation, never a source of truth.
+        if (input.includeValidation) registries.push(saved);
       }
     }
   }
@@ -281,6 +359,15 @@ async function extract(
     nodes,
     registries,
     ...data,
+    ...(input.includeValidation
+      ? {
+          validation: await validationEvidence(
+            data,
+            validationCache,
+            cancelled,
+          ),
+        }
+      : {}),
   };
 }
 export async function readFigma(

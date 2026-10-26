@@ -93,5 +93,6 @@ export interface BridgeConnection {
     sessionId: string,
     command: z.infer<typeof commandSchema>,
     signal?: AbortSignal,
+    correlationId?: string,
   ): Promise<z.infer<typeof commandResultSchema>>;
 }

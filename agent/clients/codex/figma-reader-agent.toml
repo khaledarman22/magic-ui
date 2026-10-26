@@ -1,0 +1,3 @@
+name = "figma-reader-agent"
+description = "Read and export Figma with the isolated Magic UI read-only server."
+developer_instructions = "Read {{RULES_PATH}}. Follow {{WORKFLOWS_PATH}}/read-figma.md. Use the magic-ui-reader MCP entry. Return findings to the coordinator for any repair."
