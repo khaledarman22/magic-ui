@@ -10,3 +10,5 @@ export * from './designSpecification/designSystemValidation.js';
 export * from './commands/designSystemCommands.js';
 
 export * from './commands/readerCommands.js';
+
+export * from './commands/syncCommands.js';

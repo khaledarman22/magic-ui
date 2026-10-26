@@ -100,6 +100,10 @@ export class FakePluginClient {
             'renderDesignSystem',
             'readComponents',
             'readVariables',
+            'readFigma',
+            'inspectSync',
+            'syncStep',
+            'trashNode',
           ].includes(command.command) &&
           command.command !== 'createFrame' &&
           command.command !== 'readNode' &&

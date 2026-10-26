@@ -1,0 +1,122 @@
+Window: "test4", App: Figma.
+0 standard window test4, Secondary Actions: Raise
+	1 container test4
+		2 container
+			3 HTML content Figma, URL: file:///Applications/Figma.app/Contents/Resources/app.asar/shell.html
+				4 container
+					5 tab group Tab bar
+						6 container
+							7 tab (settable, integer) Description: Home, Value: 0
+							8 tab (selected) Description: test4, Value: 1
+								9 button Close tab
+							10 tab (settable, integer) Description: Untitled, Value: 0
+							11 button New file
+						12 pop up button Open tabs and recently closed items
+			13 HTML content test4 – Figma, URL: figma.com/design/N4T7RvY4oQpZrJR73QFD2I/test4?node-id=1-59&viewport=249%2C236%2C0.16&t=qmnOvzFoFXYF4PkE-0
+				14 container
+					15 container
+						16 container
+						17 container Figma Design
+						18 text Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+						19 container Left sidebar
+							20 toolbar Navigation Bar
+								21 pop up button Main menu
+									22 image
+								23 button File
+									24 image
+							25 container
+								26 button test4, file name
+								27 text File name
+								28 pop up button Edit file menu
+								29 button Minimize UI
+								30 link Description: Drafts, Value: figma.com/files/team/1210308858011346004/project/157355972
+								31 button Free
+								32 container
+									33 heading Pages Find, Value: 2
+										34 button Pages
+										35 button Find
+									36 container
+										37 table
+											38 row Web
+												39 cell
+													40 button Web
+											41 row Components
+												42 cell
+													43 button Components
+											44 row References
+												45 cell
+													46 button References
+										47 slider Description: Resize handle, Value: 100, Details: 104 pixels, Secondary Actions: Increment, Decrement
+								48 container
+									49 heading Layers, Value: 2
+										50 button Layers
+									51 tree grid
+										52 row Website board
+											53 container
+												54 cell
+													55 text Website board
+								56 slider Description: Resize handle, Value: 280, Details: 280 pixels, Secondary Actions: Increment, Decrement
+						57 container Right sidebar
+							58 container
+								59 container
+									60 pop up button Multiplayer tools
+										61 image
+									62 button Share
+									63 container
+										64 heading Version history, Value: 2
+											65 text Version history
+										66 pop up button Version history filter
+											67 image
+										68 button Add to version history
+										69 button Close
+									70 container
+										71 text Press  ⌘ + ⌥ + S  to add to version history while editing.
+									72 content list
+										73 container
+											74 image
+											75 toggle button Current version, Value: 1
+										76 container
+											77 image
+											78 toggle button 12:36 AM, Value: 0
+											79 container Version editors, 1 total
+												80 text khaled waleed
+									81 text Everything else is history.
+									82 container
+										83 button Upgrade to a Professional plan
+										84 text  to view versions past 30 days
+								85 slider Description: Resize handle, Value: 241, Details: 241 pixels (min), Secondary Actions: Increment, Decrement
+					86 container Application toolbar
+						87 toolbar Editor
+							88 toggle button Description: Move, Value: 1
+								89 image
+							90 toggle button Description: Hand tool, Value: 0
+								91 image
+							92 Toolbelt Mode
+								93 text Toolbelt Mode
+								94 radio button Draw, Value: 0
+								95 radio button Design, Value: 1
+								96 radio button Motion, Value: 0
+								97 radio button Dev Mode, Value: 0
+					98 container Help/zoom toolbar
+						99 toolbar Help/zoom toolbar
+							100 pop up button Help
+								101 image
+				102 text Some changes won't be synced until Figma is able to reconnect.
+	103 close button
+	104 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	105 minimize button
+106 menu bar
+	107 Figma
+	108 File
+	109 Edit
+	110 View
+	111 Object
+	112 Text
+	113 Arrange
+	114 Vector
+	115 Plugins
+	116 Widgets
+	117 Window
+	118 Help
+
+The focused UI element is 17 container Figma Design

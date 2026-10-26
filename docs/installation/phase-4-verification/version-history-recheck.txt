@@ -1,0 +1,129 @@
+Window: "test4", App: Figma.
+0 standard window test4, Secondary Actions: Raise
+	1 container test4
+		2 container
+			3 HTML content Figma, URL: file:///Applications/Figma.app/Contents/Resources/app.asar/shell.html
+				4 container
+					5 tab group Tab bar
+						6 container
+							7 tab (settable, integer) Description: Home, Value: 0
+							8 tab (selected) Description: test4, Value: 1
+								9 button Close tab
+							10 tab (settable, integer) Description: Untitled, Value: 0
+							11 button New file
+						12 pop up button Open tabs and recently closed items
+			13 HTML content test4 – Figma, URL: figma.com/design/N4T7RvY4oQpZrJR73QFD2I/test4?node-id=1-59&viewport=249%2C236%2C0.16&t=qmnOvzFoFXYF4PkE-0
+				14 container
+					15 container
+						16 container
+						17 container Figma Design
+						18 text Screenreader support for the board is currently disabled. To enable it via Accessibility settings, press ⌘K, type Accessibility Settings, and press Enter. To see available keyboard shortcuts, enter ⌃⇧Question mark .
+						19 container Left sidebar
+							20 toolbar Navigation Bar
+								21 pop up button Main menu
+									22 image
+								23 button File
+									24 image
+							25 container
+								26 button test4, file name
+								27 text File name
+								28 pop up button Edit file menu
+								29 button Minimize UI
+								30 link Description: Drafts, Value: figma.com/files/team/1210308858011346004/project/157355972
+								31 button Free
+								32 container
+									33 heading Pages Find, Value: 2
+										34 button Pages
+										35 button Find
+									36 container
+										37 table
+											38 row Web
+												39 cell
+													40 button Web
+											41 row Components
+												42 cell
+													43 button Components
+											44 row References
+												45 cell
+													46 button References
+										47 slider Description: Resize handle, Value: 100, Details: 104 pixels, Secondary Actions: Increment, Decrement
+								48 container
+									49 heading Layers, Value: 2
+										50 button Layers
+									51 tree grid
+										52 row Website board Toggle layer locking Toggle layer visibility
+											53 container
+												54 cell
+													55 text Website board
+											56 container
+												57 cell
+													58 checkbox Toggle layer locking, Value: 0
+													59 text Toggle layer locking
+												60 cell
+													61 checkbox Toggle layer visibility, Value: 0
+													62 text Toggle layer visibility
+								63 slider Description: Resize handle, Value: 280, Details: 280 pixels, Secondary Actions: Increment, Decrement
+						64 container Right sidebar
+							65 container
+								66 container
+									67 pop up button Multiplayer tools
+										68 image
+									69 button Share
+									70 container
+										71 heading Version history, Value: 2
+											72 text Version history
+										73 pop up button Version history filter
+											74 image
+										75 button Add to version history
+										76 button Close
+									77 container
+										78 text Press  ⌘ + ⌥ + S  to add to version history while editing.
+									79 content list
+										80 container
+											81 image
+											82 toggle button Current version, Value: 1
+										83 container
+											84 image
+											85 toggle button 12:36 AM, Value: 0
+											86 container Version editors, 1 total
+												87 text khaled waleed
+									88 text Everything else is history.
+									89 container
+										90 button Upgrade to a Professional plan
+										91 text  to view versions past 30 days
+								92 slider Description: Resize handle, Value: 241, Details: 241 pixels (min), Secondary Actions: Increment, Decrement
+					93 container Application toolbar
+						94 toolbar Editor
+							95 toggle button Description: Move, Value: 1
+								96 image
+							97 toggle button Description: Hand tool, Value: 0
+								98 image
+							99 Toolbelt Mode
+								100 text Toolbelt Mode
+								101 radio button Draw, Value: 0
+								102 radio button Design, Value: 1
+								103 radio button Motion, Value: 0
+								104 radio button Dev Mode, Value: 0
+					105 container Help/zoom toolbar
+						106 toolbar Help/zoom toolbar
+							107 pop up button Help
+								108 image
+				109 text Some changes won't be synced until Figma is able to reconnect.
+	110 close button
+	111 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	112 minimize button
+113 menu bar
+	114 Figma
+	115 File
+	116 Edit
+	117 View
+	118 Object
+	119 Text
+	120 Arrange
+	121 Vector
+	122 Plugins
+	123 Widgets
+	124 Window
+	125 Help
+
+The focused UI element is 71 heading Version history, Value: 2

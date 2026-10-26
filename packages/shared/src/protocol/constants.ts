@@ -15,6 +15,19 @@ export const TOOL_NAMES = [
   'magic_ui_find_component',
   'magic_ui_read_components',
   'magic_ui_read_variables',
+  'magic_ui_read_document',
+  'magic_ui_list_pages',
+  'magic_ui_read_page',
+  'magic_ui_read_selection',
+  'magic_ui_read_styles',
+  'magic_ui_export_asset',
+  'magic_ui_export_design_package',
+  'magic_ui_get_sync_status',
+  'magic_ui_preview_changes',
+  'magic_ui_apply_changes',
+  'magic_ui_resume_operation',
+  'magic_ui_move_to_trash',
+  'magic_ui_restore_from_trash',
 ] as const;
 export const identifierSchema = z.string().min(1).max(256);
 export const tokenSchema = z.string().regex(/^[a-f0-9]{64}$/);

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-**Phase 4 — قيد التنفيذ.** 2026-10-26: وافق صاحب المشروع على D9 وتم تثبيته Locked، وعلى بدء Phase 4 مع تأجيل تجربة light/dark من Phase 3 وإبقائها معلّقة (Requires User Action).
+**Phase 4 — مغلقة بموافقة صاحب المشروع مع استثناء تحقق موثّق (2026-10-26).** التنفيذ والتحقق الآلي والتصدير الحقيقي ومراجعة الـpackage: **Passed**. تأكيد مزامنة Figma وحالة version history المتزامنة: **Requires User Action — مؤجل بموافقة صريحة، ولا يمنع إغلاق المرحلة**؛ لم يُحوّل إلى Passed. D9 يظل Locked. لم يبدأ تنفيذ Phase 5.
 
 **Phase 3 — التنفيذ والتحقق الآلي وتجربة Figma الحقيقية بوضع light: Passed. تبديل light/dark: Requires User Action لأن الملف الحالي محدود بـmode واحدة؛ المرحلة لم تُغلق بالكامل.**
 
@@ -16,7 +16,99 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 
 ## Done
 
-### Phase 4 — فحص البداية 2026-10-26
+### Phase 4 — الإغلاق باستثناء معتمد — 2026-10-26
+
+- طلب صاحب المشروع صراحة: «اعتبر تأكيد مزامنة Figma بند تحقق مؤجل بموافقتي، واقفل Phase 4 مع توثيق الاستثناء في PROGRESS.md، وخلي اختبار light/dark مؤجل برضه».
+- **Phase 4 مغلقة بهذه الموافقة.** الاستثناء يخص فقط تأكيد مزامنة Figma وحالة version history على الخادم من DoD #7؛ يبقى **Requires User Action — مؤجل**، وليس Passed. مقارنة القائمة الظاهرة والتصدير الحقيقي ومراجعة الـpackage ناجحة كما هو موثق أدناه.
+- **Requires User Action — مؤجل بموافقة صاحب المشروع:** اختبار light/dark في Phase 3 ما زال معلّقًا ولم يُشغّل أو يُعتبر ناجحًا ضمن هذا الإغلاق.
+- **Passed:** فحوص الإغلاق `pnpm typecheck` — Exit 0، و`pnpm test` — Exit 0: `Test Files 13 passed (13)` و`Tests 108 passed (108)`.
+- **Failed ثم إصلاح التنسيق:** أول `pnpm lint` رفض تنسيق `PROGRESS.md` فقط؛ جرى تشغيل Prettier ثم إعادة lint: **Passed** — Exit 0، `All matched files use Prettier code style!`.
+- السجلات الأقدم التي تقول إن Phase 4 لم تُغلق تصف الحالة قبل هذه الموافقة؛ هذا الإدخال وCurrent Phase هما الحالة الحالية. لا إعادة كتابة لنتائج الأدلة القديمة ولا تغيير للكود أو القرارات المعمارية.
+
+### Phase 4 — إعادة فحص المزامنة وversion history — 2026-10-26
+
+- **Passed (القائمة الظاهرة):** أُعيد فتح Version history في test4؛ ما زالت تعرض `Current version` و`12:36 AM` للمحرر `khaled waleed`، دون نسخة جديدة مقارنةً بما قبل smoke:export. الدليل: `docs/installation/phase-4-verification/version-history-recheck.txt`.
+- **Requires User Action:** النص `Some changes won't be synced until Figma is able to reconnect.` ما زال في accessibility state. لا يوجد تأكيد مستقل بأن هذا تنبيه نشط أو إعلان قديم، ولا دليل واضح على اكتمال مزامنة جلسة Desktop؛ لذلك لم تُغلق Phase 4.
+- **Passed (إمكانية قراءة الملف من الخادم فقط):** فتح رابط test4 في جلسة متصفح جديدة حمّل التصميم وصفحاته. **Requires User Action:** فتح قائمة الملف للوصول إلى version history في تلك الجلسة عرض `Sign up for Figma`، فلم يكن سجل النسخ الموثّق متاحًا دون تسجيل دخول. أُغلق تبويب الفحص المؤقت.
+- لم تتغير nodes أو إعدادات الملف، ولم تُضف نسخة إلى version history. أُبقي السجل ظاهرًا في Desktop. اختبار light/dark ما زال مؤجلًا كما طلب صاحب المشروع.
+- **Not Tested (تعديل توثيق فقط، لا تغيير كود ولا إعلان إغلاق):** لم تُعَد typecheck/test أو smoke:export في هذه المراجعة؛ نتائجها السابقة Passed. **Passed:** `pnpm lint` بعد تحديث التوثيق — Exit 0، ESLint وPrettier.
+
+### Phase 4 — التحقق الحقيقي على test4 — 2026-10-26
+
+- **Passed:** تشغيل `pnpm smoke:export` الحقيقي — Exit 0، باستخدام الخادم المبني بوضع `--read-only` وPlugin Magic UI داخل [test4 / Web](https://www.figma.com/design/N4T7RvY4oQpZrJR73QFD2I/test4). الملف مختلف عن Untitled المستخدم في تجارب Magic UI. كل 126 node مقروءة خالية من هوية Magic UI، والصفحة تحتوي تصميم موقع «مدار» desktop/mobile موجودًا مسبقًا.
+- **Passed:** الـPlugin عرض `Connected. Read-only: document writes are blocked.`؛ السكريبت تحقق أن كل الأدوات المسجلة read-only. لم يُنشأ أو يُعدّل أي node أثناء هذه الجلسة؛ لم تُضف نسخة يدوية إلى version history.
+- **Passed:** package فعلية من 13 ملفًا، وDesign Spec صالحة. البيانات الخام: 126 node تشمل الصفحة؛ التحويل: 125 scene node بينها 71 text، و25 variable و8 text styles. لا screens ساقطة أو schema-limit errors في هذا التصدير. المكونان خارج scope صفحة Web، لذلك instance محتواهما موسع في spec ومرجعهما الأصلي محفوظ في التقرير.
+- **Passed:** فحص الصورة المصدّرة بصريًا: Website board كامل، desktop/mobile، النص العربي والأقسام والشعار ظاهرة. Preview بحجم 2041×2700، و3 PNG assets بأحجام 54×54 و40×40 و40×40، وكل headers سليمة. [صورة التحقق](docs/installation/phase-4-verification/website-board.png).
+- **Passed:** مراجعة 132 بندًا في `missing-information.json`: 125 سجل rawProperties لحفظ الخصائص الإضافية، و3 image fills غير ممثلة في solid-paint schema مع assets مقابلة، و2 instance لمكونات خارج الصفحة، وبند تصنيف tokens وبند غياب responsive behavior. لا asset export failures. التقرير متسق مع المصدر والـscope ولا يخفي فقدًا في عدد العناصر.
+- **Passed (المقارنة المرئية فقط):** فتحت Version history قبل التصدير وبعده؛ القائمتان تعرضان `Current version` و`12:36 AM`، والمحرر `khaled waleed`، دون entry جديدة ظاهرة. [دليل AX بعد التصدير](docs/installation/phase-4-verification/version-history-after.txt).
+- **Requires User Action:** ظهر قبل التجربة تنبيه `Connection issue affecting saving`، واستمر نص `Some changes won't be synced until Figma is able to reconnect.` في accessibility state بعد التجربة. لذلك تطابق القائمة الظاهرة لا يثبت حالة الخادم المتزامنة، ولا يُعلَن DoD #7 مكتملًا بالكامل. المتبقي استعادة اتصال Figma ثم إعادة مراجعة version history؛ لا حاجة لإعادة إنشاء package لمجرد هذا القيد.
+- **Passed:** حفظ نسخة كاملة قابلة للمراجعة من package في [figma-export.zip](docs/installation/phase-4-verification/figma-export.zip)، وملخص بأعداد الملفات والصور وSHA-256 في [verification.json](docs/installation/phase-4-verification/verification.json). الأصل محفوظ في `/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-export-smoke-nxCrHp/phase4-foreign-export-dy4o03/figma-export`.
+- **Passed:** إغلاق الـPlugin وانتهاء الخادم؛ فحص غياب `~/.magic-ui/session.json` أعاد `Passed: smoke session credentials removed.`. أُبقي سجل النسخ ظاهرًا للمراجعة، ولم تُحذف بيانات المستخدم.
+- **Passed:** `pnpm typecheck`، `pnpm lint`، `pnpm test` — Exit 0؛ 108 tests في 13 files. لا تغييرات production code ولا dependencies في هذه الجلسة.
+- **Failed (أداة UI مساعدة):** محاولة تنشيط التطبيق عبر Dock انتهت بـ`Computer Use server error -10005: timeoutReached`؛ لم تُستخدم كدليل على المزامنة، ولم تؤثر على نجاح التصدير أو فحص الملفات.
+- اختبار light/dark الخاص بـPhase 3 يظل مؤجلًا ومعلّقًا بموافقة صاحب المشروع.
+
+مخرجات smoke الفعلية:
+
+```text
+Passed: all registered tools are read-only.
+Target: test4 / Web
+Passed: package created with 13 files and a valid Design Spec.
+Package: /private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-export-smoke-nxCrHp/phase4-foreign-export-dy4o03/figma-export
+Requires User Action: review previews and reports/missing-information.json (132 entries), then verify the Figma version history has no design modifications.
+```
+
+مراجعة الـpackage المطلوبة في السطر الأخير أُنجزت أعلاه؛ المتبقي فقط قيد تأكيد مزامنة version history.
+
+### Phase 4 — التنفيذ والتحقق الآلي 2026-10-26
+
+- **Passed:** D9 أصبح Locked بموافقة صاحب المشروع. تجاوز شرط إغلاق Phase 3 مصرح به لهذه المرحلة فقط؛ تجربة light/dark تظل **Requires User Action** ومؤجلة صراحة.
+- Read-only من البداية للنهاية: `--read-only` يمنع تسجيل أدوات الكتابة، وready handshake يحمل `readOnly` إلزاميًا، والـbridge وPlugin Main يرفضان الكتابة بـ`PERMISSION_DENIED`. جدول permissions شامل لكل commands في shared، مع اختبار يطابقه بالـunion. يلزم إعادة فتح الـPlugin المبني لتوافق الـhandshake الجديد.
+- Reader عام لأي مستند، بدون اعتماد على ملكية Magic UI: document/pages/page أو subtree/selection/styles، تحميل الصفحات بـ`loadAsync`، خصائص Auto Layout والقيود والنص والـstyled segments والـpaints/effects والـcomponent properties والـoverrides وbindings وVariables وStyles. المعرّفات والبيانات الخام محفوظة؛ لا document setters ولا تغيير صفحة أو selection.
+- نقل JSON وbase64 في fragments مع cursor مربوط بالمدخلات؛ 8,000 UTF-16 units لكل fragment، مع بقاء حد الرسالة 65,536 bytes. Cache لأربع snapshots لمدة خمس دقائق، invalidation عند session ready، ميزانية 32 MiB من serialized characters و100,000 node، وفحص cancellation. القارئ يحتفظ بالأبناء غير المرئيين لإكمال القراءة؛ لا بحث شامل إضافي خارج scope الشجرة.
+- Normalization على server إلى schema 1.0.0 الحالية: ألوان/aliases/modes/typography، frames/text/rectangles/instances، المكونات والـvariants وخصائصها المدعومة، bindings وlayout. يستخدم القيم الفعلية؛ بيانات intent تُستخدم لاستعادة stable ID فقط. التصنيفات التي لا يخزنها Figma تُستنتج من IDs/aliases مع توثيق ذلك.
+- حدود schema الأصلية (ومنها 500 node) لم تتغير. البيانات غير الممثلة، mixed typography، transforms/effects/constraints والمراجع الخارجية وحدود التحويل محفوظة في `reports/raw-extraction.json` و`reports/missing-information.json`. لا اختراع responsive behavior أو framework code. قراءة الصفحات والموارد متتابعة وليست snapshot ذرية أمام تعديلات المستخدم المتزامنة.
+- تصدير PNG/SVG بواسطة `exportAsync`، ونقل base64 مجزأ؛ scale للـPNG عبر Figma ولـSVG عبر viewport مع الاحتفاظ بالهندسة. Package في directory جديدة خاصة `<projectId>-export-*/figma-export/` تحت workspace فقط، بدون overwrite، مع رفض traversal/symlink roots وصلاحيات ملفات 0600. ملفات project/spec/tokens/components/screens وassets/previews/reports/instructions موجودة. فشل asset يُسجّل؛ الإلغاء قد يترك directory جزئية بدون تقرير اكتمال.
+- سبع أدوات جديدة؛ الإجمالي 17 في الوضع العادي و13 في read-only. `pnpm smoke:export` يشغّل الخادم الحقيقي بـread-only ويصدر الصفحة المتصلة. دليل التشغيل: `docs/installation/figma-reader-export.md`.
+- **Passed:** round-trip عبر handlers الإنتاجية لـPhase 3 tokens والـvariants وخصائص المكونات والـlayout المدعوم؛ رفض write محقونة مباشرة إلى Plugin Main في session read-only؛ قراءة 2,000 node عبر MCP/WebSocket على عدة chunks؛ إعادة تجميع asset حجمها 100,000 bytes بدون اختلاف؛ package لتصميم أجنبي في harness، ورفض traversal/symlink، وصفر document writes أثناء القراءة.
+- **Passed:** `pnpm typecheck` — Exit 0. **Passed:** `pnpm lint` — Exit 0، ESLint وPrettier.
+- **Passed:** `pnpm test` — Exit 0؛ **108 tests / 13 files**.
+- **Passed:** `pnpm build` — Exit 0؛ shared/server/plugin. تحذيرا Zod المعروفان عن `@__PURE__` فقط، دون إخفائهما.
+- **Passed:** `pnpm --filter mcp-server start --read-only --selftest` — Exit 0، الأدوات الـ13 أدناه، ولا write tools.
+- **Failed ثم Passed:** أول `pnpm test` داخل sandbox منع sockets المحلية بـ`listen EPERM: operation not permitted 127.0.0.1`؛ أعيد بالصلاحية المناسبة ونجح. أول round-trip كشف اختلاف stable IDs لأبناء variants؛ أُصلح بإعادة الهوية الأصلية دون قراءة الخصائص المرئية من intent. اختبار خصائص المكونات كشف اختلاف الترتيب وvariant اصطناعية Default؛ أُصلح مع الإبقاء على القيم الفعلية.
+- **Requires User Action / Not Tested (لم تُنفّذ تجربة على ملف Figma خارجي في هذه الجلسة):** `pnpm smoke:export`، مراجعة package وmissing-information بصريًا، وإثبات عدم وجود تعديل في version history حسب DoD #7. لا ادعاء بتحقق Figma حقيقي.
+- لا dependencies جديدة ولا تغييرات lockfile أو إعدادات clients خارج المشروع.
+
+مخرجات التحقق الفعلية:
+
+```text
+$ tsc --noEmit && tsc -p packages/plugin/tsconfig.main.json --noEmit
+$ eslint . && prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+Test Files  13 passed (13)
+     Tests  108 passed (108)
+```
+
+مخرجات selftest:
+
+```text
+magic_ui_get_connection_status
+magic_ui_read_node
+magic_ui_validate_design_spec
+magic_ui_find_component
+magic_ui_read_components
+magic_ui_read_variables
+magic_ui_read_document
+magic_ui_list_pages
+magic_ui_read_page
+magic_ui_read_selection
+magic_ui_read_styles
+magic_ui_export_asset
+magic_ui_export_design_package
+```
+
+### Phase 4 — فحص البداية السابق 2026-10-26 (حُلّ بموافقة صاحب المشروع)
 
 - **Passed:** قراءة `AGENTS.md` و`PROGRESS.md` و`prompts/phase-4.md` وجدول القرارات في `docs/ARCHITECTURE.md §2`.
 - **Requires User Action:** D9 ما زال Proposed؛ تعليمات Phase 4 تشترط تحويله إلى Locked بعد موافقة صاحب المشروع، وتنص صراحة على التوقف والسؤال قبل التنفيذ.
@@ -449,11 +541,13 @@ $ vitest run
 
 ## Blockers / Requires User Action
 
+- **Phase 4 — بند تحقق مؤجل، وليس عائق إغلاق:** تأكيد مزامنة Figma وversion history المتزامنة يبقى Requires User Action؛ أُغلقت المرحلة بموافقة صريحة من صاحب المشروع بتاريخ 2026-10-26 على هذا الاستثناء. التصدير الحقيقي ومراجعة الـpackage والتقرير Passed، والقائمة الظاهرة متطابقة قبل/بعد.
+
 - **Phase 3:** المتبقي للإغلاق تجربة تبديل light/dark في ملف Figma يسمح بـmodeين. الملف الحالي أعاد `Limited to 1 modes only`. تجربة light مكتملة وPassed، ولا توجد موافقات معمارية معلقة.
 
 - لا توجد عوائق متبقية لإغلاق Phase 1.
 - إعادة تشغيل الخادم تولّد token جديدًا؛ يحتاج نسخه إلى الـPlugin مرة أخرى. الـframe التجريبي لم يُحذف.
-- D6 وD9 وD11 فقط ما زالت Proposed ومؤجلة. D7 وD8 وD12 Locked واستُخدمت في Phase 2. لا multi-client hub ولا read-only mode ولا تسجيل clients أو setup آلي.
+- D6 وD11 فقط ما زالت Proposed ومؤجلة. D9 Locked ونُفّذ في Phase 4. لا multi-client hub ولا تسجيل clients أو setup آلي.
 - لا توجد عوائق متبقية لـPhase 2؛ التحقق الحقيقي والمراجعة البصرية **Passed**، والمرحلة مغلقة.
 
 ## Not Verifiable in Agent Environment
@@ -461,6 +555,8 @@ $ vitest run
 - Node 24 LTS غير مثبت؛ لم تُشغّل الاختبارات عليه. هذا لا يغيّر نتيجة التجربة الحقيقية على البيئة الحالية.
 
 ## Dependencies Added (مع المبرر)
+
+**Phase 4: لا dependencies جديدة ولا تعديل على lockfile.**
 
 **Phase 3: لا dependencies جديدة ولا تعديل على lockfile.**
 
@@ -488,5 +584,5 @@ Playwright استُخدم من بيئة `webapp-testing` المثبتة مسبق
 
 ## Backlog
 
-- لا توسع خارج Phase 3. images/assets/mockups/sync/Trash/multi-session/read-only تظل للمراحل اللاحقة. components/variants/variables/styles نُفذت ضمن Phase 3.
+- لا توسع خارج Phase 4. تسجيل assets/mockups/sync/Trash/multi-session تظل للمراحل اللاحقة؛ تصدير assets والـreader وread-only نُفذت ضمن Phase 4. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
 - تسوية drift وتغيير نوع node واستكمال الفشل الجزئي بقرارات المستخدم تبقى لمسار sync/recovery في المرحلة المحددة لها؛ لا auto-merge في Phase 2.

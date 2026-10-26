@@ -43,7 +43,9 @@ export class BridgeServer {
       heartbeatMs?: number;
     },
   ) {}
-  get readOnly() { return this.options.readOnly ?? false; }
+  get readOnly() {
+    return this.options.readOnly ?? false;
+  }
   async start(): Promise<number> {
     const server = new WebSocketServer({
       host: '127.0.0.1',
@@ -204,7 +206,12 @@ export class BridgeServer {
     command: Command,
     signal?: AbortSignal,
   ): Promise<CommandResult> {
-    if (this.readOnly && commandPermissions[command.command] !== 'read') return Promise.reject(new MagicUiError(failure('PERMISSION_DENIED', 'This session is read-only.')));
+    if (this.readOnly && commandPermissions[command.command] !== 'read')
+      return Promise.reject(
+        new MagicUiError(
+          failure('PERMISSION_DENIED', 'This session is read-only.'),
+        ),
+      );
     const connection = this.plugin;
     if (!connection)
       return Promise.reject(

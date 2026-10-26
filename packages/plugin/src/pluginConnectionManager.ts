@@ -87,7 +87,9 @@ export class PluginConnectionManager {
         this.post({ kind: 'bridge', message });
         this.onState({
           phase: 'connected',
-          message: 'Connected. Ready for frame commands.',
+          message: message.payload.readOnly
+            ? 'Connected. Read-only: document writes are blocked.'
+            : 'Connected. Ready for frame commands.',
         });
       } else if (message.type === 'command') {
         this.requests.add(message.correlationId);

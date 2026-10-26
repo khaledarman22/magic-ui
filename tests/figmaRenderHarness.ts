@@ -48,6 +48,16 @@ export function createRenderHarness() {
       string,
       { type: string; defaultValue: string | boolean }
     > = {};
+    get variantProperties() {
+      return this.type === 'COMPONENT' && this.parent?.type === 'COMPONENT_SET'
+        ? Object.fromEntries(
+            this.name
+              .split(', ')
+              .filter((p) => p.includes('='))
+              .map((p) => p.split('=')),
+          )
+        : null;
+    }
     get componentPropertyDefinitions() {
       if (this.type === 'COMPONENT' && this.parent?.type === 'COMPONENT_SET')
         throw new Error(
@@ -81,6 +91,28 @@ export function createRenderHarness() {
       return this.findAll(predicate)[0] ?? null;
     }
     async loadAsync() {}
+    getStyledTextSegments() {
+      return [
+        {
+          start: 0,
+          end: String(this.characters ?? '').length,
+          characters: this.characters,
+          fontName: this.fontName,
+          fontSize: this.fontSize,
+          fills: this.fills,
+        },
+      ];
+    }
+    async exportAsync(options: { format: string }) {
+      return new Uint8Array(
+        Buffer.from(
+          options.format === 'SVG'
+            ? '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+            : 'test-only-png',
+        ),
+      );
+    }
+
     setBoundVariable(field: string, variable: { id: string } | null) {
       if (variable)
         this.boundVariables[field] = {
@@ -193,6 +225,10 @@ export function createRenderHarness() {
     styles: HarnessNode[] = [];
   const api = {
     root: document,
+    base64Encode: (bytes: Uint8Array) => Buffer.from(bytes).toString('base64'),
+    getLocalPaintStylesAsync: async () => [],
+    getLocalEffectStylesAsync: async () => [],
+    getLocalGridStylesAsync: async () => [],
     variables: {
       getLocalVariablesAsync: async () => variables,
       getLocalVariableCollectionsAsync: async () => collections,

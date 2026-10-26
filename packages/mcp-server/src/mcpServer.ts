@@ -1,4 +1,20 @@
-import { readerInputSchema, readerChunkSchema, readerToolSchema, exportPackageSchema, exportAssetSchema, exportResultSchema } from '@magic-ui/shared';
+import { SyncEngine } from './syncEngine.js';
+import {
+  syncToolSchema,
+  syncReportSchema,
+  resumeToolSchema,
+  trashToolSchema,
+  restoreToolSchema,
+  syncLiveSchema,
+} from '@magic-ui/shared';
+import {
+  readerInputSchema,
+  readerChunkSchema,
+  readerToolSchema,
+  exportPackageSchema,
+  exportAssetSchema,
+  exportResultSchema,
+} from '@magic-ui/shared';
 import { exportDesignPackage, exportAsset } from './figmaExport.js';
 import {
   designSystemToolSchema,
@@ -42,6 +58,7 @@ export function createMcpServer(
     process.env.MAGIC_UI_WORKSPACE_ROOT ?? process.cwd(),
   ),
 ) {
+  const sync = new SyncEngine(bridge, workspace);
   const server = new McpServer({ name: 'magic-ui', version: '0.1.0' });
   server.registerTool(
     'magic_ui_get_connection_status',
@@ -105,28 +122,29 @@ export function createMcpServer(
     'CANCELLED',
     'INTERNAL_ERROR',
   ];
-  if (!bridge.readOnly) server.registerTool(
-    'magic_ui_create_frame',
-    {
-      description:
-        'Create one frame in the explicitly selected session and current page. After a timeout, inspect Figma before retrying to avoid duplicates.',
-      inputSchema: createFrameToolSchema,
-      outputSchema: nodeSnapshotSchema,
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false,
+  if (!bridge.readOnly)
+    server.registerTool(
+      'magic_ui_create_frame',
+      {
+        description:
+          'Create one frame in the explicitly selected session and current page. After a timeout, inspect Figma before retrying to avoid duplicates.',
+        inputSchema: createFrameToolSchema,
+        outputSchema: nodeSnapshotSchema,
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: false,
+          openWorldHint: false,
+        },
+        _meta: {
+          permission: 'write',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: [...sharedErrors, 'PAGE_CHANGED'],
+        },
       },
-      _meta: {
-        permission: 'write',
-        timeoutMs: REQUEST_TIMEOUT_MS,
-        errorCodes: [...sharedErrors, 'PAGE_CHANGED'],
-      },
-    },
-    ({ sessionId, ...input }, extra) =>
-      execute(sessionId, { command: 'createFrame', input }, extra.signal),
-  );
+      ({ sessionId, ...input }, extra) =>
+        execute(sessionId, { command: 'createFrame', input }, extra.signal),
+    );
   server.registerTool(
     'magic_ui_read_node',
     {
@@ -172,32 +190,33 @@ export function createMcpServer(
       };
     }
   }
-  if (!bridge.readOnly) server.registerTool(
-    'magic_ui_initialize_project',
-    {
-      description:
-        'Create <ProjectName>-Design with project.json and design-spec.json inside MAGIC_UI_WORKSPACE_ROOT (defaults to server working directory). Existing directories and project IDs are refused.',
-      inputSchema: initializeProjectSchema,
-      outputSchema: initializeProjectResultSchema,
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false,
+  if (!bridge.readOnly)
+    server.registerTool(
+      'magic_ui_initialize_project',
+      {
+        description:
+          'Create <ProjectName>-Design with project.json and design-spec.json inside MAGIC_UI_WORKSPACE_ROOT (defaults to server working directory). Existing directories and project IDs are refused.',
+        inputSchema: initializeProjectSchema,
+        outputSchema: initializeProjectResultSchema,
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: false,
+          openWorldHint: false,
+        },
+        _meta: {
+          permission: 'write',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: ['INVALID_INPUT', 'WORKSPACE_ERROR', 'CANCELLED'],
+        },
       },
-      _meta: {
-        permission: 'write',
-        timeoutMs: REQUEST_TIMEOUT_MS,
-        errorCodes: ['INVALID_INPUT', 'WORKSPACE_ERROR', 'CANCELLED'],
-      },
-    },
-    (input, extra) =>
-      localResult(() => {
-        if (extra.signal.aborted)
-          throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
-        return workspace.initialize(input);
-      }),
-  );
+      (input, extra) =>
+        localResult(() => {
+          if (extra.signal.aborted)
+            throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
+          return workspace.initialize(input);
+        }),
+    );
   server.registerTool(
     'magic_ui_validate_design_spec',
     {
@@ -220,53 +239,53 @@ export function createMcpServer(
     ({ specification }) =>
       localResult(() => validateDesignSpecification(specification)),
   );
-  if (!bridge.readOnly) server.registerTool(
-    'magic_ui_render_design',
-    {
-      description:
-        'Read project design-spec.json from the allowed workspace and render one screen into the explicitly selected current Figma page. Reuses stable IDs, reports orphans without deleting, and refuses manual drift before writing.',
-      inputSchema: renderDesignToolSchema,
-      outputSchema: renderDesignResultSchema,
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false,
+  if (!bridge.readOnly)
+    server.registerTool(
+      'magic_ui_render_design',
+      {
+        description:
+          'Read project design-spec.json from the allowed workspace and render one screen into the explicitly selected current Figma page. Reuses stable IDs, reports orphans without deleting, and refuses manual drift before writing.',
+        inputSchema: renderDesignToolSchema,
+        outputSchema: renderDesignResultSchema,
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+        _meta: {
+          permission: 'write',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: [
+            ...sharedErrors,
+            'PAGE_CHANGED',
+            'SESSION_BUSY',
+            'FONT_UNAVAILABLE',
+            'FIGMA_MODE_LIMIT',
+            'DRIFT_DETECTED',
+            'MESSAGE_TOO_LARGE',
+            'PROJECT_NOT_FOUND',
+            'WORKSPACE_ERROR',
+            'UNSUPPORTED_SCHEMA_VERSION',
+          ],
+        },
       },
-      _meta: {
-        permission: 'write',
-        timeoutMs: REQUEST_TIMEOUT_MS,
-        errorCodes: [
-          ...sharedErrors,
-          'PAGE_CHANGED',
-          'SESSION_BUSY',
-          'FONT_UNAVAILABLE',
-          'FIGMA_MODE_LIMIT',
-          'DRIFT_DETECTED',
-          'MESSAGE_TOO_LARGE',
-          'PROJECT_NOT_FOUND',
-          'WORKSPACE_ERROR',
-          'UNSUPPORTED_SCHEMA_VERSION',
-        ],
-      },
-    },
-    async ({ sessionId, ...input }, extra) => {
-      try {
-        const specification = await workspace.readSpecification(
-          input.projectId,
-        );
-        return execute(
-          sessionId,
-          { command: 'renderDesign', input: { ...input, specification } },
-          extra.signal,
-        );
-      } catch (error) {
-        return localResult(() => {
-          throw error;
-        });
-      }
-    },
-  );
+      (input, extra) =>
+        localResult(() =>
+          sync.render(
+            { ...input, decisions: [] },
+            extra.signal,
+            async (progress, total) => {
+              const progressToken = extra._meta?.progressToken;
+              if (progressToken !== undefined)
+                await extra.sendNotification({
+                  method: 'notifications/progress',
+                  params: { progressToken, progress, total },
+                });
+            },
+          ),
+        ),
+    );
 
   const annotations = {
     readOnlyHint: true,
@@ -274,49 +293,53 @@ export function createMcpServer(
     idempotentHint: true,
     openWorldHint: false,
   };
-  if (!bridge.readOnly) server.registerTool(
-    'magic_ui_render_design_system',
-    {
-      description:
-        'Render project tokens, typography styles and explicit component variants in dependency order. Persist the returned component registry locally. Requires an explicit active page and session.',
-      inputSchema: designSystemToolSchema,
-      outputSchema: designSystemResultSchema,
-      annotations: { ...annotations, readOnlyHint: false },
-      _meta: {
-        permission: 'write',
-        timeoutMs: REQUEST_TIMEOUT_MS,
-        errorCodes: [
-          ...sharedErrors,
-          'PAGE_CHANGED',
-          'DRIFT_DETECTED',
-          'FONT_UNAVAILABLE',
-          'FIGMA_MODE_LIMIT',
-          'WORKSPACE_ERROR',
-          'MESSAGE_TOO_LARGE',
-        ],
+  if (!bridge.readOnly)
+    server.registerTool(
+      'magic_ui_render_design_system',
+      {
+        description:
+          'Render project tokens, typography styles and explicit component variants in dependency order. Persist the returned component registry locally. Requires an explicit active page and session.',
+        inputSchema: designSystemToolSchema,
+        outputSchema: designSystemResultSchema,
+        annotations: { ...annotations, readOnlyHint: false },
+        _meta: {
+          permission: 'write',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: [
+            ...sharedErrors,
+            'PAGE_CHANGED',
+            'DRIFT_DETECTED',
+            'FONT_UNAVAILABLE',
+            'FIGMA_MODE_LIMIT',
+            'WORKSPACE_ERROR',
+            'MESSAGE_TOO_LARGE',
+          ],
+        },
       },
-    },
-    ({ sessionId, ...input }, extra) =>
-      localResult(async () => {
-        const specification = await workspace.readSpecification(
-          input.projectId,
-        );
-        const response = await bridge.request(
-          sessionId,
-          { command: 'renderDesignSystem', input: { ...input, specification } },
-          extra.signal,
-        );
-        if (response.command !== 'renderDesignSystem')
-          throw new Error('Unexpected response');
-        await workspace.writeRegistry(
-          componentRegistrySchema.parse({
-            projectId: input.projectId,
-            components: response.result.components,
-          }),
-        );
-        return response.result;
-      }),
-  );
+      ({ sessionId, ...input }, extra) =>
+        localResult(async () => {
+          const specification = await workspace.readSpecification(
+            input.projectId,
+          );
+          const response = await bridge.request(
+            sessionId,
+            {
+              command: 'renderDesignSystem',
+              input: { ...input, specification },
+            },
+            extra.signal,
+          );
+          if (response.command !== 'renderDesignSystem')
+            throw new Error('Unexpected response');
+          await workspace.writeRegistry(
+            componentRegistrySchema.parse({
+              projectId: input.projectId,
+              components: response.result.components,
+            }),
+          );
+          return response.result;
+        }),
+    );
   server.registerTool(
     'magic_ui_find_component',
     {
@@ -387,23 +410,181 @@ export function createMcpServer(
     ({ sessionId, ...input }, extra) =>
       execute(sessionId, { command: 'readVariables', input }, extra.signal),
   );
-  const readTools = { magic_ui_read_document: 'document', magic_ui_list_pages: 'pages', magic_ui_read_page: 'page', magic_ui_read_selection: 'selection', magic_ui_read_styles: 'styles' } as const;
-  for (const [name, scope] of Object.entries(readTools)) server.registerTool(name, {
-    description: `Read Figma ${scope} without document writes. Returns a JSON fragment and nextCursor; repeat the identical scope with that cursor, concatenate data, then parse JSON. read_page accepts a page or subtree nodeId.`,
-    inputSchema: readerToolSchema.omit({scope:true}), outputSchema: readerChunkSchema, annotations,
-    _meta: {permission:'read', timeoutMs:REQUEST_TIMEOUT_MS, errorCodes:[...sharedErrors,'INVALID_CURSOR','NODE_NOT_FOUND','MESSAGE_TOO_LARGE']},
-  }, ({sessionId,...input},extra)=>execute(sessionId,{command:'readFigma',input:readerInputSchema.parse({...input,scope})},extra.signal));
-  const exportRoot=process.env.MAGIC_UI_WORKSPACE_ROOT ?? process.cwd();
-  server.registerTool('magic_ui_export_asset', {
-    description:'Export PNG or SVG without modifying Figma. Writes to a new private figma-export directory under MAGIC_UI_WORKSPACE_ROOT. SVG retains its vector dimensions; scale applies to PNG.',
-    inputSchema:exportAssetSchema,outputSchema:exportResultSchema,annotations,
-    _meta:{permission:'read',timeoutMs:REQUEST_TIMEOUT_MS,errorCodes:[...sharedErrors,'WORKSPACE_ERROR','MESSAGE_TOO_LARGE']},
-  },(input,extra)=>localResult(()=>exportAsset(bridge,exportRoot,input,extra.signal)));
-  server.registerTool('magic_ui_export_design_package', {
-    description:'Extract the specified page or subtree into a framework-independent figma-export package, including raw source, normalized design specification, assets, previews and loss reports. Does not modify Figma. Output uses a new private directory under MAGIC_UI_WORKSPACE_ROOT.',
-    inputSchema:exportPackageSchema,outputSchema:exportResultSchema,annotations,
-    _meta:{permission:'read',timeoutMs:REQUEST_TIMEOUT_MS,errorCodes:[...sharedErrors,'WORKSPACE_ERROR','MESSAGE_TOO_LARGE']},
-  },(input,extra)=>localResult(()=>exportDesignPackage(bridge,exportRoot,input,extra.signal)));
+  const readTools = {
+    magic_ui_read_document: 'document',
+    magic_ui_list_pages: 'pages',
+    magic_ui_read_page: 'page',
+    magic_ui_read_selection: 'selection',
+    magic_ui_read_styles: 'styles',
+  } as const;
+  for (const [name, scope] of Object.entries(readTools))
+    server.registerTool(
+      name,
+      {
+        description: `Read Figma ${scope} without document writes. Returns a JSON fragment and nextCursor; repeat the identical scope with that cursor, concatenate data, then parse JSON. read_page accepts a page or subtree nodeId.`,
+        inputSchema: readerToolSchema.omit({ scope: true }),
+        outputSchema: readerChunkSchema,
+        annotations,
+        _meta: {
+          permission: 'read',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: [
+            ...sharedErrors,
+            'INVALID_CURSOR',
+            'NODE_NOT_FOUND',
+            'MESSAGE_TOO_LARGE',
+          ],
+        },
+      },
+      ({ sessionId, ...input }, extra) =>
+        execute(
+          sessionId,
+          {
+            command: 'readFigma',
+            input: readerInputSchema.parse({ ...input, scope }),
+          },
+          extra.signal,
+        ),
+    );
+  const exportRoot = workspace.allowedRoot;
+  server.registerTool(
+    'magic_ui_export_asset',
+    {
+      description:
+        'Export PNG or SVG without modifying Figma. Writes to a new private figma-export directory under MAGIC_UI_WORKSPACE_ROOT. Scale controls PNG raster size and SVG viewport size.',
+      inputSchema: exportAssetSchema,
+      outputSchema: exportResultSchema,
+      annotations,
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: [...sharedErrors, 'WORKSPACE_ERROR', 'MESSAGE_TOO_LARGE'],
+      },
+    },
+    (input, extra) =>
+      localResult(() => exportAsset(bridge, exportRoot, input, extra.signal)),
+  );
+  server.registerTool(
+    'magic_ui_export_design_package',
+    {
+      description:
+        'Extract the specified page or subtree into a framework-independent figma-export package, including raw source, normalized design specification, assets, previews and loss reports. Does not modify Figma. Output uses a new private directory under MAGIC_UI_WORKSPACE_ROOT.',
+      inputSchema: exportPackageSchema,
+      outputSchema: exportResultSchema,
+      annotations,
+      _meta: {
+        permission: 'read',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+        errorCodes: [...sharedErrors, 'WORKSPACE_ERROR', 'MESSAGE_TOO_LARGE'],
+      },
+    },
+    (input, extra) =>
+      localResult(() =>
+        exportDesignPackage(bridge, exportRoot, input, extra.signal),
+      ),
+  );
+
+  for (const name of [
+    'magic_ui_get_sync_status',
+    'magic_ui_preview_changes',
+    'magic_ui_apply_changes',
+  ] as const) {
+    const write = name === 'magic_ui_apply_changes';
+    if (write && bridge.readOnly) continue;
+    server.registerTool(
+      name,
+      {
+        description: write
+          ? 'Apply only spec-changed nodes by default. Manual changes and missing identities require explicit per-node keep-figma/apply-spec. Journals each step; accepts operationId for idempotent retry.'
+          : 'Compare workspace intent, sync-state and live Figma. Preview operations without writing. Missing nodes, conflicts and orphans require explicit action.',
+        inputSchema: syncToolSchema,
+        outputSchema: syncReportSchema,
+        annotations: { ...annotations, readOnlyHint: !write },
+        _meta: {
+          permission: write ? 'write' : 'read',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: [
+            ...sharedErrors,
+            'DRIFT_DETECTED',
+            'WORKSPACE_ERROR',
+            'SESSION_BUSY',
+          ],
+        },
+      },
+      (input, extra) =>
+        localResult(() =>
+          write
+            ? sync.run(
+                input,
+                extra.signal,
+                'apply',
+                async (progress, total) => {
+                  const progressToken = extra._meta?.progressToken;
+                  if (progressToken !== undefined)
+                    await extra.sendNotification({
+                      method: 'notifications/progress',
+                      params: { progressToken, progress, total },
+                    });
+                },
+              )
+            : sync.preview(input, extra.signal),
+        ),
+    );
+  }
+  if (!bridge.readOnly) {
+    server.registerTool(
+      'magic_ui_resume_operation',
+      {
+        description:
+          'Resume a saved render/apply operation against its frozen specification. Re-inspects Figma even for completed checkpoints; never recreates a manually deleted checkpointed node without apply-spec.',
+        inputSchema: resumeToolSchema,
+        outputSchema: syncReportSchema,
+        annotations: { ...annotations, readOnlyHint: false },
+        _meta: {
+          permission: 'write',
+          timeoutMs: REQUEST_TIMEOUT_MS,
+          errorCodes: [...sharedErrors, 'DRIFT_DETECTED', 'WORKSPACE_ERROR'],
+        },
+      },
+      (input, extra) =>
+        localResult(() =>
+          sync.resume(
+            input.sessionId,
+            input.projectId,
+            input.operationId,
+            input.decisions,
+            extra.signal,
+            async (progress, total) => {
+              const progressToken = extra._meta?.progressToken;
+              if (progressToken !== undefined)
+                await extra.sendNotification({
+                  method: 'notifications/progress',
+                  params: { progressToken, progress, total },
+                });
+            },
+          ),
+        ),
+    );
+    for (const restore of [false, true])
+      server.registerTool(
+        restore ? 'magic_ui_restore_from_trash' : 'magic_ui_move_to_trash',
+        {
+          description: restore
+            ? 'Restore an owned node to its recorded parent, sibling index and coordinates. Refuses a missing parent.'
+            : 'Explicitly move an orphaned owned node to a project-owned Trash page, recording reason and original identity/location. Refuses user content.',
+          inputSchema: restore ? restoreToolSchema : trashToolSchema,
+          outputSchema: syncLiveSchema,
+          annotations: { ...annotations, readOnlyHint: false },
+          _meta: {
+            permission: 'write',
+            timeoutMs: REQUEST_TIMEOUT_MS,
+            errorCodes: [...sharedErrors, 'DRIFT_DETECTED', 'NODE_NOT_FOUND'],
+          },
+        },
+        (input, extra) =>
+          localResult(() => sync.trash(input, restore, extra.signal)),
+      );
+  }
   return server;
 }
 
@@ -415,7 +596,13 @@ export async function listRegisteredTools(bridge: BridgeServer) {
   try {
     await server.connect(serverTransport);
     await client.connect(clientTransport);
-    return (await client.listTools()).tools.map((tool) => tool.name);
+    const tools = (await client.listTools()).tools;
+    if (
+      bridge.readOnly &&
+      tools.some((tool) => tool._meta?.permission !== 'read')
+    )
+      throw new Error('Read-only server registered a write tool.');
+    return tools.map((tool) => tool.name);
   } finally {
     await client.close();
     await server.close();

@@ -1,3 +1,4 @@
+import { inspectSync, syncStep, trashNode } from './syncController';
 import { readFigma } from './figmaReader';
 import {
   renderDesignSystem,
@@ -31,11 +32,27 @@ export async function executePluginCommand(
   isCancelled: () => boolean,
   readOnly = false,
 ): Promise<CommandResult> {
-  if (readOnly && commandPermissions[command.command] !== 'read') throw new MagicUiError(failure('PERMISSION_DENIED', 'This session is read-only.'));
+  if (readOnly && commandPermissions[command.command] !== 'read')
+    throw new MagicUiError(
+      failure('PERMISSION_DENIED', 'This session is read-only.'),
+    );
   if (isCancelled())
     throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
   switch (command.command) {
-    case 'readFigma': return {command: 'readFigma', result: await readFigma(command.input, isCancelled)};
+    case 'inspectSync':
+      return {
+        command: 'inspectSync',
+        result: await inspectSync(command.input),
+      };
+    case 'syncStep':
+      return { command: 'syncStep', result: await syncStep(command.input) };
+    case 'trashNode':
+      return { command: 'trashNode', result: await trashNode(command.input) };
+    case 'readFigma':
+      return {
+        command: 'readFigma',
+        result: await readFigma(command.input, isCancelled),
+      };
     case 'renderDesignSystem':
       return {
         command: 'renderDesignSystem',

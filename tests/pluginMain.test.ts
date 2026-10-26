@@ -73,6 +73,7 @@ beforeEach(async () => {
     kind: 'bridge',
     message: envelope('ready', 'session', 'auth', {
       heartbeatIntervalMs: 5000,
+      readOnly: false,
     }),
   });
 });
@@ -230,4 +231,44 @@ it('replaces oversized responses with an explicit size error', async () => {
     },
   });
   expect(Buffer.byteLength(JSON.stringify(replies.at(-1)))).toBeLessThan(65536);
+});
+
+it('rejects a write injected into a read-only Main session independently of server enforcement', async () => {
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('ready', 'readonly', 'auth', {
+      heartbeatIntervalMs: 5000,
+      readOnly: true,
+    }),
+  });
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('command', 'readonly', 'bypass', {
+      command: 'createFrame',
+      input: {
+        pageId: '0:1',
+        name: 'Forbidden',
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+      },
+    }),
+  });
+  expect(figmaHarness.createFrame).not.toHaveBeenCalled();
+  expect(replies.at(-1)).toMatchObject({
+    kind: 'bridge',
+    message: { type: 'error', payload: { code: 'PERMISSION_DENIED' } },
+  });
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('command', 'readonly', 'read', {
+      command: 'readNode',
+      input: { nodeId: '1:2' },
+    }),
+  });
+  expect(replies.at(-1)).toMatchObject({
+    kind: 'bridge',
+    message: { type: 'result' },
+  });
 });

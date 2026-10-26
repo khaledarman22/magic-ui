@@ -20,10 +20,12 @@ import {
   MAX_MESSAGE_BYTES,
   componentRegistrySchema,
   type ComponentRegistry,
+  syncStatesSchema,
+  syncJournalsSchema,
 } from '@magic-ui/shared';
 
 export class DesignWorkspace {
-  constructor(private readonly allowedRoot: string) {}
+  constructor(readonly allowedRoot: string) {}
   private async root() {
     const root = resolve(this.allowedRoot);
     // The configured root must already exist; never follow a root symlink.
@@ -36,21 +38,21 @@ export class DesignWorkspace {
       );
     return root;
   }
-  private async readJson(path: string) {
+  private async readJson(path: string, limit = MAX_MESSAGE_BYTES) {
     const handle = await open(
       path,
       constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
     );
     try {
       const stat = await handle.stat();
-      if (!stat.isFile() || stat.size > MAX_MESSAGE_BYTES)
+      if (!stat.isFile() || stat.size > limit)
         throw new MagicUiError(
           failure(
             'MESSAGE_TOO_LARGE',
             'Workspace JSON must be a regular file of at most 65536 bytes.',
           ),
         );
-      const buffer = Buffer.alloc(MAX_MESSAGE_BYTES + 1);
+      const buffer = Buffer.alloc(limit + 1);
       let total = 0;
       while (total < buffer.length) {
         const { bytesRead } = await handle.read(
@@ -62,7 +64,7 @@ export class DesignWorkspace {
         if (!bytesRead) break;
         total += bytesRead;
       }
-      if (total > MAX_MESSAGE_BYTES)
+      if (total > limit)
         throw new MagicUiError(
           failure('MESSAGE_TOO_LARGE', 'Workspace JSON exceeds 65536 bytes.'),
         );
@@ -238,6 +240,88 @@ export class DesignWorkspace {
         failure('MESSAGE_TOO_LARGE', 'Registry exceeds workspace limit.'),
       );
     const temporary = join(directory, `.components-${randomUUID()}.json`);
+    const handle = await open(
+      temporary,
+      constants.O_WRONLY |
+        constants.O_CREAT |
+        constants.O_EXCL |
+        constants.O_NOFOLLOW,
+      0o600,
+    );
+    try {
+      await handle.writeFile(data);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    try {
+      await rename(temporary, destination);
+    } finally {
+      await unlink(temporary).catch(() => {});
+    }
+  }
+  async readSyncData(projectId: string) {
+    return syncStatesSchema.parse(
+      (await this.readRecoveryFile(projectId, 'sync-state.json')) ?? {
+        screens: [],
+      },
+    );
+  }
+  async readJournals(projectId: string) {
+    return syncJournalsSchema.parse(
+      (await this.readRecoveryFile(projectId, 'design-progress.json')) ?? {
+        operations: [],
+      },
+    );
+  }
+  private async readRecoveryFile(projectId: string, filename: string) {
+    const directory = await this.projectDirectory(projectId);
+    try {
+      return await this.readJson(join(directory, filename), 8 * 1024 * 1024);
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      )
+        return undefined;
+      throw error;
+    }
+  }
+  async writeRecoveryFile(
+    projectId: string,
+    filename: 'sync-state.json' | 'design-progress.json',
+    value: unknown,
+  ) {
+    const parsed =
+      filename === 'sync-state.json'
+        ? syncStatesSchema.parse(value)
+        : syncJournalsSchema.parse(value);
+    const directory = await this.projectDirectory(projectId);
+    const destination = join(directory, filename);
+    try {
+      const stat = await lstat(destination);
+      if (!stat.isFile() || stat.isSymbolicLink())
+        throw new Error('Recovery file must be a regular file.');
+    } catch (error) {
+      if (!(
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'ENOENT'
+      ))
+        throw error;
+    }
+    const data = JSON.stringify(parsed) + '\n';
+    if (Buffer.byteLength(data) > 8 * 1024 * 1024)
+      throw new MagicUiError(
+        failure(
+          'MESSAGE_TOO_LARGE',
+          'Recovery history exceeds 8 MiB. Archive completed operations explicitly.',
+        ),
+      );
+    const temporary = join(directory, `.recovery-${randomUUID()}.json`);
     const handle = await open(
       temporary,
       constants.O_WRONLY |

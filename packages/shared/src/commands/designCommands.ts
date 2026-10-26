@@ -26,6 +26,7 @@ export const renderDesignToolSchema = z
     projectId: stableIdSchema,
     screenId: stableIdSchema,
     pageId: identifierSchema,
+    operationId: identifierSchema.optional(),
   })
   .strict();
 export const renderDesignSchema = renderDesignToolSchema
@@ -36,6 +37,7 @@ export const nodeMappingSchema = z
   .strict();
 export const renderDesignResultSchema = z
   .object({
+    operationId: identifierSchema.optional(),
     nodeCount: z.number().int().min(0),
     created: z.number().int().min(0),
     updated: z.number().int().min(0),

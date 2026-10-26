@@ -31,7 +31,10 @@ export const envelopeSchema = z.discriminatedUnion('type', [
       ...envelopeFields,
       type: z.literal('ready'),
       payload: z
-        .object({ heartbeatIntervalMs: z.number().positive(), readOnly: z.boolean().default(false) })
+        .object({
+          heartbeatIntervalMs: z.number().positive(),
+          readOnly: z.boolean(),
+        })
         .strict(),
     })
     .strict(),
@@ -69,7 +72,7 @@ export function envelope<T extends Envelope['type']>(
   type: T,
   sessionId: string,
   correlationId: string,
-  payload: T extends 'ready' ? { heartbeatIntervalMs: number; readOnly?: boolean } : Extract<Envelope, { type: T }>['payload'],
+  payload: Extract<Envelope, { type: T }>['payload'],
 ): Extract<Envelope, { type: T }> {
   // The generic discriminator and payload are paired by the signature and checked at runtime.
   return envelopeSchema.parse({

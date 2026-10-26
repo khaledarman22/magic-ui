@@ -10,7 +10,11 @@ import {
 } from './sessionCredentials.js';
 
 export async function startServer(
-  options: { port?: number; sessionDirectory?: string; readOnly?: boolean } = {},
+  options: {
+    port?: number;
+    sessionDirectory?: string;
+    readOnly?: boolean;
+  } = {},
 ) {
   const token = generateSessionToken();
   const bridge = new BridgeServer({

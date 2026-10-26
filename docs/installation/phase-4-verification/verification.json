@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-26",
+  "file": "test4",
+  "url": "https://www.figma.com/design/N4T7RvY4oQpZrJR73QFD2I/test4",
+  "page": "Web",
+  "sourcePackage": "/private/var/folders/32/ttvmzbn52j73k1vlyl56r5mw0000gn/T/magic-ui-export-smoke-nxCrHp/phase4-foreign-export-dy4o03/figma-export",
+  "smokeExitCode": 0,
+  "fileCount": 13,
+  "rawNodes": 126,
+  "normalizedSceneNodes": 125,
+  "textNodes": 71,
+  "variables": 25,
+  "textStyles": 8,
+  "magicUiIdentities": 0,
+  "images": [
+    {
+      "file": "previews/7d7ae3bed43c875c968747ac.png",
+      "width": 2041,
+      "height": 2700
+    },
+    {
+      "file": "assets/8d2f37e2bdf040940c61a404.png",
+      "width": 54,
+      "height": 54
+    },
+    {
+      "file": "assets/4de45bdc1dd7072c830625e9.png",
+      "width": 40,
+      "height": 40
+    },
+    {
+      "file": "assets/25bef40295c52d5f9578765c.png",
+      "width": 40,
+      "height": 40
+    }
+  ],
+  "reportEntries": {
+    "rawProperties": 125,
+    "imageFills": 3,
+    "externalComponentInstances": 2,
+    "tokenCategoryProjection": 1,
+    "responsiveBehaviorUnknown": 1
+  },
+  "historyBefore": ["Current version", "12:36 AM — khaled waleed"],
+  "historyAfter": ["Current version", "12:36 AM — khaled waleed"],
+  "visibleHistoryComparison": "Passed: same visible entries; no new entry observed.",
+  "serverHistoryVerification": "Requires User Action: Figma accessibility surface retained the warning Some changes won't be synced until Figma is able to reconnect. Server synchronization could not be independently confirmed.",
+  "archiveSha256": "6f78c18dedb1b939c32738b691a9bc3ed2c9cb4e64dd47038bf0dc41e331ad14",
+  "syncRecheck": {
+    "date": "2026-10-26",
+    "visibleHistory": ["Current version", "12:36 AM — khaled waleed"],
+    "newVisibleVersion": false,
+    "desktopSyncConfirmed": false,
+    "freshWebRead": "File loaded successfully; version history required authentication.",
+    "phase4Closed": false,
+    "evidence": "version-history-recheck.txt"
+  }
+}

@@ -158,7 +158,18 @@ it('returns structured drift and font errors through the complete transport', as
   expect(JSON.stringify((await render()).content)).toContain(
     'FONT_UNAVAILABLE',
   );
-  await render();
+  const journal = (await new DesignWorkspace(root).readJournals('phase2-smoke'))
+    .operations[0]!;
+  const resumed = await client.callTool({
+    name: 'magic_ui_resume_operation',
+    arguments: {
+      sessionId: plugin.sessionId,
+      projectId: 'phase2-smoke',
+      operationId: journal.operationId,
+      decisions: [{ localId: 'header', decision: 'apply-spec' }],
+    },
+  });
+  expect(resumed.isError).not.toBe(true);
   harness.all()[1]!.name = 'Manual';
   const result = await render();
   expect(result.isError).toBe(true);
