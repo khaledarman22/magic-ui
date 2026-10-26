@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-**Phase 4 — مغلقة بموافقة صاحب المشروع مع استثناء تحقق موثّق (2026-10-26).** التنفيذ والتحقق الآلي والتصدير الحقيقي ومراجعة الـpackage: **Passed**. تأكيد مزامنة Figma وحالة version history المتزامنة: **Requires User Action — مؤجل بموافقة صريحة، ولا يمنع إغلاق المرحلة**؛ لم يُحوّل إلى Passed. D9 يظل Locked. لم يبدأ تنفيذ Phase 5.
+**Phase 5 — Sync/Preview/Apply وResume وTrash، مع استكمال جزئي للـdesign-system عبر checkpoints للموارد والـnodes.** التحقق الحقيقي داخل Figma: **Requires User Action**؛ المرحلة لم تُغلق. **Passed:** فحص النسخة النهائية: 132 اختبارًا في 15 ملفًا، مع نجاح typecheck وlint وbuild.
+
+**Phase 4 — مغلقة بموافقة صاحب المشروع مع استثناء تحقق موثّق (2026-10-26).** التنفيذ والتحقق الآلي والتصدير الحقيقي ومراجعة الـpackage: **Passed**. تأكيد مزامنة Figma وحالة version history المتزامنة: **Requires User Action — مؤجل بموافقة صريحة، ولا يمنع إغلاق المرحلة**؛ لم يُحوّل إلى Passed. D9 يظل Locked. بدأ تنفيذ Phase 5 بطلب صاحب المشروع في هذه الجلسة.
 
 **Phase 3 — التنفيذ والتحقق الآلي وتجربة Figma الحقيقية بوضع light: Passed. تبديل light/dark: Requires User Action لأن الملف الحالي محدود بـmode واحدة؛ المرحلة لم تُغلق بالكامل.**
 
@@ -15,6 +17,41 @@ Phase 1 مكتملة، بما فيها التحقق الحقيقي داخل Figm
 2026-10-26: صاحب المشروع أكد D7 وD8 وD12 وبقوا **Locked**. D7 اتعدّل لـ `setSharedPluginData` بدل `setPluginData` (السبب مكتوب في §2). تم تنفيذ Phase 2 في هذه الجلسة بدون الاعتماد على قرارات Proposed.
 
 ## Done
+
+### Phase 5 — استكمال جزئي للـdesign-system — 2026-10-26
+
+- اكتمل تنفيذ الطلب الإضافي ضمن Phase 5 دون قرارات معمارية جديدة أو dependencies. القيد المسجل في الجلسة السابقة عن عدم دعم design-system recovery أُزيل للمسار الجديد؛ السجل القديم أدناه يصف الحالة السابقة.
+- `magic_ui_render_design_system` يقبل/يرجع `operationId`. الـMCP يجمّد spec في `design-progress.json › systems` ويسجل pending قبل إرسال كل خطوة وdone بعد استلامها. `magic_ui_resume_operation` يوجه نفس الهوية لمسار النظام أو الشاشة، مع session جديدة عند اللزوم. يوجد lock مشترك للكتابة وتحقق من project/page/document، ولا تبدأ عملية جديدة فوق أخرى متقطعة.
+- renderer القائم مقسم إلى checkpoints للـcollection، وكل mode، وحجز المتغيرات قبل aliases، وكل قيمة token/mode، وكل text style، وpage/workspace/category، وكل component node وbindings، وتجميع variants، وخصائص المكونات ومراجعها، والـregistry والـmanifest. reused stable IDs تشمل `componentId` للأجزاء التي لم تدخل registry بعد؛ لا إعادة بناء component كامل لتجاوز انقطاع.
+- Plugin يحفظ spec المجمدة وprefix الخطوات والـresource IDs في shared plugin data، مع guards دقيقة على الموارد وهويتها وترتيبها ومراجع properties. قبل كل خطوة وحتى إعادة تشغيل عملية مكتملة: قراءة Figma والتحقق من الموارد الفعلية والـregistry/manifest. رد checkpoint ضائع يُؤكَّد قبل أي خطوة جديدة، فلا يسبق التنفيذ سجل pending المحلي.
+- أخطاء setters التي تترك موردًا جزئيًا معروف الهوية تُحفظ كحالة جزئية غير مكتملة، ثم تُستكمل بعد فحصها. manual drift أو deletion أو تغير ownership يوقف الاستكمال ولا ينشئ بديلًا صامتًا؛ الخطأ يحوي resource ID وexpected/actual snapshots محدودة الحجم أو missing/added IDs مع operationId. قرارات الشاشة لا تمنح إذن overwrite لموارد design-system.
+- تخزين checkpoint مقسّم إلى أجزاء 8,000 UTF-16 units، بفتحتين للتخزين وتحديث المؤشر أخيرًا. فشل كتابة fragment يبقي النسخة السابقة قابلة للقراءة. لا مسح بيانات المستخدم ولا purge. الـguard وحدود قراءة/كتابة المصدر المحلي السابقة ما زالت فعالة.
+- الحماية من concurrency تشمل مرحلة فتح checkpoint والتحقق والإكمال. الموارد غير التابعة للخطوة لا تُقبل تغييراتها ضمن baseline جديدة؛ فشل legacy preflight لا ينشر baseline معتمدة ولا يسمح بتجاوز التعديل اليدوي عند retry. الـsource resolving للـinstances يسبق swap/setProperties لتقليل فجوات الكتابة غير المتحققة.
+- **Passed:** اختبار unit لكل خطوة، والاستكمال بعد فشل إضافة mode، وفشل إنشاء نص داخل component، وفشل setter بعد تغيير قيمة فعلية، مع بقاء الهويات. manual token drift وmissing node يوقفان التنفيذ؛ رد ضائع لا ينفذ الخطوة التالية؛ تغيّر spec للعملية نفسها مرفوض.
+- **Passed:** اختبار MCP/WebSocket يفصل الاتصال بعد checkpoint رقم 60 ويفقد ردها، ثم يعيد تهيئة Plugin VM وsession والخادم؛ استكمال باقي الخطوات يحافظ على node/variable IDs، ونسخة spec المحفوظة، ثم إعادة نفس operationId لا تكرر الموارد. اختبار إلغاء العملية بعد 20 checkpoint ثم محاولة resume مع تعديل token يدوي يحافظ على التعديل ويعيد DRIFT_DETECTED؛ استعادة الحالة السابقة تسمح بالاستكمال.
+- **Passed:** `pnpm typecheck` — Exit 0؛ `pnpm build` — Exit 0 مع تحذيري Zod/Rollup المعروفين فقط؛ `pnpm --filter mcp-server start --selftest` — Exit 0 ويعرض الأدوات الـ23. `pnpm lint` — Exit 0: `All matched files use Prettier code style!`.
+- **Passed (النسخة النهائية):** `pnpm test` — Exit 0: `Test Files 15 passed (15)` و`Tests 132 passed (132)`، Duration `47.54s`. يشمل اختبار فشل كتابة storage fragment مع بقاء المؤشر السابق صالحًا ثم الاستكمال بعد إعادة تهيئة VM، واختبار رفض `advanceDesignSystem` في Main read-only. التشغيل السابق قبل هذين الاختبارين: 130/130 Passed.
+- **Failed ثم Passed بعد الإصلاح:** typecheck كشف فقد narrowing داخل callbacks فأُصلح؛ أول اختبارات recovery كشفت تمرير documentId/expectedCompletedSteps إلى schema الـrenderer القديمة strict؛ فُصل عقد الاستكمال عن مدخل renderer، ثم نجحت الاختبارات. لم يُستخدم mock في مسار الإنتاج.
+- **Requires User Action:** تجربة Figma الحقيقية لـPhase 5 لم تُشغَّل هنا. **Not Tested (لا جلسة Figma حقيقية في هذا التحقق):** إعادة تشغيل design-system recovery داخل Desktop؛ الأدلة الحالية اختبارات production handlers داخل VM ونقل MCP/WebSocket حقيقي. يجب إعادة بناء/فتح Plugin لاستخدام العقد الجديد.
+- حدود موثقة: عمليات Phase 3 القديمة المتقطعة التي لم تسجل checkpoints لا تُحوَّل تلقائيًا إلى عمليات قابلة للاستكمال؛ الدليل التاريخي غير موجود ويظل pending guard مانعًا للتخمين. لو انقطعت كتابة غامضة دون guard موثوق، يلزم فحص الحالة. لا auto-merge ولا تحويل نوع node ولا تجاوز لحدود Figma modes. دليل التشغيل محدث في `docs/installation/sync-recovery-trash.md`.
+
+### Phase 5 — Sync + checkpoints + resume + Trash — 2026-10-26
+
+- Pre-check: Phase 4 مغلقة بالاستثناء المعتمد؛ D7 وD8 وD9 Locked. لم تُستخدم D6 أوD11 المقترحتان، ولم تُضف dependencies أو تُعدّل إعدادات خارج المشروع.
+- عقود Zod جديدة في `packages/shared`: الحالات الست، القرارات لكل node، live inspection، optimistic write، mapping، journal، وتقارير التنفيذ وTrash. ست أدوات MCP جديدة؛ الإجمالي 23 في الوضع العادي و15 في read-only. أدوات الكتابة الجديدة لا تُسجَّل في read-only، وPlugin Main يرفضها كذلك وفق جدول permissions.
+- `sync-state.json` يحفظ localId وfigmaNodeId وspecVersion وlastSyncedHash مع intent وsnapshot حقيقية. الـhash للخصائص التي يديرها renderer محفوظ أيضًا في shared plugin data وفق D7؛ guard إضافي يحمي التنسيقات اليدوية وrich text وترتيب العناصر، مع مقارنة snapshots كاملة بجانب الـhash. `specVersion` نسخة schema، وتغييرات المحتوى تُكتشف من intent الدقيقة.
+- `get_sync_status` و`preview_changes` يقرآن المصدر المحلي وFigma بدون كتابة. `apply_changes` يطبّق spec-changed فقط افتراضيًا؛ figma-changed/conflict/missing تتطلب قرارًا لكل node. `keep-figma` لا يغير الخصائص المرئية، ويحفظ الفرق المقبول كـdrift. لا auto-merge ولا إعادة إنشاء صامتة بعد حذف يدوي.
+- مسار MCP لـ`render_design` وapply يسجل `operationId` وspec مجمدة وخطوة pending قبل كل node ثم done/skipped وbefore/after بعد التنفيذ. ملفات recovery خاصة 0600، مع كتابة ذرية ورفض symlinks/تعارض هوية المشروع. حدها 8 MiB؛ حد spec والرسالة يبقى 65,536 bytes. الفشل الكبير لا يُخفى ولا تُحذف سجلات قديمة تلقائيًا.
+- Resume يقرأ الهويات والخصائص الفعلية، بما فيها nodes المنقولة وTrash، ولا يعتمد على checkpoint وحده. رد ضائع بعد commit يُكتشف بلا تكرار. إعادة تشغيل `operationId` لا تعيد استخدام قرار قديم فوق تعديل يدوي أحدث. الإلغاء يوقف بعد الخطوة الحالية المحفوظة؛ MCP progress notifications تعمل عند وجود progressToken.
+- Trash بأمر صريح ولـorphaned owned nodes فقط؛ يحفظ السبب والهوية وparent/index/coordinates. يرفض user content والـcontainers التي ما زالت تحتوي descendants في spec. Restore يعيد نفس node، ويرفض parent مفقودًا أو داخل Trash. الصفحة تُعرف بـshared identity لا بالاسم؛ لا `remove()` ولا purge تلقائي. السياسة والتشغيل موثقان في `docs/installation/sync-recovery-trash.md`.
+- نطاق recovery الجديد هو screen render وsync apply. مسار Phase 3 المستقل `render_design_system` ما زال يحتفظ بحماية pending/drift القديمة؛ لم تُضف له checkpoints لكل token/component في هذه الجلسة. لا يُدّعى دعم استكمال تلقائي لكتابة design-system جزئية.
+- **Passed:** DoD #2: تصنيف الحالات الست بـfixtures. **Passed:** #3 تعديل لون يدوي ثم apply يحافظ عليه ويظل figma-changed بينما يتغير نص آخر من spec. **Passed:** #4 conflict لا يتغير دون قرار ثم يتطبق بعد apply-spec؛ keep-figma محفوظ مع drift.
+- **Passed:** DoD #5: انقطاع بعد 60 من 100 node، مع فقد رد الخطوة الستين، ثم session جديدة وإعادة إنشاء MCP server؛ الاستكمال ينتج 100 node بالضبط بلا تكرار. إعادة نفس العملية لا تضاعفها.
+- **Passed:** DoD #6: حذف node أثناء الانقطاع يُكتشف؛ الاستكمال يبقي 99 ويعرض missing-in-figma، ثم 100 فقط بعد apply-spec صريح. **Passed:** #7 رفض نقل user node/محتواه وrestore يعيد parent وترتيب sibling الأصلي.
+- **Passed:** اختبارات إضافية للحفظ الخاص وsymlink، cancellation، stale optimistic write، duplicate identities، تبنّي render قديم بعد التحقق، manual sibling reorder، وعدم استرجاع descendants من Trash ضمنيًا.
+- **Passed:** `pnpm typecheck` — Exit 0؛ `pnpm lint` — Exit 0: `All matched files use Prettier code style!`؛ `pnpm test` — Exit 0: `Test Files 14 passed (14)`، `Tests 121 passed (121)`. `pnpm build` — Exit 0؛ تحذيرا Zod/Rollup المعتادان لم يمنعا البناء. `pnpm --filter mcp-server start --selftest` — Exit 0، ويعرض الأدوات الـ23.
+- **Requires User Action:** DoD #8 لم يُشغَّل داخل Figma الحقيقي. أُضيف `pnpm smoke:sync`: ينتظر اتصال Plugin المبني في scratch file، ويطلب تعديل Header يدويًا، ثم يغيّر نصًا آخر في spec ويشغّل preview/apply ويقرأ النصين الحقيقيين، ويحفظ `sync-verification.json` في workspace التجربة. **Not Tested (يتطلب التفاعل اليدوي المذكور):** تشغيل السكريبت الحي نفسه؛ نجاح typecheck/build لا يُعتبر نجاح التجربة.
+- **Failed ثم إصلاح:** typecheck الأول بسبب عدم استثناء ملف Main الجديد من DOM tsconfig ثم optional typing وunion؛ أُصلحت. اختبارات الشبكة داخل sandbox فشلت بـ`listen EPERM 127.0.0.1`، ثم شُغلت بالصلاحية المناسبة. اختبارات قديمة تطلب عدد الأدوات القديم عُدلت، واختبار font failure أصبح يستأنف journal بدل بدء عملية جديدة. fixtures لـ100 node وduplicate createPage أُصلحت. ESLint كشف import غير مستخدم وأُزيل؛ النتائج النهائية أعلاه.
 
 ### Phase 4 — الإغلاق باستثناء معتمد — 2026-10-26
 
@@ -169,6 +206,8 @@ magic_ui_export_design_package
 - دليل الاستيراد والتجربة اليدوية في `docs/installation/figma-plugin-import.md`، وأمر `pnpm smoke:figma` يشغل الخادم المبني ويختبر إنشاء/قراءة frame حقيقي بعد أن يوصّل المستخدم الـPlugin ويؤكد المستند المستهدف.
 
 ## In Progress
+
+- Phase 5: تجربة Figma الحقيقية بـ`pnpm smoke:sync` ما زالت Requires User Action. لا توجد عملية smoke شغالة أو جلسة تنتظر إدخالًا.
 
 - Phase 3: الفحص الحقيقي للـVariables والـcomponents والـinstances بوضع light مكتمل. المتبقي فقط تبديل light/dark في ملف يسمح بأكثر من mode.
 - لا توجد عملية smoke منتظرة؛ الخادم خرج Exit 0 وcredentials الخاصة بالتجربة نُظفت. لم يُحذف أي node أو variable للمستخدم.
@@ -541,6 +580,8 @@ $ vitest run
 
 ## Blockers / Requires User Action
 
+- **Phase 5:** DoD #8 Requires User Action: إعادة فتح الـPlugin المبني وتوصيله إلى scratch file، ثم `pnpm smoke:sync` والتعديل اليدوي المطلوب. لم تُغلق المرحلة. استكمال design-system الجديد نُفذ واختُبر آليًا؛ التحقق الحقيقي ما زال مطلوبًا.
+
 - **Phase 4 — بند تحقق مؤجل، وليس عائق إغلاق:** تأكيد مزامنة Figma وversion history المتزامنة يبقى Requires User Action؛ أُغلقت المرحلة بموافقة صريحة من صاحب المشروع بتاريخ 2026-10-26 على هذا الاستثناء. التصدير الحقيقي ومراجعة الـpackage والتقرير Passed، والقائمة الظاهرة متطابقة قبل/بعد.
 
 - **Phase 3:** المتبقي للإغلاق تجربة تبديل light/dark في ملف Figma يسمح بـmodeين. الملف الحالي أعاد `Limited to 1 modes only`. تجربة light مكتملة وPassed، ولا توجد موافقات معمارية معلقة.
@@ -555,6 +596,8 @@ $ vitest run
 - Node 24 LTS غير مثبت؛ لم تُشغّل الاختبارات عليه. هذا لا يغيّر نتيجة التجربة الحقيقية على البيئة الحالية.
 
 ## Dependencies Added (مع المبرر)
+
+**Phase 5: لا dependencies جديدة ولا تعديل على lockfile.**
 
 **Phase 4: لا dependencies جديدة ولا تعديل على lockfile.**
 
@@ -584,5 +627,5 @@ Playwright استُخدم من بيئة `webapp-testing` المثبتة مسبق
 
 ## Backlog
 
-- لا توسع خارج Phase 4. تسجيل assets/mockups/sync/Trash/multi-session تظل للمراحل اللاحقة؛ تصدير assets والـreader وread-only نُفذت ضمن Phase 4. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
-- تسوية drift وتغيير نوع node واستكمال الفشل الجزئي بقرارات المستخدم تبقى لمسار sync/recovery في المرحلة المحددة لها؛ لا auto-merge في Phase 2.
+- لا توسع خارج Phase 5. assets/mockups/multi-session للمراحل اللاحقة؛ sync/Trash للشاشات نُفذا هنا. تجربة light/dark في Phase 3 مؤجلة بموافقة المستخدم.
+- تغيير نوع node وهجرة هويته ما زالا مرفوضين دون مسار صريح؛ no auto-merge. تسوية drift والاستكمال للشاشات نُفذا في Phase 5. استكمال design-system الجزئي على مستوى token/component نُفذ في الإدخال الأحدث؛ قيد بيانات Phase 3 القديمة بدون checkpoints موثق في دليل التشغيل.

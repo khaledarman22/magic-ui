@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import {
   classifySync,
+  designSystemStepIds,
+  type SystemRecoveryInput,
   flattenScreen,
   MagicUiError,
   failure,
@@ -8,7 +10,6 @@ import {
   type SyncToolInput,
   type SyncLive,
   type SyncState,
-  type SyncJournal,
   type SyncReport,
   type DesignSpecification,
 } from '@magic-ui/shared';
@@ -191,7 +192,13 @@ export class SyncEngine {
         throw new MagicUiError(
           failure('INVALID_INPUT', 'Operation scope cannot be changed.'),
         );
-      if (!journal && journals.operations.some((o) => o.status !== 'completed'))
+      if (
+        journals.systems.some((o) => o.status !== 'completed') ||
+        (!journal &&
+          journals.operations.some((o) => o.status !== 'completed')) ||
+        (input.operationId &&
+          journals.systems.some((o) => o.operationId === input.operationId))
+      )
         throw new MagicUiError(
           failure(
             'SESSION_BUSY',
@@ -219,6 +226,35 @@ export class SyncEngine {
       } = context;
       const resuming = Boolean(journal);
       kind = journal?.kind ?? kind;
+      if (
+        kind === 'render' &&
+        scan.rootNodeId &&
+        !lives.has(scope.screenId) &&
+        !input.decisions.some(
+          (d) => d.localId === scope.screenId && d.decision === 'apply-spec',
+        )
+      )
+        throw new MagicUiError(
+          failure(
+            'DRIFT_DETECTED',
+            'Previously rendered root is missing; preview and explicitly apply-spec to recreate it.',
+          ),
+        );
+      if (
+        kind === 'render' &&
+        !resuming &&
+        report.operations.some(
+          (r) =>
+            r.status === 'missing-in-figma' &&
+            context.state?.nodes.some((n) => n.localId === r.localId),
+        )
+      )
+        throw new MagicUiError(
+          failure(
+            'DRIFT_DETECTED',
+            'Previously synchronized nodes are missing. Use preview/apply with explicit per-node decisions.',
+          ),
+        );
       if (
         kind === 'render' &&
         !resuming &&
@@ -292,9 +328,12 @@ export class SyncEngine {
           const prior = journal.steps.find((s) => s.localId === entry.id);
           // A response may have been lost after the plugin committed. Verify its
           // live guard and intent, never trust local "done" alone.
-          const explicitNow = input.decisions.some((d) => d.localId === entry.id);
+          const explicitNow = input.decisions.some(
+            (d) => d.localId === entry.id,
+          );
           const committed =
-            !explicitNow && live?.operationId === journal.operationId &&
+            !explicitNow &&
+            live?.operationId === journal.operationId &&
             live.intent === entry.intent &&
             live.snapshot === live.baseline;
           if (committed) {
@@ -313,10 +352,28 @@ export class SyncEngine {
             row.reason =
               'Node disappeared during interruption; explicit apply-spec required.';
           }
-          if (resuming && prior && !explicitNow && !committed && (live?.snapshot ?? null) !== prior.before && (live?.snapshot ?? null) !== prior.after) {
-            row.action = 'skip'; row.reason = 'New drift after the saved decision; a fresh per-node decision is required.';
+          if (
+            resuming &&
+            prior &&
+            !explicitNow &&
+            !committed &&
+            (live?.snapshot ?? null) !== prior.before &&
+            (live?.snapshot ?? null) !== prior.after
+          ) {
+            row.action = 'skip';
+            row.reason =
+              'New drift after the saved decision; a fresh per-node decision is required.';
           }
-          if (!scan.documentId && live && row.status === 'in-sync') row.action = 'keep-figma';
+          if (
+            resuming &&
+            !explicitNow &&
+            ['figma-changed', 'conflict'].includes(row.status)
+          ) {
+            row.action = 'skip';
+            row.reason = 'Manual changes require a fresh decision on resume.';
+          }
+          if (!scan.documentId && live && row.status === 'in-sync')
+            row.action = 'keep-figma';
           const step = prior ?? {
             localId: entry.id,
             status: 'pending' as const,
@@ -426,6 +483,174 @@ export class SyncEngine {
       }
     });
   }
+  async renderSystem(
+    input: {
+      sessionId: string;
+      projectId: string;
+      pageId: string;
+      operationId?: string | undefined;
+    },
+    signal: AbortSignal,
+    progress?: (done: number, total: number) => Promise<void>,
+  ) {
+    return this.exclusive(async () => {
+      const journals = await this.workspace.readJournals(input.projectId);
+      let journal = journals.systems.find(
+        (j) => j.operationId === input.operationId,
+      );
+      if (
+        journals.operations.some(
+          (j) =>
+            j.status !== 'completed' || j.operationId === input.operationId,
+        ) ||
+        journals.systems.some((j) => j !== journal && j.status !== 'completed')
+      )
+        throw new MagicUiError(
+          failure(
+            'SESSION_BUSY',
+            'Resume the interrupted operation before starting another one.',
+          ),
+        );
+      if (journal && journal.input.pageId !== input.pageId)
+        throw new MagicUiError(
+          failure('INVALID_INPUT', 'Cannot change operation page.'),
+        );
+      const specification =
+        journal?.input.specification ??
+        (await this.workspace.readSpecification(input.projectId));
+      const scan = await this.inspect(
+        input.sessionId,
+        {
+          projectId: input.projectId,
+          pageId: input.pageId,
+          screenId: 'design-system',
+        },
+        signal,
+      );
+      if (
+        journal &&
+        scan.documentId !== journal.input.documentId &&
+        (scan.documentId || journal.steps.some((s) => s.status === 'done'))
+      )
+        throw new MagicUiError(
+          failure(
+            'DRIFT_DETECTED',
+            'Design-system journal belongs to another document.',
+          ),
+        );
+      const operationId =
+        journal?.operationId ?? input.operationId ?? randomUUID();
+      const commandInput: SystemRecoveryInput = journal?.input ?? {
+        projectId: input.projectId,
+        pageId: input.pageId,
+        operationId,
+        documentId: scan.documentId || randomUUID(),
+        specification,
+        expectedCompletedSteps: 0,
+      };
+      if (!journal) {
+        journal = {
+          operationId,
+          input: commandInput,
+          status: 'running',
+          steps: [],
+          result: null,
+        };
+        journals.systems.push(journal);
+      }
+      journal.status = 'running';
+      const save = () =>
+        this.workspace.writeRecoveryFile(
+          input.projectId,
+          'design-progress.json',
+          journals,
+        );
+      const plan = designSystemStepIds(specification);
+      await save();
+      try {
+        while (true) {
+          if (signal.aborted)
+            throw new MagicUiError(
+              failure(
+                'CANCELLED',
+                'Stopped after the previous durable design-system checkpoint.',
+              ),
+            );
+          const completed = journal.steps.filter(
+            (s) => s.status === 'done',
+          ).length;
+          const stepId = plan[completed] ?? 'complete';
+          let step = journal.steps.find((s) => s.stepId === stepId);
+          if (!step) {
+            step = {
+              stepId,
+              status: 'pending',
+              completedBefore: completed,
+              completedAfter: null,
+            };
+            journal.steps.push(step);
+          }
+          await save();
+          const response = await this.bridge.request(
+            input.sessionId,
+            {
+              command: 'advanceDesignSystem',
+              input: { ...commandInput, expectedCompletedSteps: completed },
+            },
+            new AbortController().signal,
+          );
+          if (response.command !== 'advanceDesignSystem')
+            throw new Error('Unexpected design-system checkpoint response');
+          const result = response.result;
+          if (
+            result.completedSteps !== completed + (result.done ? 0 : 1) ||
+            result.totalSteps !== plan.length ||
+            (!result.done && result.stepId !== stepId)
+          )
+            throw new MagicUiError(
+              failure(
+                'DRIFT_DETECTED',
+                'Unexpected design-system checkpoint sequence.',
+              ),
+            );
+          if (result.done) {
+            if (!result.result || completed !== plan.length)
+              throw new Error('Incomplete design-system result');
+            // The completion read is not an extra mutation checkpoint.
+            journal.steps = journal.steps.filter(
+              (s) => s.stepId !== 'complete',
+            );
+            journal.result = result.result;
+            journal.status = 'completed';
+            await this.workspace.writeRegistry({
+              projectId: input.projectId,
+              components: result.result.components,
+            });
+            await save();
+            return { ...result.result, operationId };
+          }
+          step.status = 'done';
+          step.completedAfter = result.completedSteps;
+          await save();
+          await progress?.(result.completedSteps, plan.length);
+        }
+      } catch (error) {
+        journal.status = 'interrupted';
+        await save();
+        if (error instanceof MagicUiError)
+          throw new MagicUiError({
+            ...error.error,
+            details: {
+              ...error.error.details,
+              operationId,
+              completedSteps: journal.steps.filter((s) => s.status === 'done')
+                .length,
+            },
+          });
+        throw error;
+      }
+    });
+  }
   async resume(
     sessionId: string,
     projectId: string,
@@ -434,9 +659,33 @@ export class SyncEngine {
     signal: AbortSignal,
     progress?: (done: number, total: number) => Promise<void>,
   ) {
-    const journal = (
-      await this.workspace.readJournals(projectId)
-    ).operations.find((o) => o.operationId === operationId);
+    const journals = await this.workspace.readJournals(projectId);
+    const system = journals.systems.find((o) => o.operationId === operationId);
+    if (system) {
+      if (decisions.length)
+        throw new MagicUiError(
+          failure(
+            'INVALID_INPUT',
+            'Screen decisions cannot resolve design-system drift; restore the reported checkpoint state first.',
+          ),
+        );
+      await this.renderSystem(
+        { sessionId, projectId, pageId: system.input.pageId, operationId },
+        signal,
+        progress,
+      );
+      const total = designSystemStepIds(system.input.specification).length;
+      return {
+        operationId,
+        status: 'completed' as const,
+        completedSteps: total,
+        totalSteps: total,
+        operations: [],
+      };
+    }
+    const journal = journals.operations.find(
+      (o) => o.operationId === operationId,
+    );
     if (!journal)
       throw new MagicUiError(failure('INVALID_INPUT', 'Unknown operation ID.'));
     return this.run(
@@ -495,20 +744,30 @@ export class SyncEngine {
         throw new MagicUiError(
           failure('NODE_NOT_FOUND', 'Owned identity not found.'),
         );
-      // Do not move descendants still present in the spec with an orphan parent.
+      // Check the entire live ancestor chain, not just direct children.
+      const parents = new Map(
+        [...context.lives.values()].map((n) => [
+          n.figmaNodeId,
+          (JSON.parse(n.snapshot) as { parentId: string | null }).parentId,
+        ]),
+      );
       if (!restore)
         for (const entry of context.entries) {
-          const actual = context.lives.get(entry.id);
-          if (
-            actual &&
-            JSON.parse(actual.snapshot).parentId === item.figmaNodeId
-          )
-            throw new MagicUiError(
-              failure(
-                'DRIFT_DETECTED',
-                'Container still contains a specified child.',
-              ),
-            );
+          let parentId = parents.get(
+            context.lives.get(entry.id)?.figmaNodeId ?? '',
+          );
+          const seen = new Set<string>();
+          while (parentId && !seen.has(parentId)) {
+            if (parentId === item.figmaNodeId)
+              throw new MagicUiError(
+                failure(
+                  'DRIFT_DETECTED',
+                  'Container still contains a specified descendant.',
+                ),
+              );
+            seen.add(parentId);
+            parentId = parents.get(parentId);
+          }
         }
       const result = await this.bridge.request(
         input.sessionId,

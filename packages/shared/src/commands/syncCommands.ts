@@ -1,3 +1,4 @@
+import { systemJournalSchema } from './designSystemRecoveryCommands.js';
 import { z } from 'zod';
 import { identifierSchema } from '../protocol/constants.js';
 import {
@@ -70,6 +71,7 @@ export const syncInspectSchema = syncScopeSchema.extend({
 export const syncInspectResultSchema = z
   .object({
     documentId: z.string(),
+    rootNodeId: z.string(),
     nodes: z.array(
       z
         .object({ localId: stableIdSchema, figmaNodeId: identifierSchema })
@@ -153,7 +155,10 @@ export const syncJournalSchema = z
   })
   .strict();
 export const syncJournalsSchema = z
-  .object({ operations: z.array(syncJournalSchema) })
+  .object({
+    operations: z.array(syncJournalSchema),
+    systems: z.array(systemJournalSchema).default([]),
+  })
   .strict();
 export const resumeToolSchema = z
   .object({

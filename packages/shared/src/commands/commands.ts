@@ -1,4 +1,8 @@
 import {
+  systemRecoveryInputSchema,
+  systemRecoveryResultSchema,
+} from './designSystemRecoveryCommands.js';
+import {
   syncInspectSchema,
   syncInspectResultSchema,
   syncStepSchema,
@@ -39,6 +43,12 @@ export const createFrameSchema = z
 export const readNodeSchema = z.object({ nodeId: identifierSchema }).strict();
 export const pingSchema = z.object({}).strict();
 export const commandSchema = z.discriminatedUnion('command', [
+  z
+    .object({
+      command: z.literal('advanceDesignSystem'),
+      input: systemRecoveryInputSchema,
+    })
+    .strict(),
   z
     .object({ command: z.literal('inspectSync'), input: syncInspectSchema })
     .strict(),
@@ -89,6 +99,12 @@ export const nodeSnapshotSchema = z
   })
   .strict();
 export const commandResultSchema = z.discriminatedUnion('command', [
+  z
+    .object({
+      command: z.literal('advanceDesignSystem'),
+      result: systemRecoveryResultSchema,
+    })
+    .strict(),
   z
     .object({
       command: z.literal('inspectSync'),
@@ -163,6 +179,7 @@ export const connectionStatusSchema = z
   .strict();
 
 export const commandPermissions = {
+  advanceDesignSystem: 'write',
   inspectSync: 'read',
   syncStep: 'write',
   trashNode: 'write',

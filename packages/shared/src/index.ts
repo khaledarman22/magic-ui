@@ -12,3 +12,5 @@ export * from './commands/designSystemCommands.js';
 export * from './commands/readerCommands.js';
 
 export * from './commands/syncCommands.js';
+
+export * from './commands/designSystemRecoveryCommands.js';

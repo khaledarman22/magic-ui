@@ -49,7 +49,7 @@ export class DesignWorkspace {
         throw new MagicUiError(
           failure(
             'MESSAGE_TOO_LARGE',
-            'Workspace JSON must be a regular file of at most 65536 bytes.',
+            `Workspace JSON must be a regular file of at most ${limit} bytes.`,
           ),
         );
       const buffer = Buffer.alloc(limit + 1);
@@ -66,7 +66,10 @@ export class DesignWorkspace {
       }
       if (total > limit)
         throw new MagicUiError(
-          failure('MESSAGE_TOO_LARGE', 'Workspace JSON exceeds 65536 bytes.'),
+          failure(
+            'MESSAGE_TOO_LARGE',
+            `Workspace JSON exceeds ${limit} bytes.`,
+          ),
         );
       return JSON.parse(buffer.subarray(0, total).toString('utf8')) as unknown;
     } finally {
@@ -261,18 +264,61 @@ export class DesignWorkspace {
     }
   }
   async readSyncData(projectId: string) {
-    return syncStatesSchema.parse(
+    const result = syncStatesSchema.parse(
       (await this.readRecoveryFile(projectId, 'sync-state.json')) ?? {
         screens: [],
       },
     );
+    if (
+      result.screens.some((s) => s.projectId !== projectId) ||
+      new Set(result.screens.map((s) => s.screenId)).size !==
+        result.screens.length
+    )
+      throw new MagicUiError(
+        failure(
+          'WORKSPACE_ERROR',
+          'Sync state has mismatched or duplicate screen identities.',
+        ),
+      );
+    return result;
   }
   async readJournals(projectId: string) {
-    return syncJournalsSchema.parse(
+    const result = syncJournalsSchema.parse(
       (await this.readRecoveryFile(projectId, 'design-progress.json')) ?? {
         operations: [],
       },
     );
+    if (
+      result.operations.some(
+        (o) =>
+          o.scope.projectId !== projectId ||
+          o.specification.projectId !== projectId,
+      ) ||
+      new Set(result.operations.map((o) => o.operationId)).size !==
+        result.operations.length
+    )
+      throw new MagicUiError(
+        failure(
+          'WORKSPACE_ERROR',
+          'Journal has mismatched or duplicate operation identities.',
+        ),
+      );
+    if (
+      result.systems.some(
+        (j) =>
+          j.input.projectId !== projectId ||
+          j.input.specification.projectId !== projectId ||
+          j.operationId !== j.input.operationId,
+      ) ||
+      new Set(
+        [...result.operations, ...result.systems].map((j) => j.operationId),
+      ).size !==
+        result.operations.length + result.systems.length
+    )
+      throw new MagicUiError(
+        failure('WORKSPACE_ERROR', 'Design-system journal identity mismatch.'),
+      );
+    return result;
   }
   private async readRecoveryFile(projectId: string, filename: string) {
     const directory = await this.projectDirectory(projectId);

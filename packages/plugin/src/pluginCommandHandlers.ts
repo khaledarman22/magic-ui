@@ -1,3 +1,4 @@
+import { advanceDesignSystem } from './designSystemRecovery';
 import { inspectSync, syncStep, trashNode } from './syncController';
 import { readFigma } from './figmaReader';
 import {
@@ -39,15 +40,26 @@ export async function executePluginCommand(
   if (isCancelled())
     throw new MagicUiError(failure('CANCELLED', 'Request cancelled.'));
   switch (command.command) {
+    case 'advanceDesignSystem':
+      return {
+        command: 'advanceDesignSystem',
+        result: await advanceDesignSystem(command.input, isCancelled),
+      };
     case 'inspectSync':
       return {
         command: 'inspectSync',
         result: await inspectSync(command.input),
       };
     case 'syncStep':
-      return { command: 'syncStep', result: await syncStep(command.input) };
+      return {
+        command: 'syncStep',
+        result: await syncStep(command.input, isCancelled),
+      };
     case 'trashNode':
-      return { command: 'trashNode', result: await trashNode(command.input) };
+      return {
+        command: 'trashNode',
+        result: await trashNode(command.input, isCancelled),
+      };
     case 'readFigma':
       return {
         command: 'readFigma',

@@ -146,3 +146,28 @@ it('persists registry atomically with private permissions and refuses directory/
   await expect(workspace.writeRegistry(registry)).rejects.toThrow();
   expect(await readdir(outsideDir)).toEqual([]);
 });
+
+it('writes private atomic recovery files and refuses malformed or symlinked checkpoints', async () => {
+  const { stat } = await import('node:fs/promises');
+  const project = await workspace.initialize({
+    projectId: 'recovery',
+    projectName: 'Recovery',
+  });
+  await workspace.writeRecoveryFile('recovery', 'sync-state.json', {
+    screens: [],
+  });
+  const path = join(project.directory, 'sync-state.json');
+  expect((await stat(path)).mode & 0o777).toBe(0o600);
+  expect(await workspace.readSyncData('recovery')).toEqual({ screens: [] });
+  await writeFile(path, '{');
+  await expect(workspace.readSyncData('recovery')).rejects.toThrow();
+  await rm(path);
+  const outside = join(root, 'outside-recovery.json');
+  await writeFile(outside, 'untouched');
+  await symlink(outside, path);
+  await expect(
+    workspace.writeRecoveryFile('recovery', 'sync-state.json', { screens: [] }),
+  ).rejects.toThrow();
+  await expect(workspace.readSyncData('recovery')).rejects.toThrow();
+  expect(await readFile(outside, 'utf8')).toBe('untouched');
+});

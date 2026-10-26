@@ -204,7 +204,8 @@ it('renders the design system and instances over MCP/WebSocket, persists searcha
   };
   const first = await system(),
     second = await system();
-  expect(second).toEqual(first);
+  expect({ ...second, operationId: first.operationId }).toEqual(first);
+  expect(second.operationId).not.toBe(first.operationId);
   const screenFirst = renderDesignResultSchema.parse(
     (await render()).structuredContent,
   );

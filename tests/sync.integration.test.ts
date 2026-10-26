@@ -202,10 +202,22 @@ async function interruptAt60() {
   expect(response.isError).toBe(true);
   expect(harness.all()).toHaveLength(60);
   afterCommand = undefined;
+  const previousSession = plugin.sessionId;
+  plugin = new FakePluginClient(plugin.url, plugin.token, async (command) =>
+    harness.execute(command),
+  );
   await plugin.connect();
+  expect(plugin.sessionId).not.toBe(previousSession);
 }
 it('resumes after 60/100 nodes including a lost response, validates live state and never duplicates', async () => {
   await interruptAt60();
+  await client.close();
+  await server.close();
+  server = createMcpServer(bridge, new DesignWorkspace(root));
+  client = new Client({ name: 'restarted-sync', version: '1' });
+  const [transportA, transportB] = InMemoryTransport.createLinkedPair();
+  await server.connect(transportB);
+  await client.connect(transportA);
   await resume('resume-100');
   expect(harness.all()).toHaveLength(100);
   expect(
@@ -347,3 +359,193 @@ it('cancels between durable steps and resumes safely', async () => {
   );
   expect(JSON.parse(raw).operations[0].status).toBe('completed');
 });
+
+it('never reuses an old apply-spec approval over a newer manual edit on repeated resumes', async () => {
+  await success('render_design');
+  node('header').characters = 'First manual edit';
+  await success('apply_changes', {
+    operationId: 'approved-once',
+    decisions: [{ localId: 'header', decision: 'apply-spec' }],
+  });
+  node('header').characters = 'New manual edit';
+  for (let i = 0; i < 2; i++) {
+    const report = await resume('approved-once');
+    expect(report.operations.find((r) => r.localId === 'header')).toMatchObject(
+      { status: 'figma-changed', action: 'skip' },
+    );
+    expect(node('header').characters).toBe('New manual edit');
+  }
+});
+it('adopts a legacy render with live validation and keeps its identities', async () => {
+  await harness.render({ ...scope, specification: sampleSpecification() });
+  const identities = harness.all().map((n) => n.id);
+  await success('render_design');
+  await success('render_design');
+  expect(harness.all().map((n) => n.id)).toEqual(identities);
+  expect(
+    (await workspace.readSyncData(scope.projectId)).screens[0]!.nodes,
+  ).toHaveLength(7);
+});
+it('does not auto-restore descendants of a trashed container or restore into a missing parent', async () => {
+  await success('render_design');
+  const spec = sampleSpecification();
+  spec.pages[0]!.screens[0]!.nodes = [];
+  await writeFile(path, JSON.stringify(spec));
+  await success('move_to_trash', { localId: 'list', reason: 'Removed list' });
+  await writeFile(path, JSON.stringify(sampleSpecification()));
+  const report = syncReportSchema.parse(
+    (
+      await success('apply_changes', {
+        decisions: [{ localId: 'item-one', decision: 'apply-spec' }],
+      })
+    ).structuredContent,
+  );
+  expect(report.operations.find((r) => r.localId === 'item-one')?.action).toBe(
+    'skip',
+  );
+  expect(node('item-one').parent).toBe(node('list'));
+  const rootNode = node('home');
+  rootNode.parent!.children = rootNode.parent!.children.filter(
+    (n) => n !== rootNode,
+  );
+  rootNode.parent = null;
+  expect((await call('restore_from_trash', { localId: 'list' })).isError).toBe(
+    true,
+  );
+  expect(node('list').parent?.name).toBe('Trash');
+});
+
+it('detects manual sibling reordering and refuses to recreate a deleted node through ordinary render', async () => {
+  await success('render_design');
+  const list = node('list'),
+    item = node('item-two');
+  list.insertChild(0, item);
+  const status = syncReportSchema.parse(
+    (await success('get_sync_status')).structuredContent,
+  );
+  expect(status.operations.find((r) => r.localId === 'item-two')?.status).toBe(
+    'figma-changed',
+  );
+  await success('apply_changes');
+  expect(list.children[0]).toBe(item);
+  const header = node('header');
+  header.parent!.children = header.parent!.children.filter((n) => n !== header);
+  header.parent = null;
+  expect((await call('render_design')).isError).toBe(true);
+  expect(node('header')).toBeUndefined();
+});
+
+it('resumes the design system after a lost 60th checkpoint with fresh plugin runtime, session and server', async () => {
+  const { default: raw } =
+    await import('../scripts/samples/phase-3.design-spec.json');
+  const { designSystemStepIds } =
+    await import('../packages/shared/src/index.js');
+  const specification = designSpecificationSchema.parse({
+    ...raw,
+    projectId: scope.projectId,
+  });
+  const plan = designSystemStepIds(specification);
+  expect(plan.length).toBeGreaterThan(60);
+  await writeFile(path, JSON.stringify(specification));
+  afterCommand = async (command) => {
+    if (
+      command.command === 'advanceDesignSystem' &&
+      command.input.expectedCompletedSteps === 59
+    )
+      await plugin.disconnect();
+  };
+  const interrupted = await client.callTool({
+    name: 'magic_ui_render_design_system',
+    arguments: {
+      sessionId: plugin.sessionId,
+      projectId: scope.projectId,
+      pageId: scope.pageId,
+      operationId: 'system-restart',
+    },
+  });
+  expect(interrupted.isError).toBe(true);
+  const journal = (await workspace.readJournals(scope.projectId)).systems[0]!;
+  expect(journal.status).toBe('interrupted');
+  expect(journal.steps.filter((s) => s.status === 'done')).toHaveLength(59);
+  const originalIds = harness.document.findAll(() => true).map((n) => n.id);
+  const originalVariables = harness.variables.map((v) => v.id);
+  harness.resetRuntime();
+  afterCommand = undefined;
+  plugin = new FakePluginClient(plugin.url, plugin.token, async (command) =>
+    harness.execute(command),
+  );
+  await plugin.connect();
+  await client.close();
+  await server.close();
+  server = createMcpServer(bridge, new DesignWorkspace(root));
+  client = new Client({ name: 'system-restart', version: '1' });
+  const [a, b] = InMemoryTransport.createLinkedPair();
+  await server.connect(b);
+  await client.connect(a);
+  specification.tokens.values[0]!.values.light = '#112233';
+  await writeFile(path, JSON.stringify(specification));
+  const result = await resume('system-restart');
+  expect(result.completedSteps).toBe(plan.length);
+  expect(harness.document.findAll(() => true).map((n) => n.id)).toEqual(
+    expect.arrayContaining(originalIds),
+  );
+  expect(harness.variables.map((v) => v.id)).toEqual(originalVariables);
+  const saved = (await workspace.readJournals(scope.projectId)).systems[0]!;
+  expect(saved.status).toBe('completed');
+  expect(saved.steps).toHaveLength(plan.length);
+  expect(saved.result?.componentCount).toBe(6);
+  expect(saved.input.specification.tokens.values[0]!.values.light).not.toBe(
+    '#112233',
+  );
+  const completedIds = harness.document.findAll(() => true).map((n) => n.id);
+  await resume('system-restart');
+  expect(harness.document.findAll(() => true).map((n) => n.id)).toEqual(
+    completedIds,
+  );
+}, 30000);
+
+it('cancels design-system work between checkpoints and preserves manual drift on resume', async () => {
+  const { default: raw } =
+    await import('../scripts/samples/phase-3.design-spec.json');
+  const { SyncEngine } =
+    await import('../packages/mcp-server/src/syncEngine.js');
+  await writeFile(path, JSON.stringify({ ...raw, projectId: scope.projectId }));
+  const engine = new SyncEngine(bridge, workspace),
+    abort = new AbortController();
+  await expect(
+    engine.renderSystem(
+      {
+        sessionId: plugin.sessionId,
+        projectId: scope.projectId,
+        pageId: scope.pageId,
+        operationId: 'system-cancel',
+      },
+      abort.signal,
+      async (done) => {
+        if (done === 20) abort.abort();
+      },
+    ),
+  ).rejects.toMatchObject({ error: { code: 'CANCELLED' } });
+  expect(
+    (await workspace.readJournals(scope.projectId)).systems[0]!.steps.filter(
+      (s) => s.status === 'done',
+    ),
+  ).toHaveLength(20);
+  const variable = harness.variables[0]!,
+    original = variable.name;
+  variable.name = 'Manual token';
+  const rejected = await client.callTool({
+    name: 'magic_ui_resume_operation',
+    arguments: {
+      sessionId: plugin.sessionId,
+      projectId: scope.projectId,
+      operationId: 'system-cancel',
+    },
+  });
+  expect(rejected.isError).toBe(true);
+  expect(JSON.stringify(rejected.content)).toContain('DRIFT_DETECTED');
+  expect(variable.name).toBe('Manual token');
+  variable.name = original;
+  await resume('system-cancel');
+  expect(harness.collections).toHaveLength(1);
+}, 20000);

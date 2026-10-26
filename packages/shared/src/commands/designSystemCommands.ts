@@ -10,6 +10,7 @@ export const designSystemToolSchema = z
     sessionId: identifierSchema,
     projectId: stableIdSchema,
     pageId: identifierSchema,
+    operationId: identifierSchema.optional(),
   })
   .strict();
 export const designSystemInputSchema = designSystemToolSchema
@@ -106,6 +107,7 @@ export const variablesResultSchema = z
   })
   .strict();
 export const designSystemResultSchema = componentRegistrySchema.safeExtend({
+  operationId: identifierSchema.optional(),
   variables: variablesResultSchema,
   componentCount: z.number().int(),
   variableCount: z.number().int(),

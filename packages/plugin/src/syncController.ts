@@ -27,8 +27,20 @@ import { applyInstance, findVariant } from './designSystemRenderer';
 
 // Hash only fields the renderer owns. Keep a separate conservative guard for
 // other manual styling that a Figma setter could incidentally replace.
+function managedIndex(node: SceneNode) {
+  if (!node.parent || !('children' in node.parent)) return -1;
+  return node.parent.children
+    .filter(
+      (n) =>
+        read(n, 'projectId') === read(node, 'projectId') &&
+        read(n, 'screenId') === read(node, 'screenId') &&
+        read(n, 'id'),
+    )
+    .indexOf(node);
+}
 export function ownedSnapshot(node: SceneNode): string {
   const data = JSON.parse(snapshot(node)) as Record<string, unknown>;
+  data.managedIndex = managedIndex(node);
   for (const key of [
     'children',
     'visible',
@@ -48,6 +60,7 @@ export function ownedSnapshot(node: SceneNode): string {
 }
 function guardSnapshot(node: SceneNode): string {
   const data = JSON.parse(snapshot(node)) as Record<string, unknown>;
+  data.managedIndex = managedIndex(node);
   delete data.children; // Children have their own independent checkpoints.
   if (node.type === 'TEXT')
     data.segments = node.getStyledTextSegments([
@@ -98,7 +111,8 @@ async function ownedNodes(scope: SyncScope): Promise<SceneNode[]> {
 function isTrashed(node: BaseNode): boolean {
   let current: BaseNode | null = node;
   while (current) {
-    if (read(current, 'role') === 'trash' || read(current, 'trash')) return true;
+    if (read(current, 'role') === 'trash' || read(current, 'trash'))
+      return true;
     current = current.parent;
   }
   return false;
@@ -111,7 +125,12 @@ function commitBaseline(node: SceneNode, input: SyncStep) {
   write(node, 'syncGuard', guardSnapshot(node));
   write(node, 'snapshot', snapshot(node));
   write(node, 'operationId', input.operationId);
-  if (!input.entry.parentId) write(figma.currentPage, `screen:${input.projectId}:${input.screenId}`, node.id);
+  if (!input.entry.parentId)
+    write(
+      figma.currentPage,
+      `screen:${input.projectId}:${input.screenId}`,
+      node.id,
+    );
   return live(node);
 }
 function live(node: SceneNode): SyncLive {
@@ -137,7 +156,15 @@ export async function inspectSync(
   const node = nodes.find((n) => read(n, 'id') === input.localId);
   return {
     documentId: read(figma.root, 'documentId'),
-    nodes: nodes.map((n) => ({ localId: read(n, 'id'), figmaNodeId: n.id })),
+    rootNodeId: read(
+      figma.root.children.find((p) => p.id === input.pageId) ??
+        figma.currentPage,
+      `screen:${input.projectId}:${input.screenId}`,
+    ),
+    nodes: (input.localId ? [] : nodes).map((n) => ({
+      localId: read(n, 'id'),
+      figmaNodeId: n.id,
+    })),
     live: node ? live(node) : null,
   };
 }
@@ -152,13 +179,18 @@ function verify(
   )
     drift('Figma changed after inspection. Preview again before applying.');
 }
-export async function syncStep(input: SyncStep): Promise<SyncLive> {
+export async function syncStep(
+  input: SyncStep,
+  cancelled: () => boolean = () => false,
+): Promise<SyncLive> {
   if (renderState.busy)
     throw new MagicUiError(
       failure('SESSION_BUSY', 'Another write is running.', true),
     );
   renderState.busy = true;
   try {
+    if (cancelled())
+      throw new MagicUiError(failure('CANCELLED', 'Cancelled before writes.'));
     active(input);
     const documentId = read(figma.root, 'documentId');
     if (documentId && documentId !== input.documentId)
@@ -169,6 +201,10 @@ export async function syncStep(input: SyncStep): Promise<SyncLive> {
     if (node && live(node).trashed)
       drift('Restore this identity from Trash before applying a spec.');
     if (input.action === 'keep-figma') {
+      if (cancelled())
+        throw new MagicUiError(
+          failure('CANCELLED', 'Cancelled before writes.'),
+        );
       active(input);
       if (!node) drift('Cannot keep a missing node.');
       verify(node, input.expectedNodeId, input.expectedSnapshot);
@@ -181,9 +217,7 @@ export async function syncStep(input: SyncStep): Promise<SyncLive> {
       : figma.currentPage;
     if (
       input.action === 'apply-spec' &&
-      (!parent ||
-        !('insertChild' in parent) ||
-        isTrashed(parent))
+      (!parent || !('insertChild' in parent) || isTrashed(parent))
     )
       drift('Parent is absent or in Trash; restore it before applying.');
     if (
@@ -213,8 +247,11 @@ export async function syncStep(input: SyncStep): Promise<SyncLive> {
     }
     // Re-scan after preflight to detect identities created during await gaps.
     const currentNodes = await ownedNodes(input);
-    if (currentNodes.find((n) => read(n, 'id') === input.entry.id) !== node) drift('Identity changed during preflight.');
+    if (currentNodes.find((n) => read(n, 'id') === input.entry.id) !== node)
+      drift('Identity changed during preflight.');
     // All async preflight is followed by optimistic concurrency validation.
+    if (cancelled())
+      throw new MagicUiError(failure('CANCELLED', 'Cancelled before writes.'));
     active(input);
     verify(node, input.expectedNodeId, input.expectedSnapshot);
     if (node?.removed || parent?.removed)
@@ -263,6 +300,7 @@ export async function syncStep(input: SyncStep): Promise<SyncLive> {
       if (node.type === 'INSTANCE' && spec.type === 'component-instance')
         await applyInstance(node, spec, input.projectId, () => active(input));
       await applyTokenBindings(node, spec, input.tokens, variables, styles);
+      active(input);
     }
     return commitBaseline(node, input);
   } finally {
@@ -271,6 +309,7 @@ export async function syncStep(input: SyncStep): Promise<SyncLive> {
 }
 export async function trashNode(
   input: Extract<Command, { command: 'trashNode' }>['input'],
+  cancelled: () => boolean = () => false,
 ): Promise<SyncLive> {
   if (renderState.busy)
     throw new MagicUiError(
@@ -278,6 +317,8 @@ export async function trashNode(
     );
   renderState.busy = true;
   try {
+    if (cancelled())
+      throw new MagicUiError(failure('CANCELLED', 'Cancelled before writes.'));
     active(input);
     const nodes = await ownedNodes(input);
     const node = nodes.find((n) => read(n, 'id') === input.localId);
@@ -290,6 +331,10 @@ export async function trashNode(
     if (input.restore) {
       if (!metadata) drift('No original parent recorded for this node.');
       const parent = await figma.getNodeByIdAsync(metadata.parentId);
+      if (cancelled())
+        throw new MagicUiError(
+          failure('CANCELLED', 'Cancelled before writes.'),
+        );
       active(input);
       verify(node, input.expectedNodeId, input.expectedSnapshot);
       if (
@@ -335,6 +380,10 @@ export async function trashNode(
         reason: input.reason,
         trashed: true,
       };
+      if (cancelled())
+        throw new MagicUiError(
+          failure('CANCELLED', 'Cancelled before writes.'),
+        );
       active(input);
       let page = figma.root.children.find(
         (p) =>

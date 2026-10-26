@@ -272,3 +272,34 @@ it('rejects a write injected into a read-only Main session independently of serv
     message: { type: 'result' },
   });
 });
+
+it('blocks design-system recovery commands in a read-only Main session', async () => {
+  const { sampleSpecification } =
+    await import('./fixtures/sampleSpecification.js');
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('ready', 'readonly-system', 'auth-system', {
+      heartbeatIntervalMs: 5000,
+      readOnly: true,
+    }),
+  });
+  await figmaHarness.ui.onmessage({
+    kind: 'bridge',
+    message: envelope('command', 'readonly-system', 'system-write', {
+      command: 'advanceDesignSystem',
+      input: {
+        projectId: 'phase2-smoke',
+        pageId: '0:1',
+        operationId: 'operation',
+        documentId: 'document',
+        expectedCompletedSteps: 0,
+        specification: sampleSpecification(),
+      },
+    }),
+  });
+  expect(replies.at(-1)).toMatchObject({
+    kind: 'bridge',
+    message: { type: 'error', payload: { code: 'PERMISSION_DENIED' } },
+  });
+  expect(figmaHarness.createFrame).not.toHaveBeenCalled();
+});

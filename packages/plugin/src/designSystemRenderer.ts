@@ -1,3 +1,7 @@
+import type {
+  DesignSystemRecovery,
+  SystemRecoveryResource,
+} from './designSystemRecovery';
 import {
   canonicalJson,
   componentRegistrySchema,
@@ -109,8 +113,6 @@ export async function applyInstance(
     );
   const main = await findVariant(projectId, c.id, selected.id);
   const previousMain = await node.getMainComponentAsync();
-  active();
-  if (previousMain?.id !== main.id) node.swapComponent(main);
   const properties: Record<string, string | boolean> = {};
   for (const p of c.properties) {
     if (p.type === 'VARIANT') continue;
@@ -126,6 +128,7 @@ export async function applyInstance(
         : value;
   }
   active();
+  if (previousMain?.id !== main.id) node.swapComponent(main);
   if (
     Object.entries(properties).some(
       ([k, v]) => node.componentProperties[k]?.value !== v,
@@ -137,8 +140,9 @@ export async function applyInstance(
 export async function renderDesignSystem(
   raw: DesignSystemInput,
   cancelled: () => boolean,
+  recovery?: DesignSystemRecovery,
 ): Promise<DesignSystemResult> {
-  if (renderState.busy)
+  if (renderState.busy && !recovery)
     throw new MagicUiError(
       failure('SESSION_BUSY', 'Design system render in progress.'),
     );
@@ -155,8 +159,20 @@ export async function renderDesignSystem(
         throw new MagicUiError(failure('PAGE_CHANGED', 'Target page changed.'));
     };
     active();
+    const touch = (...items: (SystemRecoveryResource | undefined | null)[]) =>
+      items.forEach((item) => {
+        if (item) recovery?.touch(item);
+      });
+    const checkpoint = async (
+      id: string,
+      action: () => void | Promise<void>,
+    ) => {
+      active();
+      if (recovery) await recovery.step(id, action);
+      else await action();
+    };
     const pendingKey = `design-system-pending:${input.projectId}`;
-    if (read(figma.root, pendingKey))
+    if (read(figma.root, pendingKey) && !recovery)
       drift(
         'A previous design system write did not finish. Inspect the document and resolve the partial render before retrying; no duplicate system was created.',
       );
@@ -194,21 +210,28 @@ export async function renderDesignSystem(
         letterSpacing: s.letterSpacing,
       });
     for (const v of variables)
-      if (read(v, 'snapshot') !== variableSnapshot(v))
+      if (
+        (!recovery || recovery.fresh) &&
+        read(v, 'snapshot') !== variableSnapshot(v)
+      )
         drift(`Variable changed manually: ${read(v, 'id')}`);
     for (const s of styles)
-      if (read(s, 'snapshot') !== styleSnapshot(s))
+      if (
+        (!recovery || recovery.fresh) &&
+        read(s, 'snapshot') !== styleSnapshot(s)
+      )
         drift(`Text style changed manually: ${read(s, 'id')}`);
     let collection = collections[0];
     if (
       collection &&
+      (!recovery || recovery.fresh) &&
       read(collection, 'snapshot') !==
         canonicalJson({ name: collection.name, modes: collection.modes })
     )
       drift('Token collection changed manually.');
     const manifestKey = `design-system-manifest:${input.projectId}`;
     const manifest = read(figma.root, manifestKey);
-    if (manifest) {
+    if (manifest && (!recovery || recovery.fresh)) {
       const saved = JSON.parse(manifest) as {
         collectionId: string | null;
         variableIds: string[];
@@ -244,7 +267,10 @@ export async function renderDesignSystem(
           (n) => read(n, 'projectId') === input.projectId,
         ),
       ]) {
-        if (read(n, 'snapshot') !== snapshot(n))
+        if (
+          (!recovery || recovery.fresh) &&
+          read(n, 'snapshot') !== snapshot(n)
+        )
           drift(`Component changed manually: ${read(n, 'id')}`);
         const identity =
           n.id === set.id ? `set:${c.id}` : `${c.id}:${read(n, 'id')}`;
@@ -253,6 +279,47 @@ export async function renderDesignSystem(
         existingNodes.set(identity, n);
       }
     }
+    if (recovery) {
+      for (const page of figma.root.children) {
+        await page.loadAsync();
+        const visit = (node: SceneNode) => {
+          if (
+            read(node, 'projectId') === input.projectId &&
+            read(node, 'componentId')
+          ) {
+            const identity =
+              node.type === 'COMPONENT_SET'
+                ? `set:${read(node, 'componentId')}`
+                : `${read(node, 'componentId')}:${read(node, 'id')}`;
+            const existing = existingNodes.get(identity);
+            if (existing && existing.id !== node.id)
+              drift('Duplicate component identity during recovery.');
+            existingNodes.set(identity, node);
+          }
+          if (node.type !== 'INSTANCE' && 'children' in node)
+            node.children.forEach(visit);
+        };
+        page.children.forEach(visit);
+      }
+    }
+    const dependents = async (
+      source: SceneNode | undefined,
+    ): Promise<InstanceNode[]> => {
+      if (
+        !recovery ||
+        !source ||
+        !['COMPONENT', 'COMPONENT_SET'].includes(source.type)
+      )
+        return [];
+      const result: InstanceNode[] = [];
+      for (const candidate of existingNodes.values()) {
+        if (candidate.type !== 'INSTANCE') continue;
+        const main = await candidate.getMainComponentAsync();
+        if (main?.id === source.id || main?.parent?.id === source.id)
+          result.push(candidate);
+      }
+      return result;
+    };
     for (const token of spec.tokens.values) {
       const existing = variables.find((v) => read(v, 'id') === token.id);
       const expected =
@@ -312,33 +379,41 @@ export async function renderDesignSystem(
       }
     }
     active();
-    write(figma.root, pendingKey, 'Writing tokens and components');
+    if (!recovery)
+      write(figma.root, pendingKey, 'Writing tokens and components');
     if (spec.tokens.values.length) {
-      if (!collection) {
-        collection = figma.variables.createVariableCollection('Magic UI');
-        write(collection, 'id', 'tokens');
-        write(collection, 'projectId', input.projectId);
-      }
-      const modes = new Map(collection.modes.map((m) => [m.name, m.modeId]));
-      if (!read(collection, 'snapshot')) {
-        collection.renameMode(collection.defaultModeId, spec.tokens.modes[0]!);
-        modes.clear();
-        modes.set(spec.tokens.modes[0]!, collection.defaultModeId);
-      }
-      for (const mode of spec.tokens.modes) {
-        if (modes.has(mode)) continue;
-        try {
-          modes.set(mode, collection.addMode(mode));
-        } catch (error) {
-          if (/Limited to \d+ modes only/.test(String(error)))
-            throw new MagicUiError(
-              failure(
-                'FIGMA_MODE_LIMIT',
-                'This Figma file does not permit the requested number of variable modes. Use a file with sufficient mode capacity. The partial collection is retained; inspect it before recovery.',
-              ),
-            );
-          throw error;
+      await checkpoint('collection', () => {
+        touch(collection);
+        if (!collection) {
+          collection = figma.variables.createVariableCollection('Magic UI');
+          touch(collection);
+          write(collection, 'id', 'tokens');
+          write(collection, 'projectId', input.projectId);
+          collection.renameMode(
+            collection.defaultModeId,
+            spec.tokens.modes[0]!,
+          );
         }
+      });
+      if (!collection) drift('Missing token collection.');
+      const modes = new Map(collection.modes.map((m) => [m.name, m.modeId]));
+      for (const mode of spec.tokens.modes) {
+        await checkpoint(`mode:${mode}`, () => {
+          if (modes.has(mode)) return;
+          touch(collection);
+          try {
+            modes.set(mode, collection!.addMode(mode));
+          } catch (error) {
+            if (/Limited to \d+ modes only/.test(String(error)))
+              throw new MagicUiError(
+                failure(
+                  'FIGMA_MODE_LIMIT',
+                  'This Figma file does not permit the requested modes. Resume this operation after capacity is available.',
+                ),
+              );
+            throw error;
+          }
+        });
       }
       const byId = new Map(variables.map((v) => [read(v, 'id'), v]));
       for (const t of spec.tokens.values) {
@@ -351,17 +426,20 @@ export async function renderDesignSystem(
         let v = byId.get(t.id);
         if (v && v.resolvedType !== type)
           drift('Changing token type requires migration.');
-        if (!v) {
-          v = figma.variables.createVariable(
-            t.id.replace(/\./g, '/'),
-            collection,
-            type,
-          );
-          write(v, 'id', t.id);
-          write(v, 'projectId', input.projectId);
-          variables.push(v);
-          byId.set(t.id, v);
-        }
+        await checkpoint(`allocate:${t.id}`, () => {
+          if (!v) {
+            v = figma.variables.createVariable(
+              t.id.replace(/\./g, '/'),
+              collection!,
+              type,
+            );
+            touch(v);
+            write(v, 'id', t.id);
+            write(v, 'projectId', input.projectId);
+            variables.push(v);
+            byId.set(t.id, v);
+          }
+        });
       }
       for (const t of spec.tokens.values) {
         const v = byId.get(t.id)!;
@@ -379,57 +457,75 @@ export async function renderDesignSystem(
                   }
                 : resolved;
           const modeId = modes.get(mode)!;
-          if (canonicalJson(v.valuesByMode[modeId]) !== canonicalJson(value))
-            v.setValueForMode(modeId, value);
+          await checkpoint(`value:${t.id}:${mode}`, () => {
+            touch(v);
+            if (canonicalJson(v.valuesByMode[modeId]) !== canonicalJson(value))
+              v.setValueForMode(modeId, value);
+            write(v, 'snapshot', variableSnapshot(v));
+          });
         }
-        write(v, 'snapshot', variableSnapshot(v));
+        if (!recovery) write(v, 'snapshot', variableSnapshot(v));
       }
-      write(
-        collection,
-        'snapshot',
-        canonicalJson({ name: collection.name, modes: collection.modes }),
-      );
+      if (!recovery)
+        write(
+          collection,
+          'snapshot',
+          canonicalJson({ name: collection.name, modes: collection.modes }),
+        );
     }
     for (const token of spec.tokens.typography) {
       let style = styles.find((s) => read(s, 'id') === token.id);
-      if (!style) {
-        style = figma.createTextStyle();
-        write(style, 'id', token.id);
-        write(style, 'projectId', input.projectId);
-        styles.push(style);
-      }
-      style.name = token.name;
-      style.fontName = { family: token.fontFamily, style: token.fontStyle };
-      style.fontSize = token.fontSize;
-      style.lineHeight =
-        token.lineHeight === 'auto'
-          ? { unit: 'AUTO' }
-          : { unit: 'PIXELS', value: token.lineHeight };
-      style.letterSpacing = { unit: 'PIXELS', value: token.letterSpacing };
-      write(style, 'snapshot', styleSnapshot(style));
+      await checkpoint(`style:${token.id}`, () => {
+        touch(style);
+        if (!style) {
+          style = figma.createTextStyle();
+          touch(style);
+          write(style, 'id', token.id);
+          write(style, 'projectId', input.projectId);
+          styles.push(style);
+        }
+        style.name = token.name;
+        style.fontName = { family: token.fontFamily, style: token.fontStyle };
+        style.fontSize = token.fontSize;
+        style.lineHeight =
+          token.lineHeight === 'auto'
+            ? { unit: 'AUTO' }
+            : { unit: 'PIXELS', value: token.lineHeight };
+        style.letterSpacing = { unit: 'PIXELS', value: token.letterSpacing };
+        write(style, 'snapshot', styleSnapshot(style));
+      });
     }
     let page = figma.root.children.find(
       (p) => read(p, 'designSystemProject') === input.projectId,
     );
-    if (spec.components.length && !page) {
-      page = figma.createPage();
-      page.name = 'Components';
-      write(page, 'designSystemProject', input.projectId);
-    }
+    if (spec.components.length)
+      await checkpoint('page', () => {
+        if (!page) {
+          page = figma.createPage();
+          touch(page);
+          page.name = 'Components';
+          write(page, 'designSystemProject', input.projectId);
+        }
+      });
     if (page) await page.loadAsync();
     active();
     let workspace = page?.children.find((n) => read(n, 'id') === 'workspace');
-    if (page && !workspace) {
-      workspace = figma.createFrame();
-      workspace.name = 'Workspace';
-      workspace.layoutMode = 'VERTICAL';
-      workspace.itemSpacing = 48;
-      workspace.layoutSizingHorizontal = 'HUG';
-      workspace.layoutSizingVertical = 'HUG';
-      page.appendChild(workspace);
-      write(workspace, 'id', 'workspace');
-      write(workspace, 'projectId', input.projectId);
-    }
+    if (spec.components.length)
+      await checkpoint('workspace', () => {
+        if (page && !workspace) {
+          touch(page);
+          workspace = figma.createFrame();
+          touch(workspace);
+          workspace.name = 'Workspace';
+          workspace.layoutMode = 'VERTICAL';
+          workspace.itemSpacing = 48;
+          workspace.layoutSizingHorizontal = 'HUG';
+          workspace.layoutSizingVertical = 'HUG';
+          page.appendChild(workspace);
+          write(workspace, 'id', 'workspace');
+          write(workspace, 'projectId', input.projectId);
+        }
+      });
     const registry: ComponentRegistry = {
       projectId: input.projectId,
       components: [...previous.components],
@@ -438,26 +534,40 @@ export async function renderDesignSystem(
       active();
       if (!workspace || workspace.type !== 'FRAME')
         drift('Missing component workspace.');
+      const componentWorkspace = workspace;
       let section = workspace.children.find(
         (n) => read(n, 'id') === `category:${c.category}`,
       );
-      if (!section) {
-        section = figma.createFrame();
-        section.name = c.category;
-        section.layoutMode = 'VERTICAL';
-        section.itemSpacing = 24;
-        section.layoutSizingHorizontal = 'HUG';
-        section.layoutSizingVertical = 'HUG';
-        workspace.appendChild(section);
-        write(section, 'id', `category:${c.category}`);
-        write(section, 'projectId', input.projectId);
-      }
+      await checkpoint(`category:${c.category}`, () => {
+        if (!section) {
+          touch(componentWorkspace);
+          section = figma.createFrame();
+          touch(section);
+          section.name = c.category;
+          section.layoutMode = 'VERTICAL';
+          section.itemSpacing = 24;
+          section.layoutSizingHorizontal = 'HUG';
+          section.layoutSizingVertical = 'HUG';
+          componentWorkspace.appendChild(section);
+          write(section, 'id', `category:${c.category}`);
+          write(section, 'projectId', input.projectId);
+        }
+      });
+      if (!section) drift('Missing component category.');
       if (section.type !== 'FRAME') drift('Category identity is not a frame.');
+      const categoryFrame = section;
       let set = existingNodes.get(`set:${c.id}`) as
         ComponentSetNode | undefined;
       const variantRecords: ComponentRegistry['components'][number]['variants'] =
         [];
       for (const v of c.variants) {
+        const variantName =
+          Object.entries(v.values)
+            .map(
+              ([id, val]) =>
+                `${c.properties.find((p) => p.id === id)!.name}=${val}`,
+            )
+            .join(', ') || `Variant=${v.name}`;
         const prefix = `${v.id}/`;
         const tree = async (
           rawNode: NodeSpecification,
@@ -475,58 +585,74 @@ export async function renderDesignSystem(
               : rawNode.type.toUpperCase();
           if (node && node.type !== expected)
             drift('Changing component node type requires migration.');
-          if (!node) {
-            const source =
-              rawNode.type === 'component-instance'
-                ? await findVariant(
-                    input.projectId,
-                    rawNode.componentId,
-                    rawNode.variant,
-                  )
-                : undefined;
+          const source =
+            rawNode.type === 'component-instance'
+              ? await findVariant(
+                  input.projectId,
+                  rawNode.componentId,
+                  rawNode.variant,
+                )
+              : undefined;
+          await checkpoint(`node:${c.id}:${id}`, async () => {
+            const inherited = await dependents(node);
+            touch(node, parent, node?.parent, ...inherited);
+            if (!node) {
+              active();
+              node = isRoot
+                ? figma.createComponent()
+                : rawNode.type === 'frame'
+                  ? figma.createFrame()
+                  : rawNode.type === 'text'
+                    ? figma.createText()
+                    : rawNode.type === 'rectangle'
+                      ? figma.createRectangle()
+                      : source!.createInstance();
+              touch(node);
+              write(node, 'id', id);
+              write(node, 'projectId', input.projectId);
+              write(node, 'componentId', c.id);
+              existingNodes.set(`${c.id}:${id}`, node);
+            }
+            if (
+              node.parent?.id !== parent.id ||
+              parent.children.indexOf(node) !== index
+            )
+              parent.insertChild(index, node);
+            write(node, 'intent', canonicalJson(rawNode));
+            const resolved = resolveTokenReferences(rawNode, spec.tokens);
+            applyProperties(
+              node as
+                | FrameNode
+                | ComponentNode
+                | InstanceNode
+                | TextNode
+                | RectangleNode,
+              resolved,
+              'ltr',
+            );
+            if (isRoot) node.name = variantName;
+          });
+          if (!node) drift('Missing component node after checkpoint.');
+          const boundNode = node;
+          await checkpoint(`bindings:${c.id}:${id}`, async () => {
+            touch(boundNode);
+            if (
+              rawNode.type === 'component-instance' &&
+              boundNode.type === 'INSTANCE'
+            )
+              await applyInstance(boundNode, rawNode, input.projectId, active);
             active();
-            node = isRoot
-              ? figma.createComponent()
-              : rawNode.type === 'frame'
-                ? figma.createFrame()
-                : rawNode.type === 'text'
-                  ? figma.createText()
-                  : rawNode.type === 'rectangle'
-                    ? figma.createRectangle()
-                    : source!.createInstance();
-            write(node, 'id', id);
-            write(node, 'projectId', input.projectId);
-          }
-          if (
-            node.parent?.id !== parent.id ||
-            parent.children.indexOf(node) !== index
-          )
-            parent.insertChild(index, node);
-          const resolved = resolveTokenReferences(rawNode, spec.tokens);
-          applyProperties(
-            node as
-              | FrameNode
-              | ComponentNode
-              | InstanceNode
-              | TextNode
-              | RectangleNode,
-            resolved,
-            'ltr',
-          );
-          if (rawNode.type === 'component-instance' && node.type === 'INSTANCE')
-            await applyInstance(node, rawNode, input.projectId, active);
-          active();
-          await applyTokenBindings(
-            node,
-            rawNode,
-            spec.tokens,
-            variables,
-            styles,
-          );
+            await applyTokenBindings(
+              boundNode,
+              rawNode,
+              spec.tokens,
+              variables,
+              styles,
+            );
+          });
           if ('nodes' in rawNode && 'insertChild' in node)
             for (const [i, child] of rawNode.nodes.entries())
               await tree(child, node, i);
-          write(node, 'intent', canonicalJson(rawNode));
           return node;
         };
         const root = (await tree(
@@ -535,24 +661,22 @@ export async function renderDesignSystem(
           (set ?? section).children.length,
           true,
         )) as ComponentNode;
-        const variantName =
-          Object.entries(v.values)
-            .map(
-              ([id, val]) =>
-                `${c.properties.find((p) => p.id === id)!.name}=${val}`,
-            )
-            .join(', ') || `Variant=${v.name}`;
-        root.name = variantName;
-        if (!set) {
-          set = figma.combineAsVariants([root], section);
-          write(set, 'id', c.id);
-          write(set, 'projectId', input.projectId);
-          set.name = c.name;
-          set.layoutMode = 'HORIZONTAL';
-          set.itemSpacing = 24;
-          set.layoutSizingHorizontal = 'HUG';
-          set.layoutSizingVertical = 'HUG';
-        } else if (root.parent?.id !== set.id) set.appendChild(root);
+        await checkpoint(`variant:${c.id}:${v.id}`, () => {
+          touch(root, set, categoryFrame, root.parent);
+          root.name = variantName;
+          if (!set) {
+            set = figma.combineAsVariants([root], categoryFrame);
+            touch(set);
+            write(set, 'id', c.id);
+            write(set, 'projectId', input.projectId);
+            write(set, 'componentId', c.id);
+            set.name = c.name;
+            set.layoutMode = 'HORIZONTAL';
+            set.itemSpacing = 24;
+            set.layoutSizingHorizontal = 'HUG';
+            set.layoutSizingVertical = 'HUG';
+          } else if (root.parent?.id !== set.id) set.appendChild(root);
+        });
         variantRecords.push({
           id: v.id,
           name: v.name,
@@ -561,12 +685,16 @@ export async function renderDesignSystem(
         });
       }
       if (!set) throw new Error('Missing component set');
-      if (set.name !== c.name) set.name = c.name;
-      if (set.parent?.id !== section.id) section.appendChild(set);
+      await checkpoint(`set:${c.id}`, () => {
+        touch(set, set?.parent, categoryFrame);
+        if (set!.name !== c.name) set!.name = c.name;
+        if (set!.parent?.id !== categoryFrame.id)
+          categoryFrame.appendChild(set!);
+      });
       const propertyKeys: Record<string, string> = {};
       for (const property of c.properties) {
         if (property.type === 'VARIANT') continue;
-        let propertyKey = read(set, `property:${property.id}`);
+        let propertyKey = read(set!, `property:${property.id}`);
         const defaultValue =
           property.type === 'INSTANCE_SWAP'
             ? (
@@ -576,29 +704,8 @@ export async function renderDesignSystem(
                 )
               ).id
             : property.defaultValue;
-        if (!propertyKey)
-          propertyKey = set.addComponentProperty(
-            property.name,
-            property.type,
-            defaultValue,
-          );
-        else {
-          const current = set.componentPropertyDefinitions[propertyKey]!;
-          if (!current) drift('A component property identity was removed.');
-          if (current.type !== property.type) drift('Property type changed.');
-          if (
-            current.defaultValue !== defaultValue ||
-            propertyKey.split('#')[0] !== property.name
-          )
-            propertyKey = set.editComponentProperty(propertyKey, {
-              name: property.name,
-              defaultValue,
-            });
-        }
-        write(set, `property:${property.id}`, propertyKey);
-        propertyKeys[property.id] = propertyKey;
-        for (const variant of c.variants) {
-          const root = set.children.find(
+        const targets = c.variants.map((variant) => {
+          const root = set!.children.find(
             (n) => read(n, 'id') === variant.id,
           ) as ComponentNode;
           const target =
@@ -608,15 +715,43 @@ export async function renderDesignSystem(
                   (n) => read(n, 'id') === `${variant.id}/${property.targetId}`,
                 );
           if (!target) throw new Error('Missing property target');
-          target.componentPropertyReferences = {
-            ...target.componentPropertyReferences,
-            [property.type === 'TEXT'
-              ? 'characters'
-              : property.type === 'BOOLEAN'
-                ? 'visible'
-                : 'mainComponent']: propertyKey,
-          };
-        }
+          return target;
+        });
+        await checkpoint(`property:${c.id}:${property.id}`, async () => {
+          const inherited = await dependents(set);
+          touch(set, ...inherited, ...targets);
+          if (!propertyKey)
+            propertyKey = set!.addComponentProperty(
+              property.name,
+              property.type,
+              defaultValue,
+            );
+          else {
+            const current = set!.componentPropertyDefinitions[propertyKey]!;
+            if (!current) drift('A component property identity was removed.');
+            if (current.type !== property.type) drift('Property type changed.');
+            if (
+              current.defaultValue !== defaultValue ||
+              propertyKey.split('#')[0] !== property.name
+            )
+              propertyKey = set!.editComponentProperty(propertyKey, {
+                name: property.name,
+                defaultValue,
+              });
+          }
+          write(set!, `property:${property.id}`, propertyKey);
+          for (const target of targets) {
+            target.componentPropertyReferences = {
+              ...target.componentPropertyReferences,
+              [property.type === 'TEXT'
+                ? 'characters'
+                : property.type === 'BOOLEAN'
+                  ? 'visible'
+                  : 'mainComponent']: propertyKey,
+            };
+          }
+        });
+        propertyKeys[property.id] = read(set!, `property:${property.id}`);
       }
       const usage: string[] = [];
       const countUsage = (n: NodeSpecification) => {
@@ -634,7 +769,7 @@ export async function renderDesignSystem(
         id: c.id,
         name: c.name,
         category: c.category,
-        nodeId: set.id,
+        nodeId: set!.id,
         properties: c.properties,
         propertyKeys,
         variants: variantRecords,
@@ -645,27 +780,37 @@ export async function renderDesignSystem(
       registry.components = registry.components
         .filter((e) => e.id !== c.id)
         .concat(entry);
-      write(figma.root, key(input.projectId), canonicalJson(registry));
-      for (const n of [
-        set,
-        ...ownedDescendants(
-          set,
-          (n) => read(n, 'projectId') === input.projectId,
-        ),
-      ])
-        write(n, 'snapshot', snapshot(n));
+      await checkpoint(`registry:${c.id}`, () => {
+        write(figma.root, key(input.projectId), canonicalJson(registry));
+        for (const n of [
+          set!,
+          ...ownedDescendants(
+            set!,
+            (n) => read(n, 'projectId') === input.projectId,
+          ),
+        ])
+          write(n, 'snapshot', snapshot(n));
+      });
     }
-    write(
-      figma.root,
-      manifestKey,
-      canonicalJson({
-        collectionId: collection?.id ?? null,
-        variableIds: variables.map((v) => v.id),
-        styleIds: styles.map((s) => s.id),
-        pageId: page?.id ?? null,
-      }),
-    );
-    write(figma.root, pendingKey, '');
+    await checkpoint('manifest', () => {
+      if (collection)
+        write(
+          collection,
+          'snapshot',
+          canonicalJson({ name: collection.name, modes: collection.modes }),
+        );
+      write(
+        figma.root,
+        manifestKey,
+        canonicalJson({
+          collectionId: collection?.id ?? null,
+          variableIds: variables.map((v) => v.id),
+          styleIds: styles.map((s) => s.id),
+          pageId: page?.id ?? null,
+        }),
+      );
+      write(figma.root, pendingKey, '');
+    });
     const result = await readVariables(input.projectId);
     return {
       ...registry,
@@ -677,6 +822,6 @@ export async function renderDesignSystem(
       variableCount: result.variables.length,
     };
   } finally {
-    renderState.busy = false;
+    if (!recovery) renderState.busy = false;
   }
 }

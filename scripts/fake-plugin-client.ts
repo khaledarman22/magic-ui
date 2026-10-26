@@ -98,6 +98,7 @@ export class FakePluginClient {
           [
             'renderDesign',
             'renderDesignSystem',
+            'advanceDesignSystem',
             'readComponents',
             'readVariables',
             'readFigma',

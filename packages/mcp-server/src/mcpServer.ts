@@ -298,13 +298,13 @@ export function createMcpServer(
       'magic_ui_render_design_system',
       {
         description:
-          'Render project tokens, typography styles and explicit component variants in dependency order. Persist the returned component registry locally. Requires an explicit active page and session.',
+          'Render tokens, styles and component nodes through durable per-resource checkpoints. Returns operationId; resume it after interruption. Uses a frozen specification, validates live Figma and preserves stable identities.',
         inputSchema: designSystemToolSchema,
         outputSchema: designSystemResultSchema,
         annotations: { ...annotations, readOnlyHint: false },
         _meta: {
           permission: 'write',
-          timeoutMs: REQUEST_TIMEOUT_MS,
+          timeoutMs: 120_000,
           errorCodes: [
             ...sharedErrors,
             'PAGE_CHANGED',
@@ -316,29 +316,17 @@ export function createMcpServer(
           ],
         },
       },
-      ({ sessionId, ...input }, extra) =>
-        localResult(async () => {
-          const specification = await workspace.readSpecification(
-            input.projectId,
-          );
-          const response = await bridge.request(
-            sessionId,
-            {
-              command: 'renderDesignSystem',
-              input: { ...input, specification },
-            },
-            extra.signal,
-          );
-          if (response.command !== 'renderDesignSystem')
-            throw new Error('Unexpected response');
-          await workspace.writeRegistry(
-            componentRegistrySchema.parse({
-              projectId: input.projectId,
-              components: response.result.components,
-            }),
-          );
-          return response.result;
-        }),
+      (input, extra) =>
+        localResult(() =>
+          sync.renderSystem(input, extra.signal, async (progress, total) => {
+            const progressToken = extra._meta?.progressToken;
+            if (progressToken !== undefined)
+              await extra.sendNotification({
+                method: 'notifications/progress',
+                params: { progressToken, progress, total },
+              });
+          }),
+        ),
     );
   server.registerTool(
     'magic_ui_find_component',
@@ -536,13 +524,13 @@ export function createMcpServer(
       'magic_ui_resume_operation',
       {
         description:
-          'Resume a saved render/apply operation against its frozen specification. Re-inspects Figma even for completed checkpoints; never recreates a manually deleted checkpointed node without apply-spec.',
+          'Resume a saved screen render, design-system render or apply operation against its frozen specification. Re-inspects Figma even for completed checkpoints; never recreates a manually deleted checkpointed node without apply-spec.',
         inputSchema: resumeToolSchema,
         outputSchema: syncReportSchema,
         annotations: { ...annotations, readOnlyHint: false },
         _meta: {
           permission: 'write',
-          timeoutMs: REQUEST_TIMEOUT_MS,
+          timeoutMs: 120_000,
           errorCodes: [...sharedErrors, 'DRIFT_DETECTED', 'WORKSPACE_ERROR'],
         },
       },

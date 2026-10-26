@@ -77,6 +77,11 @@ export function createRenderHarness() {
     mainComponent: HarnessNode | null = null;
     fontName: unknown = { family: 'Inter', style: 'Regular' };
     constructor(public type: string) {}
+    getSharedPluginDataKeys(ns: string) {
+      return [...this.data.keys()]
+        .filter((key) => key.startsWith(`${ns}/`))
+        .map((key) => key.slice(ns.length + 1));
+    }
     getSharedPluginData(ns: string, key: string) {
       return this.data.get(`${ns}/${key}`) ?? '';
     }
@@ -305,6 +310,10 @@ export function createRenderHarness() {
   });
   return {
     api,
+    resetRuntime: () =>
+      runInNewContext(bundle, context, {
+        contextCodeGeneration: { strings: false, wasm: false },
+      }),
     page,
     render: (input: RenderDesignInput, cancelled = () => false) =>
       context.renderer
